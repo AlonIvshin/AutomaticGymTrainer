@@ -13,8 +13,8 @@ def index():
 @app.route('/my-link/',methods = ['GET','POST'])
 def mylink():
     temp = request.form['test']
-    #temp2 = request.form['test2']
-    my_est()
+    temp2 = request.form['test2']
+    my_est(temp2)
     return temp+' Estimation process has ended'
 
 
