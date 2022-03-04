@@ -2,10 +2,88 @@ import cv2
 import mediapipe as mp
 import numpy as np
 from datetime import datetime
+from enum import Enum
 
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
+
+class E_ExerciseInstructionType(Enum):
+    STATIC =  0
+    DYNAMIC = 1
+
+
+class E_AlertDeviationTrigger(Enum):
+    POSITIVE = 1
+    BOTH = 0
+    NEGATIVE = -1
+
+class ExerciseInstruction:
+    def __init__(self,exerciseInstructionId,exerciseId,instructionId,alertId,
+    deviationPositive,deviationNegative,instructionStage,exerciseInstructionType,alertDeviationTrigger) -> None:
+         self.exerciseInstructionId = exerciseInstructionId
+         self.exerciseId = exerciseId 
+         self.instructionId = instructionId
+         self.alertId = alertId
+         self.deviationPositive = deviationPositive
+         self.deviationNegative = deviationNegative
+         self.instructionStage = instructionStage
+         self.exerciseInstructionType = exerciseInstructionType
+         self.alertDeviationTrigger = alertDeviationTrigger
+
+
+class Instruction:
+    def __init__(self,instructionId,vertex1,vertex2,vertex3,angle,description) -> None:
+        self.instructionId = instructionId
+        self.vertex1 = vertex1
+        self.vertex2 = vertex2
+        self.vertex3 = vertex3
+        self.angle = angle
+        self.description = description
+
+#Dummy exercise data:
+exerciseInstructionId = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+exerciseId = 1
+deviationPositive = [7,7,7,7,2,20,20,120,140,120,140,10,10,10,10]
+deviationNegative = [-7,-7,-7,-7,-1,-20,-20,-10,-10,-10,-10,-120,-140,-120,-140] 
+instructionStage = [0,0,0,0,0,0,0,1,1,1,1,2,2,2,2]
+
+exerciseInstructionType = [E_ExerciseInstructionType.STATIC.value,E_ExerciseInstructionType.STATIC.value,
+E_ExerciseInstructionType.STATIC.value,E_ExerciseInstructionType.STATIC.value,
+E_ExerciseInstructionType.STATIC.value,E_ExerciseInstructionType.STATIC.value
+,E_ExerciseInstructionType.STATIC.value,E_ExerciseInstructionType.DYNAMIC.value,
+E_ExerciseInstructionType.DYNAMIC.value,E_ExerciseInstructionType.DYNAMIC.value,
+E_ExerciseInstructionType.DYNAMIC.value,E_ExerciseInstructionType.DYNAMIC.value,
+E_ExerciseInstructionType.DYNAMIC.value,E_ExerciseInstructionType.DYNAMIC.value,
+E_ExerciseInstructionType.DYNAMIC.value]
+
+alertDeviationTrigger = [E_AlertDeviationTrigger.BOTH.value,E_AlertDeviationTrigger.BOTH.value,E_AlertDeviationTrigger.BOTH.value,
+E_AlertDeviationTrigger.BOTH.value,E_AlertDeviationTrigger.BOTH.value,E_AlertDeviationTrigger.BOTH.value,
+E_AlertDeviationTrigger.BOTH.value,E_AlertDeviationTrigger.NEGATIVE.value,E_AlertDeviationTrigger.NEGATIVE.value,
+E_AlertDeviationTrigger.NEGATIVE.value,E_AlertDeviationTrigger.NEGATIVE.value,E_AlertDeviationTrigger.POSITIVE.value,
+E_AlertDeviationTrigger.POSITIVE.value,E_AlertDeviationTrigger.POSITIVE.value,E_AlertDeviationTrigger.POSITIVE.value]
+
+instructionId = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+vertex1 = [mp_pose.PoseLandmark.RIGHT_HIP.value,mp_pose.PoseLandmark.LEFT_HIP.value,
+mp_pose.PoseLandmark.RIGHT_HIP.value,mp_pose.PoseLandmark.LEFT_HIP.value,
+mp_pose.PoseLandmark.LEFT_HIP.value,mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.RIGHT_ELBOW,
+mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.LEFT_WRIST,mp_pose.PoseLandmark.RIGHT_ELBOW,
+mp_pose.PoseLandmark.RIGHT_WRIST,mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.LEFT_WRIST,
+mp_pose.PoseLandmark.RIGHT_ELBOW,mp_pose.PoseLandmark.RIGHT_WRIST]
+vertex2 = [mp_pose.PoseLandmark.RIGHT_KNEE,mp_pose.PoseLandmark.LEFT_KNEE,mp_pose.PoseLandmark.LEFT_HIP,
+mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.NOSE,mp_pose.PoseLandmark.LEFT_SHOULDER,
+mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.LEFT_ELBOW,
+mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.RIGHT_ELBOW,mp_pose.PoseLandmark.LEFT_SHOULDER,
+mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.RIGHT_ELBOW]
+vertex3 = [mp_pose.PoseLandmark.RIGHT_ANKLE,mp_pose.PoseLandmark.LEFT_ANKLE,mp_pose.PoseLandmark.LEFT_ANKLE,
+mp_pose.PoseLandmark.RIGHT_ANKLE,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER,
+mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,mp_pose.PoseLandmark.LEFT_SHOULER,
+mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,
+mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER]
+angle = [170,170,90,90,11,180,180,45,30,45,30,165,170,165,170]
+description = ""
+
+for Item in 
 
 def my_est(temp2):
     def calculate_angle(a, b, c):
