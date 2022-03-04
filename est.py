@@ -8,6 +8,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 
+
 class E_ExerciseInstructionType(Enum):
     STATIC =  0
     DYNAMIC = 1
@@ -64,9 +65,9 @@ E_AlertDeviationTrigger.NEGATIVE.value,E_AlertDeviationTrigger.NEGATIVE.value,E_
 E_AlertDeviationTrigger.POSITIVE.value,E_AlertDeviationTrigger.POSITIVE.value,E_AlertDeviationTrigger.POSITIVE.value]
 
 instructionId = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-vertex1 = [mp_pose.PoseLandmark.RIGHT_HIP.value,mp_pose.PoseLandmark.LEFT_HIP.value,
-mp_pose.PoseLandmark.RIGHT_HIP.value,mp_pose.PoseLandmark.LEFT_HIP.value,
-mp_pose.PoseLandmark.LEFT_HIP.value,mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.RIGHT_ELBOW,
+vertex1 = [mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.LEFT_HIP,
+mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.LEFT_HIP,
+mp_pose.PoseLandmark.LEFT_HIP,mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.RIGHT_ELBOW,
 mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.LEFT_WRIST,mp_pose.PoseLandmark.RIGHT_ELBOW,
 mp_pose.PoseLandmark.RIGHT_WRIST,mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.LEFT_WRIST,
 mp_pose.PoseLandmark.RIGHT_ELBOW,mp_pose.PoseLandmark.RIGHT_WRIST]
@@ -77,7 +78,7 @@ mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.RIGHT_ELBOW,mp_pose.Pos
 mp_pose.PoseLandmark.LEFT_ELBOW,mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.RIGHT_ELBOW]
 vertex3 = [mp_pose.PoseLandmark.RIGHT_ANKLE,mp_pose.PoseLandmark.LEFT_ANKLE,mp_pose.PoseLandmark.LEFT_ANKLE,
 mp_pose.PoseLandmark.RIGHT_ANKLE,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER,
-mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,mp_pose.PoseLandmark.LEFT_SHOULER,
+mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,mp_pose.PoseLandmark.LEFT_SHOULDER,
 mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,
 mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER]
 angle = [170,170,90,90,11,180,180,45,30,45,30,165,170,165,170]
@@ -89,13 +90,15 @@ exerciseInstructions = []
 for id,v1,v2,v3,ang in zip(instructionId,vertex1,vertex2,vertex3,angle):
     instructions.append(Instruction(id,v1,v2,v3,ang,description))
 
-for eiid,ei,id,devpos,devneg,istage,eitype,adt in zip(exerciseInstructionId,exerciseId,
+for eiid,id,devpos,devneg,istage,eitype,adt in zip(exerciseInstructionId,
     instructionId,deviationPositive,deviationNegative,instructionStage,exerciseInstructionType
     ,alertDeviationTrigger):
-    exerciseInstructions.append(ExerciseInstruction(eiid,ei,id,0,devpos,devneg,istage,eitype,adt))
+    exerciseInstructions.append(ExerciseInstruction(eiid,1,id,0,devpos,devneg,istage,eitype,adt))
     #end of dummy data
 
-def my_est(temp2):
+def my_est():
+    # current stage variable
+    current_stage = 0
     def calculate_angle(a, b, c):
         a = np.array(a)  # First
         b = np.array(b)  # Mid
@@ -161,9 +164,53 @@ def my_est(temp2):
                                  landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
 
                 #testing exercie instructions
-                v1 = v2 =v3 =0
-                for ei in exerciseInstructions:
-                    v1 = ei.instructionid.
+                v1 = v2 = v3 = 0
+                total_num_of_exercise_instructions_in_stage = 0
+                successful_exercise_instructions_in_current_stage = 0
+                for exercise_instruction_loop in exerciseInstructions:
+                    # we are checking only instructions that match the current stage
+                    if exercise_instruction_loop.instructionStage != current_stage and exercise_instruction_loop.instructionStage != 0:
+                        pass
+
+                    if exercise_instruction_loop.instructionStage != 0:
+                        total_num_of_exercise_instructions_in_stage += 1
+
+
+                    current_instruction = instructions[exercise_instruction_loop.instructionId]
+                    v1 = [landmarks[current_instruction.vertex1.value].x,landmarks[current_instruction.vertex1.value].y] # vertex 1 value
+                    v2 = [landmarks[current_instruction.vertex2.value].x,landmarks[current_instruction.vertex2.value].y] # vertex 2 value
+                    v3 = [landmarks[current_instruction.vertex3.value].x,landmarks[current_instruction.vertex3.value].y] # vertex 3 value
+
+                    starting_angle = current_instruction.angle # starting angle value
+                    tested_angle = calculate_angle(v1,v2,v3) # calculating the current angle
+
+                    # searching for matching deviation trigger
+                
+                    if exercise_instruction_loop.alertDeviationTrigger == E_AlertDeviationTrigger.POSITIVE.value:
+                        if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle:
+                            print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
+                            f'\n, current stage is {current_stage}')
+                        if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
+                            successful_exercise_instructions_in_current_stage+=1
+                        break
+                    elif exercise_instruction_loop.alertDeviationTrigger == E_AlertDeviationTrigger.NEGATIVE.value:
+                        if tested_angle -  exercise_instruction_loop.deviationNegative < starting_angle:
+                            print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
+                            f'\n, current stage is {current_stage}')
+                        if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
+                            successful_exercise_instructions_in_current_stage += 1
+                        break
+
+                    elif exercise_instruction_loop.alertDeviationTrigger == E_AlertDeviationTrigger.BOTH.value:
+                        if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle or \
+                                tested_angle -  exercise_instruction_loop.deviationNegative < starting_angle:
+                            print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
+                            f'\n, current stage is {current_stage}')
+                        break
+                if successful_exercise_instructions_in_current_stage == total_num_of_exercise_instructions_in_stage:
+                    current_stage+=1
+
+
 
                 # Calculate angle
                 #angle = calculate_angle(shoulderLeft, nose, shoulderRight)
@@ -175,12 +222,12 @@ def my_est(temp2):
                           #  )
 
                 # Curl counter logic
-                if angle > 160:
-                    stage = "down"
-                if angle < 30 and stage == 'down':
-                    stage = "up"
-                    counter += 1
-                    print(counter)
+               # if angle > 160:
+                  #  stage = "down"
+               # if angle < 30 and stage == 'down':
+                #    stage = "up"
+                 #   counter += 1
+                #    print(counter)
 
             except:
                 pass
@@ -216,3 +263,5 @@ def my_est(temp2):
 
         cap.release()
         cv2.destroyAllWindows()
+print("Hello world")
+my_est()
