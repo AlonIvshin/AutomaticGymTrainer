@@ -83,7 +83,17 @@ mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLa
 angle = [170,170,90,90,11,180,180,45,30,45,30,165,170,165,170]
 description = ""
 
-for Item in 
+instructions = []
+exerciseInstructions = []
+
+for id,v1,v2,v3,ang in zip(instructionId,vertex1,vertex2,vertex3,angle):
+    instructions.append(Instruction(id,v1,v2,v3,ang,description))
+
+for eiid,ei,id,devpos,devneg,istage,eitype,adt in zip(exerciseInstructionId,exerciseId,
+    instructionId,deviationPositive,deviationNegative,instructionStage,exerciseInstructionType
+    ,alertDeviationTrigger):
+    exerciseInstructions.append(ExerciseInstruction(eiid,ei,id,0,devpos,devneg,istage,eitype,adt))
+    #end of dummy data
 
 def my_est(temp2):
     def calculate_angle(a, b, c):
@@ -150,14 +160,19 @@ def my_est(temp2):
                 shoulderRight = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
                                  landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y]
 
+                #testing exercie instructions
+                v1 = v2 =v3 =0
+                for ei in exerciseInstructions:
+                    v1 = ei.instructionid.
+
                 # Calculate angle
-                angle = calculate_angle(shoulderLeft, nose, shoulderRight)
+                #angle = calculate_angle(shoulderLeft, nose, shoulderRight)
 
                 # Visualize angle
-                cv2.putText(image, str(angle),
-                            tuple(np.multiply(nose, [640, 480]).astype(int)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA
-                            )
+               # cv2.putText(image, str(angle),
+                            #tuple(np.multiply(nose, [640, 480]).astype(int)),
+                            #cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA
+                          #  )
 
                 # Curl counter logic
                 if angle > 160:
@@ -186,12 +201,6 @@ def my_est(temp2):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
             cv2.putText(image, stage,
                         (60, 60),
-                        cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-            # testing data
-            cv2.putText(image, 'Test', (115, 12),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-            cv2.putText(image, temp2,
-                        (110, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
 
             # Render detections
