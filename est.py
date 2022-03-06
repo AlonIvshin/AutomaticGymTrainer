@@ -8,9 +8,8 @@ mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
 
-
 class E_ExerciseInstructionType(Enum):
-    STATIC =  0
+    STATIC = 0
     DYNAMIC = 1
 
 
@@ -18,6 +17,7 @@ class E_AlertDeviationTrigger(Enum):
     POSITIVE = 1
     BOTH = 0
     NEGATIVE = -1
+
 
 class ExerciseInstruction:
     def __init__(self,exerciseInstructionId,exerciseId,instructionId,alertId,
@@ -170,7 +170,7 @@ def my_est():
                 for exercise_instruction_loop in exerciseInstructions:
                     # we are checking only instructions that match the current stage
                     if exercise_instruction_loop.instructionStage != current_stage and exercise_instruction_loop.instructionStage != 0:
-                        pass
+                        continue
 
                     if exercise_instruction_loop.instructionStage != 0:
                         total_num_of_exercise_instructions_in_stage += 1
@@ -192,21 +192,21 @@ def my_est():
                             f'\n, current stage is {current_stage}')
                         if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
                             successful_exercise_instructions_in_current_stage+=1
-                        break
+                        continue
                     elif exercise_instruction_loop.alertDeviationTrigger == E_AlertDeviationTrigger.NEGATIVE.value:
                         if tested_angle -  exercise_instruction_loop.deviationNegative < starting_angle:
                             print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
                             f'\n, current stage is {current_stage}')
                         if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
                             successful_exercise_instructions_in_current_stage += 1
-                        break
+                        continue
 
                     elif exercise_instruction_loop.alertDeviationTrigger == E_AlertDeviationTrigger.BOTH.value:
                         if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle or \
                                 tested_angle -  exercise_instruction_loop.deviationNegative < starting_angle:
                             print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
                             f'\n, current stage is {current_stage}')
-                        break
+                        continue
                 if successful_exercise_instructions_in_current_stage == total_num_of_exercise_instructions_in_stage:
                     current_stage+=1
 
