@@ -178,7 +178,7 @@ def my_est():
                         total_num_of_exercise_instructions_in_stage += 1
 
 
-                    current_instruction = instructions[exercise_instruction_loop.instructionId]
+                    current_instruction = instructions[exercise_instruction_loop.instructionId-1]
                     v1 = [landmarks[current_instruction.vertex1.value].x,landmarks[current_instruction.vertex1.value].y] # vertex 1 value
                     v2 = [landmarks[current_instruction.vertex2.value].x,landmarks[current_instruction.vertex2.value].y] # vertex 2 value
                     v3 = [landmarks[current_instruction.vertex3.value].x,landmarks[current_instruction.vertex3.value].y] # vertex 3 value
