@@ -45,8 +45,8 @@ class Instruction:
 #Dummy exercise data:
 exerciseInstructionId = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 exerciseId = 1
-deviationPositive = [7,7,7,7,2,20,20,120,140,120,140,10,10,10,10]
-deviationNegative = [-7,-7,-7,-7,-1,-20,-20,-10,-10,-10,-10,-120,-140,-120,-140] 
+deviationPositive = [7,7,7,7,5,20,20,120,140,120,110,10,10,10,10]
+deviationNegative = [-7,-7,-7,-7,-5,-20,-20,-10,-10,-10,-10,-120,-140,-120,-140]
 instructionStage = [0,0,0,0,0,0,0,1,1,1,1,2,2,2,2]
 
 exerciseInstructionType = [E_ExerciseInstructionType.STATIC.value,E_ExerciseInstructionType.STATIC.value,
@@ -81,7 +81,7 @@ mp_pose.PoseLandmark.RIGHT_ANKLE,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLand
 mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,mp_pose.PoseLandmark.LEFT_SHOULDER,
 mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,
 mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER]
-angle = [170,170,90,90,11,180,180,45,30,45,30,165,170,165,170]
+angle = [175,175,90,90,16,180,180,45,30,45,60,165,170,165,170]
 description = ""
 
 instructions = []
@@ -95,6 +95,7 @@ for eiid,id,devpos,devneg,istage,eitype,adt in zip(exerciseInstructionId,
     ,alertDeviationTrigger):
     exerciseInstructions.append(ExerciseInstruction(eiid,1,id,0,devpos,devneg,istage,eitype,adt))
     #end of dummy data
+
 
 def my_est():
     # current stage variable
@@ -136,11 +137,12 @@ def my_est():
     counter = 0
     stage = None
 
+    count = 0
     ## Setup mediapipe instance
     with mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5) as pose:
         while cap.isOpened():
             ret, frame = cap.read()
-
+            count +=1
             # Recolor image to RGB
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
@@ -188,15 +190,18 @@ def my_est():
                 
                     if exercise_instruction_loop.alertDeviationTrigger == E_AlertDeviationTrigger.POSITIVE.value:
                         if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle:
-                            print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
+                            print(f'Positive Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
                             f'\n, current stage is {current_stage}')
+                            print(f'Angle is {tested_angle}')
                         if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
                             successful_exercise_instructions_in_current_stage+=1
                         continue
                     elif exercise_instruction_loop.alertDeviationTrigger == E_AlertDeviationTrigger.NEGATIVE.value:
-                        if tested_angle -  exercise_instruction_loop.deviationNegative < starting_angle:
-                            print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
+                        if tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
+                            print(f'Negative Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
                             f'\n, current stage is {current_stage}')
+                            print(f'Angle is {tested_angle}')
+                            print(f'Starting Angle is {starting_angle}')
                         if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
                             successful_exercise_instructions_in_current_stage += 1
                         continue
@@ -206,20 +211,27 @@ def my_est():
                                 tested_angle -  exercise_instruction_loop.deviationNegative < starting_angle:
                             print(f'Deviation found, exercise instruction {exercise_instruction_loop.exerciseInstructionId}'
                             f'\n, current stage is {current_stage}')
+                            print(f'Angle is {tested_angle}')
                         continue
                 if successful_exercise_instructions_in_current_stage == total_num_of_exercise_instructions_in_stage:
                     current_stage+=1
 
 
-
+                first = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
+                second = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
+                third = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
                 # Calculate angle
-                #angle = calculate_angle(shoulderLeft, nose, shoulderRight)
+                angle = calculate_angle(first, second, third)
 
+
+                #print(f' Right elbow z value: {landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW].x}')
+                #print(f' Right shoulder z value: {landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].x} \n')
+                #to_visualize = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
                 # Visualize angle
-               # cv2.putText(image, str(angle),
-                            #tuple(np.multiply(nose, [640, 480]).astype(int)),
-                            #cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA
-                          #  )
+                cv2.putText(image, str(angle),
+                            tuple(np.multiply(second, [640, 480]).astype(int)),
+                            cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA
+                            )
 
                 # Curl counter logic
                # if angle > 160:
