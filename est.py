@@ -18,6 +18,11 @@ class E_AlertDeviationTrigger(Enum):
     BOTH = 0
     NEGATIVE = -1
 
+class E_InstructionAxis(Enum):
+    XY = 1
+    XZ = 2
+    YZ = 3
+
 
 class ExerciseInstruction:
     def __init__(self,exerciseInstructionId,exerciseId,instructionId,alertId,
@@ -34,19 +39,20 @@ class ExerciseInstruction:
 
 
 class Instruction:
-    def __init__(self,instructionId,vertex1,vertex2,vertex3,angle,description) -> None:
+    def __init__(self,instructionId,vertex1,vertex2,vertex3,angle,description,instructionAxis) -> None:
         self.instructionId = instructionId
         self.vertex1 = vertex1
         self.vertex2 = vertex2
         self.vertex3 = vertex3
         self.angle = angle
         self.description = description
+        self.instructionAxis = instructionAxis
 
 #Dummy exercise data:
 exerciseInstructionId = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
 exerciseId = 1
-deviationPositive = [7,7,7,7,5,20,20,120,140,120,110,10,10,10,10]
-deviationNegative = [-7,-7,-7,-7,-5,-20,-20,-10,-10,-10,-10,-120,-140,-120,-140]
+deviationPositive = [7,7,7,7,8,20,20,120,140,120,110,10,10,10,10]
+deviationNegative = [-7,-7,-7,-7,-8,-20,-20,-10,-10,-10,-10,-120,-140,-120,-140]
 instructionStage = [0,0,0,0,0,0,0,1,1,1,1,2,2,2,2]
 
 exerciseInstructionType = [E_ExerciseInstructionType.STATIC.value,E_ExerciseInstructionType.STATIC.value,
@@ -81,14 +87,20 @@ mp_pose.PoseLandmark.RIGHT_ANKLE,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLand
 mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,mp_pose.PoseLandmark.LEFT_SHOULDER,
 mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER,mp_pose.PoseLandmark.LEFT_HIP,
 mp_pose.PoseLandmark.LEFT_SHOULDER,mp_pose.PoseLandmark.RIGHT_HIP,mp_pose.PoseLandmark.RIGHT_SHOULDER]
-angle = [175,175,90,90,16,180,180,45,30,45,60,165,170,165,170]
+angle = [175,175,90,90,15,115,115,45,30,45,60,165,170,165,170]
 description = ""
+#1XY 2XZ 3YZ
+instructionAxis = [E_InstructionAxis.XY.value, E_InstructionAxis.XY.value, E_InstructionAxis.XY.value,
+E_InstructionAxis.XY.value, E_InstructionAxis.XY.value, E_InstructionAxis.XZ.value,
+E_InstructionAxis.XZ.value, E_InstructionAxis.XY.value, E_InstructionAxis.XY.value,
+E_InstructionAxis.XY.value, E_InstructionAxis.XY.value, E_InstructionAxis.XY.value,
+E_InstructionAxis.XY.value, E_InstructionAxis.XY.value, E_InstructionAxis.XY.value]
 
 instructions = []
 exerciseInstructions = []
 
-for id,v1,v2,v3,ang in zip(instructionId,vertex1,vertex2,vertex3,angle):
-    instructions.append(Instruction(id,v1,v2,v3,ang,description))
+for id,v1,v2,v3,ang,axis in zip(instructionId,vertex1,vertex2,vertex3,angle,instructionAxis):
+    instructions.append(Instruction(id,v1,v2,v3,ang,description,instructionAxis))
 
 for eiid,id,devpos,devneg,istage,eitype,adt in zip(exerciseInstructionId,
     instructionId,deviationPositive,deviationNegative,instructionStage,exerciseInstructionType
@@ -100,12 +112,25 @@ for eiid,id,devpos,devneg,istage,eitype,adt in zip(exerciseInstructionId,
 def my_est():
     # current stage variable
     current_stage = 0
-    def calculate_angle(a, b, c):
-        a = np.array(a)  # First
-        b = np.array(b)  # Mid
-        c = np.array(c)  # End
+    def calculate_angle(vertex1, vertex2, vertex3, axis):
+        if axis == E_InstructionAxis.XY.value:
+            vertex1 = [vertex1[0],vertex1[1]]
+            vertex2 = [vertex2[0], vertex2[1]]
+            vertex3 = [vertex3[0], vertex3[1]]
+        elif axis == E_InstructionAxis.XZ.value:
+            vertex1 = [vertex1[0], vertex1[2]]
+            vertex2 = [vertex2[0], vertex2[2]]
+            vertex3 = [vertex3[0], vertex3[2]]
+        else:
+            vertex1 = [vertex1[1], vertex1[2]]
+            vertex2 = [vertex2[1], vertex2[2]]
+            vertex3 = [vertex3[1], vertex3[2]]
 
-        radians = np.arctan2(c[1] - b[1], c[0] - b[0]) - np.arctan2(a[1] - b[1], a[0] - b[0])
+        vertex1 = np.array(vertex1)  # First
+        vertex2 = np.array(vertex2)  # Mid
+        vertex3 = np.array(vertex3)  # End
+
+        radians = np.arctan2(vertex3[1] - vertex2[1], vertex3[0] - vertex2[0]) - np.arctan2(vertex1[1] - vertex2[1], vertex1[0] - vertex2[0])
         angle = np.abs(radians * 180.0 / np.pi)
 
         if angle > 180.0:
@@ -116,7 +141,7 @@ def my_est():
     cap = cv2.VideoCapture(0)
 
     # the duration (in seconds)
-    duration = 1
+    duration = 3
 
     ret, frame = cap.read()
     start_time = datetime.now()
@@ -179,12 +204,12 @@ def my_est():
 
 
                     current_instruction = instructions[exercise_instruction_loop.instructionId-1]
-                    v1 = [landmarks[current_instruction.vertex1.value].x,landmarks[current_instruction.vertex1.value].y] # vertex 1 value
-                    v2 = [landmarks[current_instruction.vertex2.value].x,landmarks[current_instruction.vertex2.value].y] # vertex 2 value
-                    v3 = [landmarks[current_instruction.vertex3.value].x,landmarks[current_instruction.vertex3.value].y] # vertex 3 value
+                    v1 = [landmarks[current_instruction.vertex1.value].x,landmarks[current_instruction.vertex1.value].y,landmarks[current_instruction.vertex1.value].z] # vertex 1 value
+                    v2 = [landmarks[current_instruction.vertex2.value].x,landmarks[current_instruction.vertex2.value].y,landmarks[current_instruction.vertex2.value].z] # vertex 2 value
+                    v3 = [landmarks[current_instruction.vertex3.value].x,landmarks[current_instruction.vertex3.value].y,landmarks[current_instruction.vertex3.value].z] # vertex 3 value
 
                     starting_angle = current_instruction.angle # starting angle value
-                    tested_angle = calculate_angle(v1,v2,v3) # calculating the current angle
+                    tested_angle = calculate_angle(v1,v2,v3,current_instruction.axis) # calculating the current angle
 
                     # searching for matching deviation trigger
                 
@@ -217,12 +242,12 @@ def my_est():
                     current_stage+=1
 
 
-                first = [landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_WRIST.value].y]
-                second = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x, landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y]
-                third = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y]
+                first = [landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].x,landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].y,landmarks[mp_pose.PoseLandmark.LEFT_ELBOW.value].z]
+                second = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].z]
+                third = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].z]
                 # Calculate angle
-                angle = calculate_angle(first, second, third)
-
+                angle = calculate_angle(first, second, third,E_InstructionAxis.XY.value)
+                second = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
 
                 #print(f' Right elbow z value: {landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW].x}')
                 #print(f' Right shoulder z value: {landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER].x} \n')
