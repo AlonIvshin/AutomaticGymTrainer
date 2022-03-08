@@ -209,7 +209,7 @@ def my_est():
                     v3 = [landmarks[current_instruction.vertex3.value].x,landmarks[current_instruction.vertex3.value].y,landmarks[current_instruction.vertex3.value].z] # vertex 3 value
 
                     starting_angle = current_instruction.angle # starting angle value
-                    tested_angle = calculate_angle(v1,v2,v3,current_instruction.axis) # calculating the current angle
+                    tested_angle = calculate_angle(v1,v2,v3,current_instruction.instructionAxis) # calculating the current angle
 
                     # searching for matching deviation trigger
                 
@@ -246,7 +246,7 @@ def my_est():
                 second = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].z]
                 third = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y,landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].z]
                 # Calculate angle
-                angle = calculate_angle(first, second, third,E_InstructionAxis.XY.value)
+                angle = calculate_angle(first, second, third,E_InstructionAxis.XZ.value)
                 second = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x, landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y]
 
                 #print(f' Right elbow z value: {landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW].x}')
