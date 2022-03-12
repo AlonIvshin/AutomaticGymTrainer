@@ -500,7 +500,7 @@ def my_est():
                     elif current_stage == 0:
                         repetition_direction = 1
                         print("current stage " + current_stage)
-                        print("11111111111111111111")
+
 
                     # Visualize angle
                     first = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
