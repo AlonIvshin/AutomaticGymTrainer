@@ -170,6 +170,7 @@ def my_est():
 
     cap = cv2.VideoCapture(0)
 
+
     # the duration (in seconds)
     duration = 2
 
@@ -178,9 +179,10 @@ def my_est():
     diff = (datetime.now() - start_time).seconds  # converting into seconds
     while (diff <= duration):
         ret, frame = cap.read()
+        imS = cv2.resize(frame, (1024, 768))  # Resize image
         cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                     cv2.LINE_AA)  # adding timer text
-        cv2.imshow('frame', frame)
+        cv2.imshow('frame', imS)
         diff = (datetime.now() - start_time).seconds
         k = cv2.waitKey(10)
 
@@ -365,7 +367,8 @@ def my_est():
                                       mp_drawing.DrawingSpec(color=(245, 66, 230), thickness=2, circle_radius=2)
                                       )
 
-            cv2.imshow('Mediapipe Feed', image)
+            imS = cv2.resize(image, (1024, 768))  # Resize image
+            cv2.imshow('Mediapipe Feed', imS)
 
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
