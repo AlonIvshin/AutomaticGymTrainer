@@ -11,8 +11,8 @@ from threading import Thread
 # Defines
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
-FRONT_CAMERA_ID = 0
-SIDE_CAMERA_ID = 1
+FRONT_CAMERA_ID = 1
+SIDE_CAMERA_ID = 0
 
 
 class E_ExerciseInstructionType(Enum):
@@ -65,7 +65,7 @@ class ThreadedCamera:
         self.capture = cv2.VideoCapture(camID)
 
         self.thread = Thread(target=self.update, args=())
-        self.thread.daemon = True  # ofir
+        #self.thread.daemon = True  # ofir
         self.thread.start()
 
         self.status = False
@@ -80,6 +80,7 @@ class ThreadedCamera:
         if self.status:
             return self.frame
         return None
+
 
 
 # Dummy exercise data:
@@ -139,6 +140,8 @@ instructionAxis = [E_InstructionAxis.XY.value, E_InstructionAxis.XY.value, E_Ins
 instructions = []
 exerciseInstructions = []
 
+print(mp_pose.PoseLandmark["RIGHT_HIP"].value)
+
 for id, v1, v2, v3, ang, axis in zip(instructionId, vertex1, vertex2, vertex3, angle, instructionAxis):
     instructions.append(Instruction(id, v1, v2, v3, ang, description, axis))
 
@@ -168,14 +171,28 @@ def calculate_angle(vertex1, vertex2, vertex3, axis):
     vertex2 = np.array(vertex2)  # Mid
     vertex3 = np.array(vertex3)  # End
 
-    radians = np.arctan2(vertex3[1] - vertex2[1], vertex3[0] - vertex2[0]) - np.arctan2(vertex1[1] - vertex2[1],
-                                                                                        vertex1[0] - vertex2[0])
+    radians = np.arctan2(vertex3[1] - vertex2[1], vertex3[0] - vertex2[0]) -\
+              np.arctan2(vertex1[1] - vertex2[1],vertex1[0] - vertex2[0])
     angle = np.abs(radians * 180.0 / np.pi)
 
     if angle > 180.0:
         angle = 360 - angle
 
     return angle
+
+
+def angle_3D(vertex1, vertex2, vertex3):
+
+    vertex1 = np.array(vertex1)  # First
+    vertex2 = np.array(vertex2)  # Mid
+    vertex3 = np.array(vertex3)  # End
+
+    ba = vertex1 - vertex2
+    bc = vertex3 - vertex2
+
+    cosine_angle = np.dot(ba,bc) / (np.linalg.norm(ba) *np.linalg.norm(bc))
+    angle = np.arccos(cosine_angle)
+    return np.degrees(angle)
 
 
 def my_est():
@@ -190,9 +207,12 @@ def my_est():
     side_camera_thread = None
 
     number_of_cameras = int(input("Enter the number of cameras you would like to use (1/2):"))
-    front_camera_thread = ThreadedCamera(FRONT_CAMERA_ID)
-    if number_of_cameras > 1:  # if the user selected more than 1 camera
-        side_camera_thread = ThreadedCamera(SIDE_CAMERA_ID)
+    #front_camera_thread = ThreadedCamera(FRONT_CAMERA_ID)
+    #if number_of_cameras > 1:  # if the user selected more than 1 camera #side_camera_thread = ThreadedCamera(SIDE_CAMERA_ID)
+
+    front_camera = cv2.VideoCapture(FRONT_CAMERA_ID)
+    if number_of_cameras > 1:
+        side_camera = cv2.VideoCapture(SIDE_CAMERA_ID)
 
     #Testing bandwith fix
     #cv2.SetCaptureProperty(video1, cv.CV_CAP_PROP_FRAME_WIDTH, 800)
@@ -200,10 +220,11 @@ def my_est():
     start_time = datetime.now()
     diff = (datetime.now() - start_time).seconds  # converting into seconds
     while diff <= delay_duration:
-        frame = front_camera_thread.grab_frame()
+        #frame = front_camera_thread.grab_frame()
+        ret,frame = front_camera.read()
         if number_of_cameras > 1:
-            side_frame = side_camera_thread.grab_frame()  # Camera #2 setup
-
+            #side_frame = side_camera_thread.grab_frame()  # Camera #2 setup
+            ret,side_frame = side_camera.read()
         cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                     cv2.LINE_AA)  # adding timer text
         cv2.imshow('Front Camera', frame)
@@ -212,10 +233,11 @@ def my_est():
         diff = (datetime.now() - start_time).seconds
         k = cv2.waitKey(10)
 
-    front_camera_thread.capture.release()
+    #front_camera_thread.capture.release()
+    front_camera.release()
     if number_of_cameras > 1:
-        side_camera_thread.capture.release()  # Camera 2 setup
-
+        #side_camera_thread.capture.release()  # Camera 2 setup
+        side_camera.release()
     cv2.destroyAllWindows()
 
     # Trainee setup stage has finished
@@ -223,18 +245,23 @@ def my_est():
     #time.sleep(1)  # let the main thread sleep for 1 sec ofir
     # Both threads should be done by now (No cap is opened in this stage)
 
-    front_camera_thread = ThreadedCamera(FRONT_CAMERA_ID)
+    #front_camera_thread = ThreadedCamera(FRONT_CAMERA_ID)
+    front_camera = cv2.VideoCapture(FRONT_CAMERA_ID)
     if number_of_cameras > 1:  # if the user selected more than 1 camera
-        side_camera_thread = ThreadedCamera(SIDE_CAMERA_ID)
+        #side_camera_thread = ThreadedCamera(SIDE_CAMERA_ID)
+        side_camera = cv2.VideoCapture(SIDE_CAMERA_ID)
     time.sleep(1)
     # Exercise counter variables
     # Setup mediapipe instance
     with mp_pose.Pose(min_detection_confidence=0.9, min_tracking_confidence=0.5) as front_pose,\
-            mp_pose.Pose(min_detection_confidence=0.9, min_tracking_confidence=0.5) as side_pose:
+            mp_pose.Pose(min_detection_confidence=0.95, min_tracking_confidence=0.75) as side_pose:
         if number_of_cameras > 1:  # If True: enter 2 camera setup
             while True:
-                frame = front_camera_thread.grab_frame()  # grab front camera frame
-                side_frame = side_camera_thread.grab_frame()  # grab side camera frame
+               # frame = front_camera_thread.grab_frame()  # grab front camera frame
+               # side_frame = side_camera_thread.grab_frame()  # grab side camera frame
+                ret,frame = front_camera.read()
+                ret,side_frame = side_camera.read()
+
                 # Recolor image to RGB
                 # First camera
                 image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -338,7 +365,7 @@ def my_est():
                             repetition_counter += 1
                         repetition_direction = -1
 
-                    elif current_stage == 0:
+                    elif current_stage == 1:
                         repetition_direction = 1
 
                     # Only for camera 1 atm
@@ -349,10 +376,12 @@ def my_est():
                     second = [side_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
                               side_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y,
                               side_landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].z]  # vertex 2 value
-                    third = [side_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                             side_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y,
-                             side_landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].z]  # vertex 3 value
-                    displayed_angle = calculate_angle(first, second, third, E_InstructionAxis.XZ.value)
+                    third = [side_landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].x,
+                             side_landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].y,
+                             side_landmarks[mp_pose.PoseLandmark.LEFT_HIP.value].z]  # vertex 3 value
+                    displayed_angle = calculate_angle(first, second,third , E_InstructionAxis.XZ.value)
+                    print(f"x{first[0]} y{first[1]} z{first[2]}")
+                    #displayed_angle = angle_3D(first, second, third)
 
                     cv2.putText(side_image, str(displayed_angle),
                                 tuple(np.multiply(second[0:2], [640, 480]).astype(int)),
@@ -407,7 +436,10 @@ def my_est():
 
         else:
             while True:
-                frame = front_camera_thread.grab_frame()  # grab front camera frame
+                #frame = front_camera_thread.grab_frame()  # grab front camera frame
+                ret,frame = front_camera.read()
+                real_landmarks = None
+
                 # Recolor image to RGB
                 # First camera
                 image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -489,36 +521,36 @@ def my_est():
                     if successful_exercise_instructions_in_current_stage == total_num_of_exercise_instructions_in_stage:
                         current_stage += repetition_direction
 
-
-
-
                     if current_stage == exercise_stages:
                         if repetition_direction == 1:
                             repetition_counter += 1
                         repetition_direction = -1
 
-                    elif current_stage == 0:
+                    elif current_stage == 1:
                         repetition_direction = 1
-                        print("current stage " + current_stage)
+
 
 
                     # Visualize angle
-                    first = [landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].x,
-                             landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].y,
-                             landmarks[mp_pose.PoseLandmark.RIGHT_ELBOW.value].z]  # vertex 1 value
-                    second = [landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].x,
-                              landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].y,
-                              landmarks[mp_pose.PoseLandmark.RIGHT_SHOULDER.value].z]  # vertex 2 value
-                    third = [landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].x,
-                             landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].y,
-                             landmarks[mp_pose.PoseLandmark.LEFT_SHOULDER.value].z]  # vertex 3 value
 
-                    '''displayed_angle = calculate_angle(first, second, third, E_InstructionAxis.XZ.value)
-                    
+
+                    first = [landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].x,
+                             landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].y,
+                             landmarks[mp_pose.PoseLandmark.RIGHT_HIP.value].z]  # vertex 1 value
+                    second = [landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value].x,
+                              landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value].y,
+                              landmarks[mp_pose.PoseLandmark.RIGHT_KNEE.value].z]  # vertex 2 value
+                    third = [landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value].x,
+                             landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value].y,
+                             landmarks[mp_pose.PoseLandmark.RIGHT_ANKLE.value].z]  # vertex 3 value
+
+                    displayed_angle = calculate_angle(first, second, third,E_InstructionAxis.XZ.value)
+                    print(f"x:{first[0]} y:{first[1]} z:{first[2]}")
+
                     cv2.putText(image, str(displayed_angle),
                                 tuple(np.multiply(second[0:2], [640, 480]).astype(int)),
                                 cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA
-                                )'''
+                                )
 
 
                 # ofir
@@ -560,9 +592,11 @@ def my_est():
                     break
 
 
-        front_camera_thread.capture.release()
+        #front_camera_thread.capture.release()
+        front_camera.release()
         if number_of_cameras > 1:
-            side_camera_thread.capture.release()  # Camera 2 setup
+            #side_camera_thread.capture.release()  # Camera 2 setup
+            side_camera.release()
         cv2.destroyAllWindows()
 
 
