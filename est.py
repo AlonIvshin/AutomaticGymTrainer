@@ -206,6 +206,7 @@ def my_est():
             image.flags.writeable = False
             current_set = set()
             current_list = []
+            alerts_array = []
             # Make detection
             results = pose.process(image)
 
@@ -263,6 +264,7 @@ def my_est():
                     if E_AlertDeviationTrigger[exercise_instruction_loop.alertDeviationTrigger].value == E_AlertDeviationTrigger.POSITIVE.value:
                         if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle:
                             print(current_instruction.insAlertData.alerttext)
+                            alerts_array.append(current_instruction.insAlertData.alerttext)
                             current_list.append((current_instruction_v1_index, current_instruction_v2_index))
                             current_list.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -285,6 +287,7 @@ def my_est():
                     elif E_AlertDeviationTrigger[exercise_instruction_loop.alertDeviationTrigger].value == E_AlertDeviationTrigger.NEGATIVE.value:
                         if tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
                             print(current_instruction.insAlertData.alerttext)
+                            alerts_array.append(current_instruction.insAlertData.alerttext)
                             current_list.append((current_instruction_v1_index, current_instruction_v2_index))
                             current_list.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -309,6 +312,7 @@ def my_est():
                         if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle or \
                                 tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
                             print(current_instruction.insAlertData.alerttext)
+                            alerts_array.append(current_instruction.insAlertData.alerttext)
                             current_list.append((current_instruction_v1_index, current_instruction_v2_index))
                             current_list.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -371,7 +375,7 @@ def my_est():
             except:
                 pass
 
-            status_image = np.zeros((512, 256, 3), np.uint8)
+            status_image = np.zeros((512, 720, 3), np.uint8)
 
             cv2.rectangle(status_image, (0, 0), (225, 73), (245, 117, 16), -1)
 
@@ -395,8 +399,10 @@ def my_est():
                         (110, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
 
-            cv2.putText(status_image, "Alerts", (15, 150), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-
+            cv2.putText(status_image, "Alerts:", (8, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+            for item in alerts_array:
+                cv2.putText(status_image, item, (8, 120+alerts_array.index(item)*30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1,
+                            cv2.LINE_AA)
 
 
 
@@ -421,7 +427,7 @@ def my_est():
                                                              circle_radius=2)  # edges color
                                       )
 
-            image = cv2.resize(image, (512, 512))  # Resize image
+            image = cv2.resize(image, (720, 512))  # Resize image
             verti = np.concatenate((status_image,image),axis=1)
             cv2.imshow("testing",verti)
 
