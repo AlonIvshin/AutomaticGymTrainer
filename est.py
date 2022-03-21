@@ -105,7 +105,7 @@ for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviat
     # end of dummy data
 
 
-def my_est(arg):
+def my_est():
     # current stage variable
     current_stage = 0
 
@@ -326,12 +326,21 @@ def my_est(arg):
 
             image = cv2.resize(image, (720, 512))  # Resize image
             verticalConcatenatedImage = np.concatenate((status_image, image), axis=1)
-            cv2.imshow("AutomaticGymTrainer Feed", verticalConcatenatedImage)
 
-            if cv2.waitKey(10) & 0xFF == ord('q'):
-                break
+            ret, buffer = cv2.imencode('.jpg',verticalConcatenatedImage)
+            frame=buffer.tobytes()
+
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+            #cv2.imshow("AutomaticGymTrainer Feed", verticalConcatenatedImage)
+
+
+
+            #if cv2.waitKey(10) & 0xFF == ord('q'):
+            #   break
 
         cap.release()
         cv2.destroyAllWindows()
 
-my_est(1)
+#my_est()
