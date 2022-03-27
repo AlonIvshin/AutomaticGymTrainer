@@ -5,6 +5,7 @@ from datetime import datetime
 from enum import Enum
 import DBConnection
 
+#if __name__ == '__main__':
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
 
@@ -63,6 +64,7 @@ class Alerts:
 
 # Dummy exercise data:
 exerciseId = 1
+repsGoal = 10
 
 # extracting exercise instruction data from db:
 res = DBConnection.getAllExerciseInstructionData(exerciseId)
@@ -89,7 +91,8 @@ for alert_Id, alert_instructionId, alert_Text in zip(alertId2, alertInstructionI
     instruction_alert_data_list.append(Alerts(alert_Id, alert_instructionId, alert_Text))
 
 # creating instructions and exerciseInstructions objects
-for instruction_Id, v1, v2, v3, ang, instruction_desc,axis in zip(instructionId, vertex1, vertex2, vertex3, angle, description,instructionAxis):
+for instruction_Id, v1, v2, v3, ang, instruction_desc, axis in zip(instructionId, vertex1, vertex2, vertex3, angle,
+                                                                   description, instructionAxis):
     instructions_list.append(Instruction(instruction_Id, v1, v2, v3, ang, instruction_desc, axis))
 
 # creating the relevant instructions
@@ -98,16 +101,24 @@ for item in instruction_alert_data_list:
 
 # creating the relevant exercise instructions
 for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviation_Negative, instruction_Stage, exerciseInstruction_Type \
-        , alertDeviation_Trigger, alertExtended_Id in zip(exerciseInstructionId, instructionId, exerciseInstructionAlertId,deviationPositive, deviationNegative,
-                                                          instructionStage, exerciseInstructionType, alertDeviationTrigger, alertExtendedId):
+        , alertDeviation_Trigger, alertExtended_Id in zip(exerciseInstructionId, instructionId,
+                                                          exerciseInstructionAlertId, deviationPositive,
+                                                          deviationNegative,
+                                                          instructionStage, exerciseInstructionType,
+                                                          alertDeviationTrigger, alertExtendedId):
     exerciseInstructions_list.append(
-        ExerciseInstruction(exerciseInstruction_Id, exerciseId, instruction_Id, alert_Id, deviation_Positive, deviation_Negative, instruction_Stage, exerciseInstruction_Type, alertDeviation_Trigger, alertExtended_Id))
+        ExerciseInstruction(exerciseInstruction_Id, exerciseId, instruction_Id, alert_Id, deviation_Positive,
+                            deviation_Negative, instruction_Stage, exerciseInstruction_Type, alertDeviation_Trigger,
+                            alertExtended_Id))
     # end of dummy data
 
 
-def my_est():
+def my_est(e_id, r_num):
     # current stage variable
     current_stage = 0
+    a = e_id
+    b = r_num
+    print(f"this is e_id {a} and this is r_num{b}")
 
     def calculate_angle(vertex1, vertex2, vertex3, axis):
         if axis == E_InstructionAxis.XY.value:
@@ -170,8 +181,8 @@ def my_est():
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
 
-            error_edges = [] # will be translated to set when drawing connections
-            alerts_array = [] # contains all alerts that showed during the frame analysis
+            error_edges = []  # will be translated to set when drawing connections
+            alerts_array = []  # contains all alerts that showed during the frame analysis
             # Make detection
             results = pose.process(image)
 
@@ -220,8 +231,8 @@ def my_est():
                     tested_angle = calculate_angle(v1, v2, v3, E_InstructionAxis[
                         current_instruction.instructionAxis].value)  # calculating the current angle
 
-                    deviation_trigger_value =E_AlertDeviationTrigger[exercise_instruction_loop.alertDeviationTrigger].value
-
+                    deviation_trigger_value = E_AlertDeviationTrigger[
+                        exercise_instruction_loop.alertDeviationTrigger].value
 
                     if deviation_trigger_value == E_AlertDeviationTrigger.POSITIVE.value:
                         # check for deviation trigger
@@ -234,7 +245,8 @@ def my_est():
                         if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
                             if starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 >= tested_angle:
                                 alerts_array.append(
-                                    instruction_alert_data_list[exercise_instruction_loop.alertExtendedId].alertText)
+                                    instruction_alert_data_list[
+                                        exercise_instruction_loop.alertExtendedId].alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
                             else:
@@ -249,7 +261,8 @@ def my_est():
                         if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
                             if starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1 <= tested_angle:
                                 alerts_array.append(
-                                    instruction_alert_data_list[exercise_instruction_loop.alertExtendedId].alertText)
+                                    instruction_alert_data_list[
+                                        exercise_instruction_loop.alertExtendedId].alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
                             else:
@@ -303,9 +316,11 @@ def my_est():
                         (110, 60),
                         cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
 
-            cv2.putText(status_image, "Alerts:", (8, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+            cv2.putText(status_image, "Alerts:", (8, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
+                        cv2.LINE_AA)
             for item in alerts_array:
-                cv2.putText(status_image, item, (8, 120 + alerts_array.index(item) * 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                cv2.putText(status_image, item, (8, 120 + alerts_array.index(item) * 30), cv2.FONT_HERSHEY_SIMPLEX,
+                            0.5,
                             (0, 0, 255), 1,
                             cv2.LINE_AA)
 
@@ -323,24 +338,15 @@ def my_est():
                                                              circle_radius=2)  # edges color
                                       )
 
-
             image = cv2.resize(image, (720, 512))  # Resize image
             verticalConcatenatedImage = np.concatenate((status_image, image), axis=1)
 
-            ret, buffer = cv2.imencode('.jpg',verticalConcatenatedImage)
-            frame=buffer.tobytes()
+            cv2.imshow("AutomaticGymTrainer Feed", verticalConcatenatedImage)
 
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
-            #cv2.imshow("AutomaticGymTrainer Feed", verticalConcatenatedImage)
-
-
-
-            #if cv2.waitKey(10) & 0xFF == ord('q'):
-            #   break
+            if cv2.waitKey(10) & 0xFF == ord('q'):
+                break
 
         cap.release()
         cv2.destroyAllWindows()
 
-#my_est()
+# my_est()

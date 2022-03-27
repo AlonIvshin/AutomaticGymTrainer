@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="AutomaticGymTrainerLocal",
+                database="mytrainer",
                 user="postgres",
-                password="012net")
+                password="root")
         return self.con
 
 
