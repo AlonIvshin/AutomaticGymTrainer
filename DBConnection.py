@@ -61,5 +61,13 @@ def getAllAlertsData(exerciseId):
     return res
 
 
+def getExerciesNamesAndTarget():
+    cur = con.cursor()
+    cur.execute('''select exercise_id,exercise_name,main_target from exercises''')
+    res = cur.fetchall()
+    cur.close
+    return res
+
+
 def closeConnection():
     con.close()
