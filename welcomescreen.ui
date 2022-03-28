@@ -54,7 +54,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
      <string>Sign in or create a new account</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="bt_login">
     <property name="geometry">
      <rect>
       <x>450</x>
@@ -72,7 +72,7 @@ background-color: rgb(205, 236, 255);</string>
      <string>Log in</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="bt_signup">
     <property name="geometry">
      <rect>
       <x>450</x>

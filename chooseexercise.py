@@ -9,7 +9,7 @@ from numpy.core.defchararray import isnumeric
 class ChooseExerciseScreen(QMainWindow):
     def __init__(self):
         super(ChooseExerciseScreen, self).__init__()
-        loadUi("chooseexercise.ui", self)
+        loadUi("./ui/chooseexercise.ui", self)
         self.setFixedSize(1200, 800)
         self.bt_start.clicked.connect(self.startEstimationFunction)
         self.loaddata()
@@ -17,7 +17,7 @@ class ChooseExerciseScreen(QMainWindow):
         self.table.setColumnWidth(1, 80)
         self.table.setColumnWidth(0, 10)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.table.doubleClicked.connect(self.doubleClicked_table)
+        self.table.clicked.connect(self.doubleClicked_table)
         self.lbl_alert.hide()
 
     def startEstimationFunction(self):

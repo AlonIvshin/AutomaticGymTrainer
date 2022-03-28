@@ -61,6 +61,7 @@ class Alerts:
         self.alertInstructionId = alertInstructionId
         self.alertText = alertText
 
+# weshould find solution for all above my_est func
 
 # Dummy exercise data:
 exerciseId = 1
