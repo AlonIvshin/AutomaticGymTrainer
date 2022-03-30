@@ -37,7 +37,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>170</y>
+     <y>120</y>
      <width>141</width>
      <height>61</height>
     </rect>
@@ -54,7 +54,7 @@ color: rgb(255, 255, 255);</string>
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>270</y>
+     <y>180</y>
      <width>141</width>
      <height>61</height>
     </rect>
@@ -67,31 +67,31 @@ color: rgb(255, 255, 255);</string>
     <string>Password</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="email">
+  <widget class="QLineEdit" name="i_email">
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>180</y>
+     <y>130</y>
      <width>211</width>
      <height>41</height>
     </rect>
    </property>
   </widget>
-  <widget class="QLineEdit" name="password">
+  <widget class="QLineEdit" name="i_password">
    <property name="geometry">
     <rect>
      <x>220</x>
-     <y>280</y>
+     <y>190</y>
      <width>211</width>
      <height>41</height>
     </rect>
    </property>
   </widget>
-  <widget class="QPushButton" name="confirmacc">
+  <widget class="QPushButton" name="bt_confirm">
    <property name="geometry">
     <rect>
-     <x>300</x>
-     <y>450</y>
+     <x>320</x>
+     <y>550</y>
      <width>141</width>
      <height>41</height>
     </rect>
@@ -109,7 +109,7 @@ background-color: rgb(205, 236, 255);</string>
    <property name="geometry">
     <rect>
      <x>40</x>
-     <y>360</y>
+     <y>240</y>
      <width>171</width>
      <height>61</height>
     </rect>
@@ -122,7 +122,61 @@ color: rgb(255, 255, 255);</string>
     <string>Confirm Pass</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="confirmpass">
+  <widget class="QLineEdit" name="i_password2">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>250</y>
+     <width>211</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_5">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>300</y>
+     <width>171</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>First Name</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>360</y>
+     <width>171</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>Last Name</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="i_firstname">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>310</y>
+     <width>211</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="i_lastname">
    <property name="geometry">
     <rect>
      <x>220</x>
@@ -130,6 +184,101 @@ color: rgb(255, 255, 255);</string>
      <width>211</width>
      <height>41</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_7">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>420</y>
+     <width>171</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+   </property>
+   <property name="text">
+    <string>Phone </string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="i_phone">
+   <property name="geometry">
+    <rect>
+     <x>220</x>
+     <y>430</y>
+     <width>211</width>
+     <height>41</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_bademail">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>490</y>
+     <width>141</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:rgb(255, 0, 0);
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Invalid Email!</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_badpass">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>500</y>
+     <width>231</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:rgb(255, 0, 0);
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
+   </property>
+   <property name="text">
+    <string>passwords doesn't match!</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_notfull">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>530</y>
+     <width>231</width>
+     <height>51</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:rgb(255, 0, 0);
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Please fill all the fields!</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="lbl_bademail2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>570</y>
+     <width>281</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:rgb(255, 0, 0);
+font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
+   </property>
+   <property name="text">
+    <string>Email address is already exist!</string>
    </property>
   </widget>
  </widget>

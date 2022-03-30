@@ -63,10 +63,45 @@ def getAllAlertsData(exerciseId):
 
 def getExerciesNamesAndTarget():
     cur = con.cursor()
+    # QUERY 5: geting exercie id name and target in order to fill a table
     cur.execute('''select exercise_id,exercise_name,main_target from exercises''')
     res = cur.fetchall()
     cur.close
     return res
+
+
+def insertIntoUsers(password, first_name, last_name, email, phoneNumber):
+    try:
+        cur = con.cursor()
+        # QUERY 6: insert new trainee user
+        sql = '''INSERT INTO users (password, first_name, last_name, email, type, "phoneNumber")
+    VALUES (%s,%s,%s,%s,%s,%s);'''
+        cur.execute(sql, (password, first_name, last_name, email, "trainee", phoneNumber))
+        con.commit()
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def isEmailExist(email):
+    try:
+        cur = con.cursor()
+        # QUERY 7: check if the email address is already in use
+        #sql = 'Select count(email) from users where email = %s'
+        cur.execute("Select count(email) from users where email = %s", (email,))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    #return res[0][0]
+    #if res[0][0] != 0:
+       # cur.close()
+      #  return True
+    # else:
+      #  cur.close()
+       # return False
+
 
 
 def closeConnection():

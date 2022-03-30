@@ -13,7 +13,7 @@ class ChooseExerciseScreen(QMainWindow):
         self.setFixedSize(1200, 800)
         self.bt_start.clicked.connect(self.startEstimationFunction)
         self.loaddata()
-        #self.table.setFixedWidth(self.table.columnWidth(0) + self.table.columnWidth(1)+ self.table.ver)
+        # self.table.setFixedWidth(self.table.columnWidth(0) + self.table.columnWidth(1)+ self.table.ver)
         self.table.setColumnWidth(1, 80)
         self.table.setColumnWidth(0, 10)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
@@ -38,7 +38,5 @@ class ChooseExerciseScreen(QMainWindow):
     def doubleClicked_table(self):
         index = self.table.currentIndex()
         newIndex = self.table.model().index(index.row(), 0)
-        eid = self.table.model().data(newIndex)
+        eid = self.table.model().data(newIndex)  # we can pass eid to the model
         self.i_eid.setText(eid)
-
-
