@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="mytrainer",
+                database="AutomaticGymTrainerLocal",
                 user="postgres",
-                password="root")
+                password="012net")
         return self.con
 
 
@@ -87,21 +87,30 @@ def isEmailExist(email):
     try:
         cur = con.cursor()
         # QUERY 7: check if the email address is already in use
-        #sql = 'Select count(email) from users where email = %s'
+        # sql = 'Select count(email) from users where email = %s'
         cur.execute("Select count(email) from users where email = %s", (email,))
         res = cur.fetchall()
         cur.close()
         return res[0][0]
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    #return res[0][0]
-    #if res[0][0] != 0:
-       # cur.close()
-      #  return True
+    # return res[0][0]
+    # if res[0][0] != 0:
+    # cur.close()
+    #  return True
     # else:
-      #  cur.close()
-       # return False
+    #  cur.close()
+    # return False
 
+
+def getExerciseImages(exerciseId):
+    cur = con.cursor()
+    # QUERY 8: get all images for specific exercise
+    # sql = 'select image from stage_images where stage_images.exercise_id = '1''
+    cur.execute('''select image from stage_images where stage_images.exercise_id = %s''', str(exerciseId))
+    res = cur.fetchall()
+    cur.close()
+    return res
 
 
 def closeConnection():

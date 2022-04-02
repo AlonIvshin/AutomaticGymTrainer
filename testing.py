@@ -1,5 +1,27 @@
+import io
+
 import cv2
 import numpy as np
+import DBConnection as DB
+
+import urllib
+
+
+''' Working image extraction from URL in DB'''
+
+image_links = DB.getExerciseImages(1)
+#print(image_links)
+#img = io.imread('https://raw2.github.com/scikit-image/scikit-image.github.com/master/_static/img/logo.png')
+url = image_links[0][0]
+url_response = urllib.request.urlopen(url)
+img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
+img = cv2.imdecode(img_array, -1)
+cv2.imshow('URL Image', img)
+cv2.waitKey()
+
+''' END '''
+
+
 
 counter = 0
 current_stage = 0
