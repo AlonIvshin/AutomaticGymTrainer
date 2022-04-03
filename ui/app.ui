@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget#MainWindow{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QWidget#centralwidget{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="styleSheet">
+       <string notr="true">QWidget#tab_main,#tab_choose,#tab_workouthistory{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab_main">
+       <attribute name="title">
+        <string>Main</string>
+       </attribute>
+       <widget class="QLabel" name="lbl_welcome">
+        <property name="geometry">
+         <rect>
+          <x>370</x>
+          <y>60</y>
+          <width>621</width>
+          <height>111</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 36pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Welcome</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_choose">
+       <attribute name="title">
+        <string>Workout Estimination</string>
+       </attribute>
+       <widget class="QLabel" name="label_2">
+        <property name="geometry">
+         <rect>
+          <x>390</x>
+          <y>40</y>
+          <width>450</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 36pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Choose exercise</string>
+        </property>
+       </widget>
+       <widget class="QTableWidget" name="table">
+        <property name="geometry">
+         <rect>
+          <x>650</x>
+          <y>200</y>
+          <width>481</width>
+          <height>201</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="sizeAdjustPolicy">
+         <enum>QAbstractScrollArea::AdjustToContents</enum>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+        <column>
+         <property name="text">
+          <string>Id</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Exercise name</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Main Muscle Group</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QLabel" name="label_3">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>200</y>
+          <width>151</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color:rgb(255, 255, 255);
+font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Exercie id:</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4">
+        <property name="geometry">
+         <rect>
+          <x>160</x>
+          <y>290</y>
+          <width>201</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color:rgb(255, 255, 255);
+font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Reps number:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="i_eid">
+        <property name="geometry">
+         <rect>
+          <x>420</x>
+          <y>220</y>
+          <width>111</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QLabel" name="lbl_alert">
+        <property name="geometry">
+         <rect>
+          <x>150</x>
+          <y>400</y>
+          <width>441</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 0, 0)</string>
+        </property>
+        <property name="text">
+         <string>Please Fill all the fields with numbers only!</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="i_repsnum">
+        <property name="geometry">
+         <rect>
+          <x>420</x>
+          <y>310</y>
+          <width>111</width>
+          <height>31</height>
+         </rect>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bt_watch">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>680</y>
+          <width>241</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+        </property>
+        <property name="text">
+         <string>Watch instructions</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bt_start">
+        <property name="geometry">
+         <rect>
+          <x>950</x>
+          <y>680</y>
+          <width>191</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+        </property>
+        <property name="text">
+         <string>Start Workout</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_workouthistory">
+       <attribute name="title">
+        <string>My Workout History</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

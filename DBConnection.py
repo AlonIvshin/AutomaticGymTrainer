@@ -87,21 +87,63 @@ def isEmailExist(email):
     try:
         cur = con.cursor()
         # QUERY 7: check if the email address is already in use
-        #sql = 'Select count(email) from users where email = %s'
+        # sql = 'Select count(email) from users where email = %s'
         cur.execute("Select count(email) from users where email = %s", (email,))
         res = cur.fetchall()
         cur.close()
         return res[0][0]
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    #return res[0][0]
-    #if res[0][0] != 0:
-       # cur.close()
-      #  return True
-    # else:
-      #  cur.close()
-       # return False
 
+
+def checkLoginData(email, password):
+    try:
+        con = getInstanceDBConnection().getConnectionInstance()
+        cur = con.cursor()
+        # QUERY 8: check id user login input is correct
+        cur.execute("select password from users where email = %s ", (email,))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def checkIfAlreadyLogedin(email):
+    try:
+        con = getInstanceDBConnection().getConnectionInstance()
+        cur = con.cursor()
+        # QUERY 9: check if this email is logein
+        cur.execute("select logged_in from users where email = %s", (email,))
+        res = cur.fetchall()
+        cur.close()
+        return res
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def changeToLoggedIn(email):
+    try:
+        cur = con.cursor()
+        # QUERY 10: change logged_in to 1
+        cur.execute("UPDATE users SET logged_in = 1 WHERE email = %s;", (email,))
+        con.commit()
+        cur.close()
+        return True
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def getUser(email):
+    try:
+        cur = con.cursor()
+        # QUERY 11: get user data
+        cur.execute("select user_id, password, first_name, last_name, email, type, 'phoneNumber' from users where email = %s;", (email,))
+        res = cur.fetchall()
+        cur.close()
+        return res
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
 
 
 def closeConnection():
