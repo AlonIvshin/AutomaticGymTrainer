@@ -4,10 +4,12 @@ import numpy as np
 from datetime import datetime
 from enum import Enum
 import DBConnection
+import urllib
 
-#if __name__ == '__main__':
+# if __name__ == '__main__':
 mp_drawing = mp.solutions.drawing_utils
 mp_pose = mp.solutions.pose
+NUMBER_OF_FRAMES_BETWEEN_SCORE = 15  # Ofir
 
 
 class E_ExerciseInstructionType(Enum):
@@ -61,6 +63,25 @@ class Alerts:
         self.alertInstructionId = alertInstructionId
         self.alertText = alertText
 
+
+class TriggeredAlerts:
+    def __init__(self, alertId, stageNumber, repNumber):
+        self.alertId = alertId
+        self.stageNumber = stageNumber
+        self.repNumber = repNumber
+
+
+def getImageFromLink(url):
+    url_response = urllib.request.urlopen(url)
+    img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
+    img = cv2.imdecode(img_array, -1)
+    return img
+
+
+def calcuateScore(deviation):
+    return max(1, deviation / 100)
+
+
 # weshould find solution for all above my_est func
 
 # Dummy exercise data:
@@ -82,6 +103,9 @@ instructionId, vertex1, vertex2, vertex3, angle, description, instructionAxis = 
 # QUERY 4: getting all alert's data of the exercise
 res = DBConnection.getAllAlertsData(exerciseId)
 alertId2, alertInstructionId, alertText = zip(*res)
+
+# QUERY 8: get all images for specific exercise
+all_stage_images_links = DBConnection.getExerciseImages(exerciseId)
 
 instructions_list = []
 exerciseInstructions_list = []
@@ -113,13 +137,29 @@ for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviat
                             alertExtended_Id))
     # end of dummy data
 
+# Ofir
+# convert all links to actual images
+stage_images = []  # change stage images to exercise images
+for image_links in all_stage_images_links:  # all_stage_images_links contains tuples
+    stage_images.append(getImageFromLink(image_links[0]))
+
+# Ofir
+exercise_score = 100  # end score
+exercise_score_frame_counter = 0  # each 15 frames score is calculated ?
+
+# Ofir
+error_list = []  # contains list triggeredAlerts
+
 
 def my_est(e_id, r_num):
     # current stage variable
     current_stage = 0
+    exercise_score = 100  # ofir
+    exercise_score_frame_counter = 0  # ofir
+    error_list = []
     a = e_id
     b = r_num
-    print(f"this is e_id {a} and this is r_num{b}")
+    print(f"this is e_id {a} and this is r_num {b}")
 
     def calculate_angle(vertex1, vertex2, vertex3, axis):
         if axis == E_InstructionAxis.XY.value:
@@ -178,6 +218,8 @@ def my_est(e_id, r_num):
     with mp_pose.Pose(min_detection_confidence=0.9, min_tracking_confidence=0.5) as pose:
         while cap.isOpened():
             ret, frame = cap.read()
+            # counting that a frame was received
+            exercise_score_frame_counter += 1
             # Recolor image to RGB
             image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             image.flags.writeable = False
@@ -242,6 +284,17 @@ def my_est(e_id, r_num):
                             error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                             error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
+                            # Save alerts that triggered during the exercise
+                            error_list.append(
+                                TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                repNumber=repetition_counter))
+
+                            # ofir - score
+                            if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                exercise_score_frame_counter = 0
+                                exercise_score -= calcuateScore(
+                                    tested_angle - exercise_instruction_loop.deviationPositive - starting_angle)
+
                         # check for extended deviation
                         if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
                             if starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 >= tested_angle:
@@ -250,6 +303,17 @@ def my_est(e_id, r_num):
                                         exercise_instruction_loop.alertExtendedId].alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
+
+                                # Save alerts that triggered during the exercise
+                                error_list.append(
+                                    TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                    repNumber=repetition_counter))
+
+                                # ofir - score
+                                if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                    exercise_score_frame_counter = 0
+                                    exercise_score -= calcuateScore(
+                                        starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 - tested_angle)
                             else:
                                 successful_exercise_instructions_in_current_stage += 1
                         continue
@@ -259,6 +323,17 @@ def my_est(e_id, r_num):
                             error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                             error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
+                            # Save alerts that triggered during the exercise
+                            error_list.append(
+                                TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                repNumber=repetition_counter))
+
+                            # ofir - score
+                            if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                exercise_score_frame_counter = 0
+                                exercise_score -= calcuateScore(
+                                    starting_angle - tested_angle - exercise_instruction_loop.deviationNegative)
+
                         if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
                             if starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1 <= tested_angle:
                                 alerts_array.append(
@@ -266,6 +341,17 @@ def my_est(e_id, r_num):
                                         exercise_instruction_loop.alertExtendedId].alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
+
+                                # Save alerts that triggered during the exercise
+                                error_list.append(
+                                    TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                    repNumber=repetition_counter))
+
+                                # ofir - score
+                                if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                    exercise_score_frame_counter = 0
+                                    exercise_score -= calcuateScore(
+                                        tested_angle - starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1)
                             else:
                                 successful_exercise_instructions_in_current_stage += 1
                         continue
@@ -276,6 +362,19 @@ def my_est(e_id, r_num):
                             alerts_array.append(current_instruction.instructionAlertData.alertText)
                             error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                             error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
+
+                            # Save alerts that triggered during the exercise
+                            error_list.append(
+                                TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                repNumber=repetition_counter))
+
+                            # ofir - score
+                            if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                exercise_score_frame_counter = 0
+                                exercise_score -= calcuateScore(
+                                    max(tested_angle - exercise_instruction_loop.deviationPositive,
+                                        tested_angle - exercise_instruction_loop.deviationNegative))
+
                         else:
                             successful_exercise_instructions_in_current_stage += 1
                         continue
@@ -339,15 +438,37 @@ def my_est(e_id, r_num):
                                                              circle_radius=2)  # edges color
                                       )
 
-            image = cv2.resize(image, (720, 512))  # Resize image
-            verticalConcatenatedImage = np.concatenate((status_image, image), axis=1)
+            # Ideal pose with camera feed concatenation - ofir
+            goal_pose_image = stage_images[current_stage + repetition_direction - 1]
+            cv2.putText(goal_pose_image, "Goal Posture:", (30, 25), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
+                        cv2.LINE_AA)
 
-            cv2.imshow("AutomaticGymTrainer Feed", verticalConcatenatedImage)
+            goal_pose_image = cv2.resize(goal_pose_image, (720, 512))  # Resize image
+            image = cv2.resize(image, (720, 512))  # Resize image
+            status_image = cv2.resize(status_image, (1440, 512))
+
+            verticalConcatenatedImage = np.concatenate((goal_pose_image, image), axis=1)  # on x axis
+            horizontalConcatenatedImage = np.concatenate((verticalConcatenatedImage, status_image), axis=0)
+
+            # image = cv2.resize(image, (720, 512))  # Resize image
+            # verticalConcatenatedImage = np.concatenate((status_image, image), axis=1)
+
+            # Concatenation with ideal position for each stage - ofir
+
+            cv2.imshow("AutomaticGymTrainer Feed", horizontalConcatenatedImage)
+
+            error_list = list(set(error_list))  # make sure there are no copies
 
             if cv2.waitKey(10) & 0xFF == ord('q'):
+                break
+
+            if repetition_counter == r_num:
                 break
 
         cap.release()
         cv2.destroyAllWindows()
 
-#my_est(1,2)
+        # Need to fix return
+        # return exercise_score
+
+my_est(1,5)

@@ -32,7 +32,7 @@ class App(QMainWindow):
         e_id = self.i_eid.text()
         r_num = self.i_repsnum.text()
         if isnumeric(e_id) and isnumeric(r_num):
-            self.bt_start.clicked.connect(my_est(e_id, r_num))
+            self.bt_start.clicked.connect(lambda: my_est(e_id, r_num))
         else:
             self.lbl_alert.show()
 

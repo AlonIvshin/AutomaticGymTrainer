@@ -138,12 +138,24 @@ def getUser(email):
     try:
         cur = con.cursor()
         # QUERY 11: get user data
-        cur.execute("select user_id, password, first_name, last_name, email, type, 'phoneNumber' from users where email = %s;", (email,))
+        cur.execute(
+            "select user_id, password, first_name, last_name, email, type, 'phoneNumber' from users where email = %s;",
+            (email,))
         res = cur.fetchall()
         cur.close()
         return res
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+
+
+def getExerciseImages(exerciseId):
+    cur = con.cursor()
+    # QUERY 12: get all images for specific exercise
+    # sql = 'select image from stage_images where stage_images.exercise_id = '1''
+    cur.execute('''select image from stage_images where stage_images.exercise_id = %s''', str(exerciseId))
+    res = cur.fetchall()
+    cur.close()
+    return res
 
 
 def closeConnection():
