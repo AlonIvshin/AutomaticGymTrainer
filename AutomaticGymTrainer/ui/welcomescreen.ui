@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>widget2</class>
+ <widget class="QMainWindow" name="widget2">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1200</width>
+    <height>800</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>AutomaticGymTrainer</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget#widget{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
+  </property>
+  <widget class="QWidget" name="widget">
+   <property name="styleSheet">
+    <string notr="true">QWidget#widget{
+background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
+   </property>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>475</x>
+      <y>50</y>
+      <width>250</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 36pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
+    </property>
+    <property name="text">
+     <string>Welcome</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>170</y>
+      <width>400</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 16pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
+    </property>
+    <property name="text">
+     <string>Sign in or create a new account</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="bt_login">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>330</y>
+      <width>300</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+    </property>
+    <property name="text">
+     <string>Log in</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="bt_signup">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>430</y>
+      <width>300</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+    </property>
+    <property name="text">
+     <string>Sign up</string>
+    </property>
+   </widget>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
