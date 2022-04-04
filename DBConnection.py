@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="AutomaticGymTrainerLocal",
+                database="mytrainer",
                 user="postgres",
-                password="012net")
+                password="root")
         return self.con
 
 
@@ -94,18 +94,63 @@ def isEmailExist(email):
         return res[0][0]
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
-    # return res[0][0]
-    # if res[0][0] != 0:
-    # cur.close()
-    #  return True
-    # else:
-    #  cur.close()
-    # return False
+
+
+def checkLoginData(email, password):
+    try:
+        con = getInstanceDBConnection().getConnectionInstance()
+        cur = con.cursor()
+        # QUERY 8: check id user login input is correct
+        cur.execute("select password from users where email = %s ", (email,))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def checkIfAlreadyLogedin(email):
+    try:
+        con = getInstanceDBConnection().getConnectionInstance()
+        cur = con.cursor()
+        # QUERY 9: check if this email is logein
+        cur.execute("select logged_in from users where email = %s", (email,))
+        res = cur.fetchall()
+        cur.close()
+        return res
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def changeToLoggedIn(email):
+    try:
+        cur = con.cursor()
+        # QUERY 10: change logged_in to 1
+        cur.execute("UPDATE users SET logged_in = 1 WHERE email = %s;", (email,))
+        con.commit()
+        cur.close()
+        return True
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def getUser(email):
+    try:
+        cur = con.cursor()
+        # QUERY 11: get user data
+        cur.execute(
+            "select user_id, password, first_name, last_name, email, type, 'phoneNumber' from users where email = %s;",
+            (email,))
+        res = cur.fetchall()
+        cur.close()
+        return res
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
 
 
 def getExerciseImages(exerciseId):
     cur = con.cursor()
-    # QUERY 8: get all images for specific exercise
+    # QUERY 12: get all images for specific exercise
     # sql = 'select image from stage_images where stage_images.exercise_id = '1''
     cur.execute('''select image from stage_images where stage_images.exercise_id = %s''', str(exerciseId))
     res = cur.fetchall()

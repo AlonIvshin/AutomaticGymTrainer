@@ -64,6 +64,13 @@ class Alerts:
         self.alertText = alertText
 
 
+class TriggeredAlerts:
+    def __init__(self, alertId, stageNumber, repNumber):
+        self.alertId = alertId
+        self.stageNumber = stageNumber
+        self.repNumber = repNumber
+
+
 def getImageFromLink(url):
     url_response = urllib.request.urlopen(url)
     img_array = np.array(bytearray(url_response.read()), dtype=np.uint8)
@@ -132,7 +139,7 @@ for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviat
 
 # Ofir
 # convert all links to actual images
-stage_images = []
+stage_images = []  # change stage images to exercise images
 for image_links in all_stage_images_links:  # all_stage_images_links contains tuples
     stage_images.append(getImageFromLink(image_links[0]))
 
@@ -140,15 +147,19 @@ for image_links in all_stage_images_links:  # all_stage_images_links contains tu
 exercise_score = 100  # end score
 exercise_score_frame_counter = 0  # each 15 frames score is calculated ?
 
+# Ofir
+error_list = []  # contains list triggeredAlerts
+
 
 def my_est(e_id, r_num):
     # current stage variable
     current_stage = 0
     exercise_score = 100  # ofir
     exercise_score_frame_counter = 0  # ofir
+    error_list = []
     a = e_id
     b = r_num
-    print(f"this is e_id {a} and this is r_num{b}")
+    print(f"this is e_id {a} and this is r_num {b}")
 
     def calculate_angle(vertex1, vertex2, vertex3, axis):
         if axis == E_InstructionAxis.XY.value:
@@ -273,6 +284,11 @@ def my_est(e_id, r_num):
                             error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                             error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
+                            # Save alerts that triggered during the exercise
+                            error_list.append(
+                                TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                repNumber=repetition_counter))
+
                             # ofir - score
                             if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                 exercise_score_frame_counter = 0
@@ -287,6 +303,12 @@ def my_est(e_id, r_num):
                                         exercise_instruction_loop.alertExtendedId].alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
+
+                                # Save alerts that triggered during the exercise
+                                error_list.append(
+                                    TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                    repNumber=repetition_counter))
+
                                 # ofir - score
                                 if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                     exercise_score_frame_counter = 0
@@ -301,6 +323,11 @@ def my_est(e_id, r_num):
                             error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                             error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
+                            # Save alerts that triggered during the exercise
+                            error_list.append(
+                                TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                repNumber=repetition_counter))
+
                             # ofir - score
                             if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                 exercise_score_frame_counter = 0
@@ -314,6 +341,11 @@ def my_est(e_id, r_num):
                                         exercise_instruction_loop.alertExtendedId].alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
+
+                                # Save alerts that triggered during the exercise
+                                error_list.append(
+                                    TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                    repNumber=repetition_counter))
 
                                 # ofir - score
                                 if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
@@ -330,6 +362,11 @@ def my_est(e_id, r_num):
                             alerts_array.append(current_instruction.instructionAlertData.alertText)
                             error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                             error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
+
+                            # Save alerts that triggered during the exercise
+                            error_list.append(
+                                TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                repNumber=repetition_counter))
 
                             # ofir - score
                             if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
@@ -420,14 +457,18 @@ def my_est(e_id, r_num):
 
             cv2.imshow("AutomaticGymTrainer Feed", horizontalConcatenatedImage)
 
+            error_list = list(set(error_list))  # make sure there are no copies
+
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
 
             if repetition_counter == r_num:
-                return exercise_score
+                break
 
         cap.release()
         cv2.destroyAllWindows()
 
+        # Need to fix return
+        # return exercise_score
 
-print(my_est(1, 5))
+my_est(1,5)
