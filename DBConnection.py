@@ -158,5 +158,41 @@ def getExerciseImages(exerciseId):
     return res
 
 
+def logOutCurrentUser(user_id):
+    try:
+        cur = con.cursor()
+        # QUERY 13: change logged_in to 0
+        cur.execute("UPDATE users SET logged_in = 0 WHERE user_id = %s;", (user_id,))
+        con.commit()
+        cur.close()
+        return True
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def getVideoId(exercise_id):
+    try:
+        cur = con.cursor()
+        # QUERY 14: get Youtube video id
+        cur.execute("select video from exercises where exercise_id = %s;", str(exercise_id))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+def getExerciseDescription(exercise_id):
+    try:
+        cur = con.cursor()
+        # QUERY 15: get user data
+        cur.execute("select description from exercises where exercise_id = %s;", str(exercise_id))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
 def closeConnection():
     con.close()

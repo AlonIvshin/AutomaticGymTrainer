@@ -470,5 +470,3 @@ def my_est(e_id, r_num):
 
         # Need to fix return
         # return exercise_score
-
-my_est(1,5)
