@@ -1,8 +1,7 @@
-from PyQt5 import QtWidgets
 from est import my_est
 from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView
-import DBConnection
+from Utils import DBConnection
 from numpy.core.defchararray import isnumeric
 
 

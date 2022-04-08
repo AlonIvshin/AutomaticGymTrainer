@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="mytrainer",
+                database="AutomaticGymTrainerLocal",
                 user="postgres",
-                password="root")
+                password="012net")
         return self.con
 
 
@@ -52,7 +52,7 @@ def getAllInstructionData(exerciseId):
 def getAllAlertsData(exerciseId):
     cur = con.cursor()
     # QUERY 4: getting all alert's data of the exercise
-    cur.execute('''select a.alert_id,a.instruction_id,a.alert_text
+    cur.execute('''select a.alert_id,a.instruction_id,a.alert_text,a.alert_wrong_posture_image_link
     from alerts as a
     inner join exercises_instructions as ei on a.instruction_id=ei.instruction_id
     where ei.exercise_id = %s''', str(exerciseId))

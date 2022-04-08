@@ -1,8 +1,7 @@
-from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDialog
 from PyQt5.uic import loadUi
 from createacc import CreateAcc
-import DBConnection
+from Utils import DBConnection
 from ourclasses import User
 from app import App
 

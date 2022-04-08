@@ -102,10 +102,7 @@ instructionId, vertex1, vertex2, vertex3, angle, description, instructionAxis = 
 
 # QUERY 4: getting all alert's data of the exercise
 res = DBConnection.getAllAlertsData(exerciseId)
-alertId2, alertInstructionId, alertText,bla = zip(*res)
-
-
-
+alertId2, alertInstructionId, alertText = zip(*res)
 
 # QUERY 8: get all images for specific exercise
 all_stage_images_links = DBConnection.getExerciseImages(exerciseId)
@@ -474,4 +471,4 @@ def my_est(e_id, r_num):
         # Need to fix return
         # return exercise_score
 
-#my_est(1,5)
+# my_est(1,5)
