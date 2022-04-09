@@ -1,22 +1,35 @@
 import sys
-import welcomscreen
-import chooseexercise
-from PyQt5.QtWidgets import QApplication
 
-import workoutestimation
+import self as self
+
+import welcomscreen
+from PyQt5.QtWidgets import QApplication
+from Utils import DBConnection
+from ClassObjects.User import User
+
+from workoutEstimation import EstimationScreen
+from app import App
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
+    app = QApplication([])
+    '''#welcome = welcomscreen.WelcomeScreen()
+    choose = chooseexercise.ChooseExerciseScreen()
+    choose.show()
+    #welcome.show()'''
+    '''res = DBConnection.getUser('ofirvaknin55@gmail.com')
+    current_user = User(*res[0])
+    myapp = App(current_user)
+    myapp.show()'''
+
+    res = DBConnection.getUser('ofirvaknin55@gmail.com')
+    current_user = User(*res[0])
+    myapp = App(current_user)
+    myapp.show()
+
+    # EstimationScreen(exercise_id=1, repetition_num=3)
+    # wo_est = EstimationScreen(1, 3)
+    #wo_est.show()
     #welcome = welcomscreen.WelcomeScreen()
-    # choose = chooseexercise.ChooseExerciseScreen()
-    # choose.show()
     #welcome.show()
-    wo_est = workoutestimation.EstimationScreen(1, 4)
-    wo_est.show()
 
-
-    try:
-        sys.exit(app.exec_())
-
-    except:
-        print("Exiting")
+    sys.exit(app.exec_())

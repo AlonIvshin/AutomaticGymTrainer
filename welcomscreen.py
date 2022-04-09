@@ -6,8 +6,8 @@ from createacc import CreateAcc
 
 class WelcomeScreen(QMainWindow):
     def __init__(self):
-        super(WelcomeScreen, self).__init__()
-        loadUi("./ui/welcomescreen.ui", self)
+        super().__init__()
+        self.ui = loadUi("./ui/welcomescreen.ui", self)
         self.setFixedSize(1200, 800)
         self.bt_login.clicked.connect(self.openLoginWindow)
         self.bt_signup.clicked.connect(self.openCreateAccountWindow)

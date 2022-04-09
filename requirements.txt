@@ -3,3 +3,4 @@ opencv-python==4.5.5.64
 mediapipe==0.8.9.1
 numpy==1.22.3
 psycopg2==2.9.3
+PyQtWebEngine==5.15.5
