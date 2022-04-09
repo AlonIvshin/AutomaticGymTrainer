@@ -68,8 +68,10 @@ from workoutEstimation import EstimationScreen
 
 class Login(QMainWindow):
     def __init__(self):
-        super(Login,self).__init__()
+        super().__init__()
         self.ui = loadUi("./ui/login3.ui", self)
+        self.setFixedSize(1200, 800)
+
         self.bt_click.clicked.connect(self.openCreateAccountWindow)
         self.bt_login.clicked.connect(self.login)
         self.bt_estimation.clicked.connect(self.gotoEstimation)

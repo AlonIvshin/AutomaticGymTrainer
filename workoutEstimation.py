@@ -1,5 +1,4 @@
 from datetime import datetime
-
 import mediapipe as mp
 from PyQt5 import uic
 
@@ -17,14 +16,12 @@ from ClassObjects.TriggeredAlerts import TriggeredAlerts
 from Utils import DBConnection
 from Utils.WorkoutEstimationFunctions import *
 from cv2 import cv2
-
-
-
-
+import threading
+import queue
 
 # Constants
 NUMBER_OF_FRAMES_BETWEEN_SCORE = 15  # Ofir
-SET_UP_DELAY_TIME = 1
+SET_UP_DELAY_TIME = 5
 IMAGE_WIDTH = 400
 IMAGE_HEIGHT = 400
 
@@ -38,31 +35,19 @@ class EstimationScreen(QMainWindow):
         self.exercise_id = exercise_id
         self.repetition_num = repetition_num
 
-        '''
-        self.VBL = QVBoxLayout()
-        '''
-
-        # camera feed
-        '''
-        self.CameraImageFeedLabel = QLabel()
-        self.VBL.addWidget(self.CameraImageFeedLabel)
-        
-
-        # Goal Image feed
-        self.GoalImageFeedLabel = QLabel()
-        self.VBL.addWidget(self.GoalImageFeedLabel)
-
-        # Wrong posture image feed
-        self.WrongPostureImageFeedLabel = QLabel()
-        self.VBL.addWidget(self.WrongPostureImageFeedLabel)
-        '''
-
-        '''self.CameraImageFeedLabel = None
-        self.GoalImageFeedLabel = None
-        self.WrongPostureImageFeedLabel = None'''
+        self.parameters_queue = None
+        self.fetch_data_thread = None
 
         # Set thread
-        self.WorkoutEstimation = WorkoutEstimationThread(exercise_id=exercise_id, repetition_num=repetition_num)
+        # self.parameters_for_thread = list(self.SetUpExerciseData())
+        self.parameters_queue = queue.Queue()
+        self.fetch_data_thread = threading.Thread(target=self.SetUpExerciseData, args=[self.parameters_queue])
+        self.fetch_data_thread.daemon = True
+        self.fetch_data_thread.start()
+
+        self.WorkoutEstimation = WorkoutEstimationThread(
+            exercise_id=self.exercise_id, repetition_num=self.repetition_num, parameters_thread=self.fetch_data_thread,
+            parameters_queue=self.parameters_queue)
 
         # For camera feed
         self.WorkoutEstimation.CameraImageUpdate.connect(self.CameraImageUpdateSlot)
@@ -75,8 +60,6 @@ class EstimationScreen(QMainWindow):
         self.lbl_repGoalValue.setText(str(repetition_num))
         self.lbl_repCurrentValue.setText('0')
         self.WorkoutEstimation.RepetitionCounterUpdate.connect(self.UpdateRepetitionLabel)
-
-        self.WorkoutEstimation.daemon = True
 
         self.WorkoutEstimation.start()
 
@@ -95,6 +78,91 @@ class EstimationScreen(QMainWindow):
     def UpdateRepetitionLabel(self, rep_counter):
         self.lbl_repCurrentValue.setText(str(rep_counter))
 
+    def SetUpExerciseData(self, queue):
+        # Get relevant data from DB:
+        mp_drawing = mp.solutions.drawing_utils
+        mp_pose = mp.solutions.pose
+
+        # extracting exercise instruction data from db:
+        res = DBConnection.getAllExerciseInstructionData(self.exercise_id)
+        exerciseInstructionId, instructionId1, exerciseInstructionAlertId, deviationPositive, deviationNegative, instructionStage, exerciseInstructionType, alertDeviationTrigger, alertExtendedId = zip(
+            *res)
+
+        res = DBConnection.getAllExerciseStages(self.exercise_id)
+        exercise_stages = res[0][0]
+
+        # QUERY 3: getting all instruction's data of the exercise
+        res = DBConnection.getAllInstructionData(self.exercise_id)
+        instructionId, vertex1, vertex2, vertex3, angle, description, instructionAxis = zip(
+            *res)  # instruction's columns
+
+        # QUERY 4: getting all alert's data of the exercise
+        res = DBConnection.getAllAlertsData(self.exercise_id)
+        alertId2, alertInstructionId, alertText, alert_wrong_posture_image_link = zip(*res)
+
+        # QUERY 8: get all images for specific exercise
+        all_stage_images_links = DBConnection.getExerciseImages(self.exercise_id)
+
+        instructions_list = []
+        exercise_instructions_list = []
+        instruction_alert_data_list = []
+
+        # creating alerts objects
+        for alert_Id, alert_instructionId, alert_Text, wrong_posture_links in zip(alertId2, alertInstructionId,
+                                                                                  alertText,
+                                                                                  alert_wrong_posture_image_link):
+            instruction_alert_data_list.append(Alerts(alert_Id, alert_instructionId, alert_Text, wrong_posture_links))
+
+        # creating instructions and exerciseInstructions objects
+        for instruction_Id, vertex1_coordinates, vertex2_coordinates, vertex3_coordinates, ang, instruction_desc, axis in zip(
+                instructionId, vertex1, vertex2, vertex3,
+                angle,
+                description, instructionAxis):
+            instructions_list.append(
+                Instruction(instruction_Id, vertex1_coordinates, vertex2_coordinates, vertex3_coordinates, ang,
+                            instruction_desc, axis))
+
+        # creating the relevant instructions
+        for item in instruction_alert_data_list:
+            instructions_list[item.alertInstructionId - 1].instructionAlertData = item
+
+        # creating the relevant exercise instructions
+        for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviation_Negative, instruction_Stage, exerciseInstruction_Type \
+                , alertDeviation_Trigger, alertExtended_Id in zip(exerciseInstructionId, instructionId,
+                                                                  exerciseInstructionAlertId, deviationPositive,
+                                                                  deviationNegative,
+                                                                  instructionStage, exerciseInstructionType,
+                                                                  alertDeviationTrigger, alertExtendedId):
+            exercise_instructions_list.append(
+                ExerciseInstruction(exerciseInstruction_Id, self.exercise_id, instruction_Id, alert_Id,
+                                    deviation_Positive,
+                                    deviation_Negative, instruction_Stage, exerciseInstruction_Type,
+                                    alertDeviation_Trigger,
+                                    alertExtended_Id))
+        # Ofir
+        # convert all links to actual images
+        stage_images = []  # change stage images to exercise images
+        for image_links in all_stage_images_links:  # all_stage_images_links contains tuples
+            stage_images.append(getImageFromLink(image_links[0]))
+
+        # Ofir
+        # Get all alert images
+        alert_wrong_images = []
+        for alert in instruction_alert_data_list:
+            alert_wrong_images.append(getImageFromLink(alert.alert_wrong_posture_image_link))
+        queue.put(mp_pose)
+        queue.put(exercise_instructions_list)
+        queue.put(instructions_list)
+        queue.put(alert_wrong_images)
+        queue.put(instruction_alert_data_list)
+        queue.put(exercise_stages)
+        queue.put(mp_drawing)
+        queue.put(stage_images)
+
+        '''queue.put(mp_pose, exercise_instructions_list, instructions_list, alert_wrong_images, instruction_alert_data_list,
+                  exercise_stages, mp_drawing, stage_images)'''
+        # return mp_pose, exercise_instructions_list, instructions_list, alert_wrong_images, instruction_alert_data_list, exercise_stages, mp_drawing, stage_images
+
 
 class WorkoutEstimationThread(QThread):
     CameraImageUpdate = pyqtSignal(QImage)  # For trainee camera
@@ -102,204 +170,164 @@ class WorkoutEstimationThread(QThread):
     WrongPostureImageUpdate = pyqtSignal(QImage)  # For trainee wrong posture
     RepetitionCounterUpdate = pyqtSignal(int)  # For repetition update
 
-    def __init__(self, exercise_id, repetition_num):
+    def __init__(self, exercise_id, repetition_num, parameters_queue, parameters_thread):
         QThread.__init__(self)
-        self.score = 100
         self.exercise_id = exercise_id
         self.repetition_num = repetition_num
+        self.parameters_queue = parameters_queue
+        self.parameters_thread = parameters_thread
+        self.score = 100
 
     def run(self):  # estimation // my_est
-        try:
-            '''
-            1 - Before starting the exercise we fetch every relevant detail from the DB. 
-            2 - We create relevant objects such as instructions, alerts and exercise instructions.
-            '''
-            mp_drawing = mp.solutions.drawing_utils
-            mp_pose = mp.solutions.pose
+        # current stage variable
+        '''mp_pose, exercise_instructions_list, instructions_list, alert_wrong_images, instruction_alert_data_list, exercise_stages, mp_drawing, stage_images = (
+            self.parameters)
+        '''
+        current_stage = 0  # current stage
+        exercise_score = 100  # exercise score
+        exercise_score_frame_counter = 0  # each NUMBER_OF_FRAMES_BETWEEN_SCORE frames we calculate the score
+        wrong_posture_image_to_display = getImageFromLink('https://i.imgur.com/9Prp4Da.jpg')
+        error_list = []  # contains list triggeredAlerts
 
-            # extracting exercise instruction data from db:
-            res = DBConnection.getAllExerciseInstructionData(self.exercise_id)
-            exerciseInstructionId, instructionId1, exerciseInstructionAlertId, deviationPositive, deviationNegative, \
-            instructionStage, exerciseInstructionType, alertDeviationTrigger, alertExtendedId = zip(*res)
+        # cap = video that is captured through the web camera
+        cap = cv2.VideoCapture(0)
 
-            res = DBConnection.getAllExerciseStages(self.exercise_id)
-            exercise_stages = res[0][0]
-
-            # QUERY 3: getting all instruction's data of the exercise
-            res = DBConnection.getAllInstructionData(self.exercise_id)
-            instructionId, vertex1, vertex2, vertex3, angle, description, instructionAxis = zip(
-                *res)  # instruction's columns
-
-            # QUERY 4: getting all alert's data of the exercise
-            res = DBConnection.getAllAlertsData(self.exercise_id)
-            alertId2, alertInstructionId, alertText, alert_wrong_posture_image_link = zip(*res)
-
-            # QUERY 8: get all images for specific exercise
-            all_stage_images_links = DBConnection.getExerciseImages(self.exercise_id)
-
-            instructions_list = []
-            exercise_instructions_list = []
-            instruction_alert_data_list = []
-
-            # creating alerts objects
-            for alert_Id, alert_instructionId, alert_Text, wrong_posture_links in zip(alertId2, alertInstructionId,
-                                                                                      alertText,
-                                                                                      alert_wrong_posture_image_link):
-                instruction_alert_data_list.append(Alerts(alert_Id, alert_instructionId, alert_Text, wrong_posture_links))
-
-            # creating instructions and exerciseInstructions objects
-            for instruction_Id, vertex1_coordinates, vertex2_coordinates, vertex3_coordinates, ang, instruction_desc, axis in zip(
-                    instructionId, vertex1, vertex2, vertex3,
-                    angle,
-                    description, instructionAxis):
-                instructions_list.append(
-                    Instruction(instruction_Id, vertex1_coordinates, vertex2_coordinates, vertex3_coordinates, ang,
-                                instruction_desc, axis))
-
-            # creating the relevant instructions
-            for item in instruction_alert_data_list:
-                instructions_list[item.alertInstructionId - 1].instructionAlertData = item
-
-            # creating the relevant exercise instructions
-            for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviation_Negative, instruction_Stage, exerciseInstruction_Type \
-                    , alertDeviation_Trigger, alertExtended_Id in zip(exerciseInstructionId, instructionId,
-                                                                      exerciseInstructionAlertId, deviationPositive,
-                                                                      deviationNegative,
-                                                                      instructionStage, exerciseInstructionType,
-                                                                      alertDeviationTrigger, alertExtendedId):
-                exercise_instructions_list.append(
-                    ExerciseInstruction(exerciseInstruction_Id, self.exercise_id, instruction_Id, alert_Id,
-                                        deviation_Positive,
-                                        deviation_Negative, instruction_Stage, exerciseInstruction_Type,
-                                        alertDeviation_Trigger,
-                                        alertExtended_Id))
-
-            # Ofir
-            # convert all links to actual images
-            stage_images = []  # change stage images to exercise images
-            for image_links in all_stage_images_links:  # all_stage_images_links contains tuples
-                stage_images.append(getImageFromLink(image_links[0]))
-
-            # Ofir
-            # Get all alert images
-            alert_wrong_images = []
-            for alert in instruction_alert_data_list:
-                alert_wrong_images.append(getImageFromLink(alert.alert_wrong_posture_image_link))
-
-            # current stage variable
-            current_stage = 0  # current stage
-            exercise_score = 100  # exercise score
-            exercise_score_frame_counter = 0  # each NUMBER_OF_FRAMES_BETWEEN_SCORE frames we calculate the score
-            wrong_posture_image_to_display = getImageFromLink('https://i.imgur.com/9Prp4Da.jpg')
-            error_list = []  # contains list triggeredAlerts
-            update_posture_image_flag = False
-            update_goal_image_flag = False
-
-            # cap = video that is captured through the web camera
-            cap = cv2.VideoCapture(0)
-
+        ret, frame = cap.read()
+        start_time = datetime.now()
+        diff = (datetime.now() - start_time).seconds  # converting into seconds
+        while diff <= SET_UP_DELAY_TIME:
             ret, frame = cap.read()
-            start_time = datetime.now()
-            diff = (datetime.now() - start_time).seconds  # converting into seconds
-            while diff <= SET_UP_DELAY_TIME:
+            camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
+                        cv2.LINE_AA)  # adding timer text
+
+            ConvertToQtFormat = QImage(camera_image.data, camera_image.shape[1], camera_image.shape[0],
+                                       QImage.Format_RGB888)
+            Pic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
+            self.CameraImageUpdate.emit(Pic)
+            diff = (datetime.now() - start_time).seconds
+
+        # cap.release()
+        # cv2.destroyAllWindows()
+
+        # End of trainee setup #
+
+        # Fetch data from thread and wait until all data has been fetched
+        self.parameters_thread.join()
+        mp_pose = self.parameters_queue.get()
+        exercise_instructions_list = self.parameters_queue.get()
+        instructions_list = self.parameters_queue.get()
+        alert_wrong_images = self.parameters_queue.get()
+        instruction_alert_data_list = self.parameters_queue.get()
+        exercise_stages = self.parameters_queue.get()
+        mp_drawing = self.parameters_queue.get()
+        stage_images = self.parameters_queue.get()
+        print("data fetched")
+
+        # start estimation
+        #cap = cv2.VideoCapture(0)
+
+        # Exercise counter variables
+        repetition_counter = 0
+        repetition_direction = 1
+        # Setup mediapipe instance
+        with mp_pose.Pose(min_detection_confidence=0.9, min_tracking_confidence=0.5) as pose:
+            while cap.isOpened():
+                # Reset Image flags
+                update_posture_image_flag = False
+                update_goal_image_flag = False
+
+                # Read webcam image
                 ret, frame = cap.read()
+                # counting that a frame was received
+                exercise_score_frame_counter += 1
+
+                # Change this line later on - instead of link grab it from somewhere
+
                 camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
-                            cv2.LINE_AA)  # adding timer text
+                camera_image.flags.writeable = False
 
-                ConvertToQtFormat = QImage(camera_image.data, camera_image.shape[1], camera_image.shape[0],
-                                           QImage.Format_RGB888)
-                Pic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
-                self.CameraImageUpdate.emit(Pic)
-                diff = (datetime.now() - start_time).seconds
+                error_edges = []  # will be translated to set when drawing connections
+                alerts_array = []  # contains all alerts that showed during the frame analysis
+                # Make detection
+                results = pose.process(camera_image)
 
-            #cap.release()
-            #cv2.destroyAllWindows()
+                # Recolor back to BGR
+                camera_image.flags.writeable = True
+                camera_image = cv2.cvtColor(camera_image, cv2.COLOR_RGB2BGR)
 
-            # End of trainee setup #
+                # Extract landmarks
+                try:
+                    landmarks = results.pose_landmarks.landmark
 
-            # start estimation
-            cap = cv2.VideoCapture(0)
-
-            # Exercise counter variables
-            repetition_counter = 0
-            stage = None
-            repetition_direction = 1
-            # Setup mediapipe instance
-            with mp_pose.Pose(min_detection_confidence=0.9, min_tracking_confidence=0.5) as pose:
-                while cap.isOpened():
-                    # Reset Image flags
-                    update_posture_image_flag = False
-                    update_goal_image_flag = False
-
-                    # Read webcam image
-                    ret, frame = cap.read()
-                    # counting that a frame was received
-                    exercise_score_frame_counter += 1
-
-                    # Change this line later on - instead of link grab it from somewhere
-
-                    camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                    camera_image.flags.writeable = False
-
+                    # testing exercise instructions
                     error_edges = []  # will be translated to set when drawing connections
-                    alerts_array = []  # contains all alerts that showed during the frame analysis
-                    # Make detection
-                    results = pose.process(camera_image)
+                    total_num_of_exercise_instructions_in_stage = 0
+                    successful_exercise_instructions_in_current_stage = 0
 
-                    # Recolor back to BGR
-                    camera_image.flags.writeable = True
-                    camera_image = cv2.cvtColor(camera_image, cv2.COLOR_RGB2BGR)
+                    for exercise_instruction_loop in exercise_instructions_list:
+                        # we are checking only instructions that match the current stage
+                        if exercise_instruction_loop.instructionStage != current_stage and exercise_instruction_loop.instructionStage != 0:
+                            continue
 
-                    # Extract landmarks
-                    try:
-                        landmarks = results.pose_landmarks.landmark
+                        # get current instruction
+                        current_instruction = instructions_list[exercise_instruction_loop.instructionId - 1]
 
-                        # testing exercise instructions
-                        error_edges = []  # will be translated to set when drawing connections
-                        total_num_of_exercise_instructions_in_stage = 0
-                        successful_exercise_instructions_in_current_stage = 0
+                        # test for Depth - only XY plain will be tested
+                        if E_InstructionAxis[current_instruction.instructionAxis].value != E_InstructionAxis.XY.value:
+                            continue
 
-                        for exercise_instruction_loop in exercise_instructions_list:
-                            # we are checking only instructions that match the current stage
-                            if exercise_instruction_loop.instructionStage != current_stage and exercise_instruction_loop.instructionStage != 0:
-                                continue
+                        # count exercise instructions
+                        total_num_of_exercise_instructions_in_stage += 1
 
-                            # get current instruction
-                            current_instruction = instructions_list[exercise_instruction_loop.instructionId - 1]
+                        current_instruction_v1_index = mp_pose.PoseLandmark[current_instruction.vertex1].value
+                        current_instruction_v2_index = mp_pose.PoseLandmark[current_instruction.vertex2].value
+                        current_instruction_v3_index = mp_pose.PoseLandmark[current_instruction.vertex3].value
+                        vertex1_coordinates = [landmarks[current_instruction_v1_index].x,
+                                               landmarks[current_instruction_v1_index].y,
+                                               landmarks[current_instruction_v1_index].z]  # vertex 1 value
+                        vertex2_coordinates = [landmarks[current_instruction_v2_index].x,
+                                               landmarks[current_instruction_v2_index].y,
+                                               landmarks[current_instruction_v2_index].z]  # vertex 2 value
+                        vertex3_coordinates = [landmarks[current_instruction_v3_index].x,
+                                               landmarks[current_instruction_v3_index].y,
+                                               landmarks[current_instruction_v3_index].z]  # vertex 3 value
 
-                            # test for Depth - only XY plain will be tested
-                            if E_InstructionAxis[current_instruction.instructionAxis].value != E_InstructionAxis.XY.value:
-                                continue
+                        starting_angle = current_instruction.angle  # starting angle value
+                        tested_angle = calculateAngle(vertex1_coordinates, vertex2_coordinates, vertex3_coordinates,
+                                                      E_InstructionAxis[
+                                                          current_instruction.instructionAxis].value)  # calculating the current angle
 
-                            # count exercise instructions
-                            total_num_of_exercise_instructions_in_stage += 1
+                        deviation_trigger_value = E_AlertDeviationTrigger[
+                            exercise_instruction_loop.alertDeviationTrigger].value
 
-                            current_instruction_v1_index = mp_pose.PoseLandmark[current_instruction.vertex1].value
-                            current_instruction_v2_index = mp_pose.PoseLandmark[current_instruction.vertex2].value
-                            current_instruction_v3_index = mp_pose.PoseLandmark[current_instruction.vertex3].value
-                            vertex1_coordinates = [landmarks[current_instruction_v1_index].x,
-                                                   landmarks[current_instruction_v1_index].y,
-                                                   landmarks[current_instruction_v1_index].z]  # vertex 1 value
-                            vertex2_coordinates = [landmarks[current_instruction_v2_index].x,
-                                                   landmarks[current_instruction_v2_index].y,
-                                                   landmarks[current_instruction_v2_index].z]  # vertex 2 value
-                            vertex3_coordinates = [landmarks[current_instruction_v3_index].x,
-                                                   landmarks[current_instruction_v3_index].y,
-                                                   landmarks[current_instruction_v3_index].z]  # vertex 3 value
+                        if deviation_trigger_value == E_AlertDeviationTrigger.POSITIVE.value:
+                            # check for deviation trigger
+                            if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle:
+                                alerts_array.append(current_instruction.instructionAlertData.alertText)
+                                error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
+                                error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                            starting_angle = current_instruction.angle  # starting angle value
-                            tested_angle = calculateAngle(vertex1_coordinates, vertex2_coordinates, vertex3_coordinates,
-                                                          E_InstructionAxis[
-                                                              current_instruction.instructionAxis].value)  # calculating the current angle
+                                # Save alerts that triggered during the exercise
+                                error_list.append(
+                                    TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                    repNumber=repetition_counter))
+                                wrong_posture_image_to_display = alert_wrong_images[
+                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                update_posture_image_flag = True
 
-                            deviation_trigger_value = E_AlertDeviationTrigger[
-                                exercise_instruction_loop.alertDeviationTrigger].value
+                                # ofir - score
+                                if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                    exercise_score_frame_counter = 0
+                                    exercise_score -= calculateScore(
+                                        tested_angle - exercise_instruction_loop.deviationPositive - starting_angle)
 
-                            if deviation_trigger_value == E_AlertDeviationTrigger.POSITIVE.value:
-                                # check for deviation trigger
-                                if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle:
-                                    alerts_array.append(current_instruction.instructionAlertData.alertText)
+                            # check for extended deviation
+                            if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
+                                if starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 >= tested_angle:
+                                    alerts_array.append(
+                                        instruction_alert_data_list[
+                                            exercise_instruction_loop.alertExtendedId].alertText)
                                     error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                     error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -315,221 +343,155 @@ class WorkoutEstimationThread(QThread):
                                     if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                         exercise_score_frame_counter = 0
                                         exercise_score -= calculateScore(
-                                            tested_angle - exercise_instruction_loop.deviationPositive - starting_angle)
-
-                                # check for extended deviation
-                                if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
-                                    if starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 >= tested_angle:
-                                        alerts_array.append(
-                                            instruction_alert_data_list[
-                                                exercise_instruction_loop.alertExtendedId].alertText)
-                                        error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
-                                        error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
-
-                                        # Save alerts that triggered during the exercise
-                                        error_list.append(
-                                            TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
-                                                            repNumber=repetition_counter))
-                                        wrong_posture_image_to_display = alert_wrong_images[
-                                            exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
-                                        update_posture_image_flag = True
-
-                                        # ofir - score
-                                        if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
-                                            exercise_score_frame_counter = 0
-                                            exercise_score -= calculateScore(
-                                                starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 - tested_angle)
-                                    else:
-                                        successful_exercise_instructions_in_current_stage += 1
-                                continue
-                            elif deviation_trigger_value == E_AlertDeviationTrigger.NEGATIVE.value:
-                                if tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
-                                    alerts_array.append(current_instruction.instructionAlertData.alertText)
-                                    error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
-                                    error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
-
-                                    # Save alerts that triggered during the exercise
-                                    error_list.append(
-                                        TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
-                                                        repNumber=repetition_counter))
-                                    wrong_posture_image_to_display = alert_wrong_images[
-                                        exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
-                                    update_posture_image_flag = True
-
-                                    # ofir - score
-                                    if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
-                                        exercise_score_frame_counter = 0
-                                        exercise_score -= calculateScore(
-                                            starting_angle - tested_angle - exercise_instruction_loop.deviationNegative)
-
-                                if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
-                                    if starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1 <= tested_angle:
-                                        alerts_array.append(
-                                            instruction_alert_data_list[
-                                                exercise_instruction_loop.alertExtendedId].alertText)
-                                        error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
-                                        error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
-
-                                        # Save alerts that triggered during the exercise
-                                        error_list.append(
-                                            TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
-                                                            repNumber=repetition_counter))
-                                        wrong_posture_image_to_display = alert_wrong_images[
-                                            exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
-                                        update_posture_image_flag = True
-
-                                        # ofir - score
-                                        if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
-                                            exercise_score_frame_counter = 0
-                                            exercise_score -= calculateScore(
-                                                tested_angle - starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1)
-                                    else:
-                                        successful_exercise_instructions_in_current_stage += 1
-                                continue
-
-                            elif deviation_trigger_value == E_AlertDeviationTrigger.BOTH.value:
-                                if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle or \
-                                        tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
-                                    alerts_array.append(current_instruction.instructionAlertData.alertText)
-                                    error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
-                                    error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
-
-                                    # Save alerts that triggered during the exercise
-                                    error_list.append(
-                                        TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
-                                                        repNumber=repetition_counter))
-                                    wrong_posture_image_to_display = alert_wrong_images[
-                                        exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
-                                    update_posture_image_flag = True
-
-                                    # ofir - score
-                                    if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
-                                        exercise_score_frame_counter = 0
-                                        exercise_score -= calculateScore(
-                                            max(tested_angle - exercise_instruction_loop.deviationPositive,
-                                                tested_angle - exercise_instruction_loop.deviationNegative))
-
+                                            starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 - tested_angle)
                                 else:
                                     successful_exercise_instructions_in_current_stage += 1
-                                continue
+                            continue
+                        elif deviation_trigger_value == E_AlertDeviationTrigger.NEGATIVE.value:
+                            if tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
+                                alerts_array.append(current_instruction.instructionAlertData.alertText)
+                                error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
+                                error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                        if successful_exercise_instructions_in_current_stage == total_num_of_exercise_instructions_in_stage:
-                            current_stage += repetition_direction
-                            update_goal_image_flag = True
+                                # Save alerts that triggered during the exercise
+                                error_list.append(
+                                    TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                    repNumber=repetition_counter))
+                                wrong_posture_image_to_display = alert_wrong_images[
+                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                update_posture_image_flag = True
 
-                        if current_stage == exercise_stages:
-                            if repetition_direction == 1:
-                                repetition_counter += 1
-                                self.RepetitionCounterUpdate.emit(repetition_counter)
-                            repetition_direction = -1
+                                # ofir - score
+                                if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                    exercise_score_frame_counter = 0
+                                    exercise_score -= calculateScore(
+                                        starting_angle - tested_angle - exercise_instruction_loop.deviationNegative)
 
-                        elif current_stage == 1:
-                            repetition_direction = 1
+                            if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
+                                if starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1 <= tested_angle:
+                                    alerts_array.append(
+                                        instruction_alert_data_list[
+                                            exercise_instruction_loop.alertExtendedId].alertText)
+                                    error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
+                                    error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                    except Exception as e:
-                        print("Exepction 0" + str(e))
-                        # status image alerts
-                    '''status_image = np.zeros((512, 720, 3), np.uint8)
-                    cv2.rectangle(status_image, (0, 0), (225, 73), (245, 117, 16), -1)
-    
-                    # Rep data
-                    cv2.putText(status_image, 'REPS', (15, 12),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-                    cv2.putText(status_image, str(repetition_counter),
-                                (10, 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-    
-                    # Stage data
-                    cv2.putText(status_image, 'STAGE', (65, 12),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-                    cv2.putText(status_image, str(current_stage),
-                                (60, 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-    
-                    cv2.putText(status_image, 'STATE', (115, 12),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-                    cv2.putText(status_image, str(repetition_direction),
-                                (110, 60),
-                                cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 2, cv2.LINE_AA)
-    
-                    cv2.putText(status_image, "Alerts:", (8, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2,
-                                cv2.LINE_AA)
-                    for item in alerts_array:
-                        cv2.putText(status_image, item, (8, 120 + alerts_array.index(item) * 30), cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.5,
-                                    (0, 0, 255), 1,
-                                    cv2.LINE_AA)
-    
-                    # for green alert message if everything is okay
-                    if len(alerts_array) == 0:
-                        cv2.putText(status_image, "Keep The Good work!", (8, 120 + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                                    (0, 255, 0), 1,
-                                    cv2.LINE_AA)
-                                    '''
+                                    # Save alerts that triggered during the exercise
+                                    error_list.append(
+                                        TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                        repNumber=repetition_counter))
+                                    wrong_posture_image_to_display = alert_wrong_images[
+                                        exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                    update_posture_image_flag = True
 
-                    # draw error landmarks
-                    mp_drawing.draw_landmarks(camera_image, results.pose_landmarks, set(error_edges),
-                                              mp_drawing.DrawingSpec(color=(0, 117, 66), thickness=0,
-                                                                     circle_radius=0),  # vertex color
-                                              mp_drawing.DrawingSpec(color=(0, 66, 230), thickness=2,
-                                                                     circle_radius=2)  # edges color
-                                              )
+                                    # ofir - score
+                                    if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                        exercise_score_frame_counter = 0
+                                        exercise_score -= calculateScore(
+                                            tested_angle - starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1)
+                                else:
+                                    successful_exercise_instructions_in_current_stage += 1
+                            continue
 
-                    # Recolor camera image
-                    camera_image = cv2.cvtColor(camera_image, cv2.COLOR_BGR2RGB)
+                        elif deviation_trigger_value == E_AlertDeviationTrigger.BOTH.value:
+                            if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle or \
+                                    tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
+                                alerts_array.append(current_instruction.instructionAlertData.alertText)
+                                error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
+                                error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
+
+                                # Save alerts that triggered during the exercise
+                                error_list.append(
+                                    TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
+                                                    repNumber=repetition_counter))
+                                wrong_posture_image_to_display = alert_wrong_images[
+                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                update_posture_image_flag = True
+
+                                # ofir - score
+                                if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
+                                    exercise_score_frame_counter = 0
+                                    exercise_score -= calculateScore(
+                                        max(tested_angle - exercise_instruction_loop.deviationPositive,
+                                            tested_angle - exercise_instruction_loop.deviationNegative))
+
+                            else:
+                                successful_exercise_instructions_in_current_stage += 1
+                            continue
+
+                    if successful_exercise_instructions_in_current_stage == total_num_of_exercise_instructions_in_stage:
+                        current_stage += repetition_direction
+                        update_goal_image_flag = True
+
+                    if current_stage == exercise_stages:
+                        if repetition_direction == 1:
+                            repetition_counter += 1
+                            self.RepetitionCounterUpdate.emit(repetition_counter)
+                        repetition_direction = -1
+
+                    elif current_stage == 1:
+                        repetition_direction = 1
+
+                except Exception as e:
+                    pass
+                    # status image alerts
+
+                # draw error landmarks
+                mp_drawing.draw_landmarks(camera_image, results.pose_landmarks, set(error_edges),
+                                          mp_drawing.DrawingSpec(color=(0, 117, 66), thickness=0,
+                                                                 circle_radius=0),  # vertex color
+                                          mp_drawing.DrawingSpec(color=(0, 66, 230), thickness=2,
+                                                                 circle_radius=2)  # edges color
+                                          )
+
+                # Recolor camera image
+                camera_image = cv2.cvtColor(camera_image, cv2.COLOR_BGR2RGB)
+                # Resize image
+                camera_image = cv2.resize(camera_image,
+                                          (IMAGE_WIDTH, IMAGE_HEIGHT))
+
+                # Camera image update
+                CameraImagePic = QImage(camera_image.data, camera_image.shape[1],
+                                        camera_image.shape[0], QImage.Format_RGB888)
+                # CameraImagePic = ConvertToQtFormat.scaled(600, 600, Qt.KeepAspectRatio)
+                self.CameraImageUpdate.emit(CameraImagePic)
+
+                if update_goal_image_flag:
+                    # Goal Posture image update
+                    goal_pose_image = stage_images[current_stage + repetition_direction - 1]
+                    goal_pose_image = cv2.cvtColor(goal_pose_image, cv2.COLOR_BGR2RGB)
                     # Resize image
-                    camera_image = cv2.resize(camera_image,
-                                              (IMAGE_WIDTH, IMAGE_HEIGHT))
+                    goal_pose_image = cv2.resize(goal_pose_image, (IMAGE_WIDTH, IMAGE_HEIGHT))
 
-                    # Camera image update
-                    ConvertToQtFormat = QImage(camera_image.data, camera_image.shape[1],
-                                               camera_image.shape[0], QImage.Format_RGB888)
-                    #CameraImagePic = ConvertToQtFormat.scaled(600, 600, Qt.KeepAspectRatio)
-                    self.CameraImageUpdate.emit(ConvertToQtFormat)
+                    # Goal image update
+                    GoalImagePic = QImage(goal_pose_image.data, goal_pose_image.shape[1],
+                                          goal_pose_image.shape[0], QImage.Format_RGB888)
+                    # GoalImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
+                    self.GoalImageUpdate.emit(GoalImagePic)
 
-                    if update_goal_image_flag:
-                        # Goal Posture image update
-                        goal_pose_image = stage_images[current_stage + repetition_direction - 1]
-                        goal_pose_image = cv2.cvtColor(goal_pose_image, cv2.COLOR_BGR2RGB)
-                        # Resize image
-                        goal_pose_image = cv2.resize(goal_pose_image, (IMAGE_WIDTH, IMAGE_HEIGHT))
+                if update_posture_image_flag:
+                    # Wrong posture image update
+                    wrong_posture_image_to_display = cv2.cvtColor(wrong_posture_image_to_display, cv2.COLOR_BGR2RGB)
+                    # Resize image
+                    wrong_posture_image_to_display = cv2.resize(wrong_posture_image_to_display,
+                                                                (IMAGE_WIDTH, IMAGE_HEIGHT))
 
-                        # Goal image update
-                        ConvertToQtFormat = QImage(goal_pose_image.data, goal_pose_image.shape[1],
-                                                   goal_pose_image.shape[0], QImage.Format_RGB888)
-                        #GoalImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
-                        self.GoalImageUpdate.emit(ConvertToQtFormat)
+                    # Wrong posture image update
+                    WrongImagePic = QImage(wrong_posture_image_to_display.data,
+                                           wrong_posture_image_to_display.shape[1],
+                                           wrong_posture_image_to_display.shape[0], QImage.Format_RGB888)
+                    # WrongImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
+                    self.WrongPostureImageUpdate.emit(WrongImagePic)
 
-                    if update_posture_image_flag:
-                        # Wrong posture image update
-                        wrong_posture_image_to_display = cv2.cvtColor(wrong_posture_image_to_display, cv2.COLOR_BGR2RGB)
-                        # Resize image
-                        wrong_posture_image_to_display = cv2.resize(wrong_posture_image_to_display,
-                                                                    (IMAGE_WIDTH, IMAGE_HEIGHT))
+                error_list = list(set(error_list))  # make sure there are no copies
+                if repetition_counter == self.repetition_num:
+                    self.score = exercise_score
+                    break
 
-                        # Wrong posture image update
-                        ConvertToQtFormat = QImage(wrong_posture_image_to_display.data,
-                                                   wrong_posture_image_to_display.shape[1],
-                                                   wrong_posture_image_to_display.shape[0], QImage.Format_RGB888)
-                        #WrongImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
-                        self.WrongPostureImageUpdate.emit(ConvertToQtFormat)
-
-                    try:
-                        error_list = list(set(error_list))  # make sure there are no copies
-                    except Exception as e:
-                        print("Exepction 1" + str(e))
-                    if repetition_counter == self.repetition_num:
-                        self.score = exercise_score
-                        break
-                        # ToDo: set exercise logs as well in self.
-
-                cap.release()
-                '''for item in error_list:
+            cap.release()
+            '''for item in error_list:
                     print(f"Alert id : {item.alertId}, Alert rep :{item.repNumber}, Alert stage : {item.stageNumber}")
                 print(exercise_score)'''
-                self.quit()
-        except Exception as e:
-            print(e)
+            self.quit()
 # my_est(1,5)
 
 

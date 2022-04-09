@@ -1,3 +1,5 @@
+import threading
+
 from Utils import DBConnection
 from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView
@@ -10,7 +12,6 @@ from workoutEstimation import EstimationScreen, WorkoutEstimationThread
 class App(QMainWindow):
     def __init__(self, current_user):
         super().__init__()
-        # super(App, self,current_user).__init__()
         self.ui = loadUi("./ui/app.ui", self)
         self.setFixedSize(1200, 800)
         self.current_user = current_user
@@ -24,7 +25,6 @@ class App(QMainWindow):
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table.clicked.connect(self.doubleClicked_table)
         self.workoutEstimationWindow = None
-        self.my_thread = None
         self.lbl_alert.hide()
         self.show()
 
@@ -32,7 +32,6 @@ class App(QMainWindow):
         e_id = self.i_eid.text()
         r_num = self.i_repsnum.text()
         if isnumeric(e_id) and isnumeric(r_num):
-
             self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num)
             self.workoutEstimationWindow.show()
 
