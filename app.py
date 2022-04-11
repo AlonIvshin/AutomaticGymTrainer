@@ -10,7 +10,7 @@ from workoutEstimation import EstimationScreen, WorkoutEstimationThread
 
 
 class App(QMainWindow):
-    def __init__(self, current_user):
+    def __init__(self, current_user,widget):
         super().__init__()
         self.ui = loadUi("./ui/app.ui", self)
         self.setFixedSize(1200, 800)
@@ -26,17 +26,21 @@ class App(QMainWindow):
         self.table.clicked.connect(self.doubleClicked_table)
         self.workoutEstimationWindow = None
         self.lbl_alert.hide()
-        self.show()
+        self.widget = widget
 
     def startEstimationFunction(self):
         e_id = self.i_eid.text()
         r_num = self.i_repsnum.text()
         if isnumeric(e_id) and isnumeric(r_num):
-            self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num)
-            self.workoutEstimationWindow.show()
+            self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num,widget = self.widget)
+            self.widget.addWidget(self.workoutEstimationWindow)
+            self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
 
-            #self.close()
+            #self.workoutEstimationWindow.show()
+            #self.close() #Problem here
+
             # self.bt_start.clicked.connect(lambda: EstimationScreen(e_id, r_num))
+
         else:
             self.lbl_alert.show()
 
@@ -62,6 +66,6 @@ class App(QMainWindow):
         else:
             self.lbl_alert.show()
 
-    def closeEvent(self, event):
+    '''def closeEvent(self, event):
         print("The user: " + self.current_user.first_name + ' ' + self.current_user.last_name + ' ' + "logged out!")
-        DBConnection.logOutCurrentUser(self.current_user.user_id)
+        DBConnection.logOutCurrentUser(self.current_user.user_id)'''

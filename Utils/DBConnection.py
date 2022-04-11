@@ -139,7 +139,7 @@ def getUser(email):
         cur = con.cursor()
         # QUERY 11: get user data
         cur.execute(
-            "select user_id, password, first_name, last_name, email, type, 'phoneNumber' from users where email = %s;",
+            "select user_id, password, first_name, last_name, email, type, phone_number from users where email = %s;",
             (email,))
         res = cur.fetchall()
         cur.close()

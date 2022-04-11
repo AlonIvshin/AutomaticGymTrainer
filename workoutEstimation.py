@@ -1,3 +1,4 @@
+import time
 from datetime import datetime
 import mediapipe as mp
 from PyQt5 import uic
@@ -21,22 +22,26 @@ import queue
 
 # Constants
 NUMBER_OF_FRAMES_BETWEEN_SCORE = 15  # Ofir
-SET_UP_DELAY_TIME = 5
+SET_UP_DELAY_TIME = 4
 IMAGE_WIDTH = 400
 IMAGE_HEIGHT = 400
+mp_drawing = mp.solutions.drawing_utils
+mp_pose = mp.solutions.pose
 
 
 # QWidget
 class EstimationScreen(QMainWindow):
-    def __init__(self, exercise_id, repetition_num):
+    def __init__(self, exercise_id, repetition_num, widget):
         super().__init__()
         self.ui = uic.loadUi("./ui/workoutfeed.ui", self)
-        self.setFixedSize(1000, 900)
+        self.setFixedSize(1000, 700)
         self.exercise_id = exercise_id
         self.repetition_num = repetition_num
 
         self.parameters_queue = None
         self.fetch_data_thread = None
+
+        self.widget = widget
 
         # Set thread
         # self.parameters_for_thread = list(self.SetUpExerciseData())
@@ -45,38 +50,46 @@ class EstimationScreen(QMainWindow):
         self.fetch_data_thread.daemon = True
         self.fetch_data_thread.start()
 
-        self.WorkoutEstimation = WorkoutEstimationThread(
-            exercise_id=self.exercise_id, repetition_num=self.repetition_num, parameters_thread=self.fetch_data_thread,
-            parameters_queue=self.parameters_queue)
+        self.WorkoutEstimation = WorkoutEstimationThread(repetition_num=self.repetition_num,
+                                                         parameters_thread=self.fetch_data_thread,
+                                                         parameters_queue=self.parameters_queue)
 
         # For camera feed
         self.WorkoutEstimation.CameraImageUpdate.connect(self.CameraImageUpdateSlot)
-        # For goal image feed
-        self.WorkoutEstimation.GoalImageUpdate.connect(self.GoalImageUpdateSlot)
+        '''# For goal image feed
+        self.WorkoutEstimation.GoalImageUpdate.connect(self.GoalImageUpdateSlot)'''
         # For wrong posture feed
-        self.WorkoutEstimation.WrongPostureImageUpdate.connect(self.WrongPostureImageUpdateSlot)
+        self.WorkoutEstimation.PostureImageUpdate.connect(self.PostureImageUpdateSlot)
 
         # Set Rep Goal label
         self.lbl_repGoalValue.setText(str(repetition_num))
         self.lbl_repCurrentValue.setText('0')
         self.WorkoutEstimation.RepetitionCounterUpdate.connect(self.UpdateRepetitionLabel)
 
+        self.WorkoutEstimation.daemon = True
         self.WorkoutEstimation.start()
 
     def CameraImageUpdateSlot(self, Image):
         self.lbl_webcamImage.setPixmap(QPixmap.fromImage(Image))
         # self.CameraImageFeedLabel.setPixmap(QPixmap.fromImage(Image))
 
-    def GoalImageUpdateSlot(self, Image):
+    '''def GoalImageUpdateSlot(self, Image):
         self.lbl_goalImage.setPixmap(QPixmap.fromImage(Image))
-        # self.GoalImageFeedLabel.setPixmap(QPixmap.fromImage(Image))
+        # self.GoalImageFeedLabel.setPixmap(QPixmap.fromImage(Image))'''
 
-    def WrongPostureImageUpdateSlot(self, Image):
-        self.lbl_errorImage.setPixmap(QPixmap.fromImage(Image))
+    def PostureImageUpdateSlot(self, Image):
+        self.lbl_postureImage.setPixmap(QPixmap.fromImage(Image))
         # self.WrongPostureImageFeedLabel.setPixmap(QPixmap.fromImage(Image))
 
     def UpdateRepetitionLabel(self, rep_counter):
         self.lbl_repCurrentValue.setText(str(rep_counter))
+
+    '''def activatePostureProccess(self,pose,Image,image_queue):
+        while image_queue
+        results = pose.process(Image)
+        if image_queue.qsize() == 1:
+            image_queue.get()
+        image_queue.put(results)'''
 
     def SetUpExerciseData(self, queue):
         # Get relevant data from DB:
@@ -150,13 +163,14 @@ class EstimationScreen(QMainWindow):
         alert_wrong_images = []
         for alert in instruction_alert_data_list:
             alert_wrong_images.append(getImageFromLink(alert.alert_wrong_posture_image_link))
-        queue.put(mp_pose)
+
+        # queue.put(mp_pose)
         queue.put(exercise_instructions_list)
         queue.put(instructions_list)
         queue.put(alert_wrong_images)
         queue.put(instruction_alert_data_list)
         queue.put(exercise_stages)
-        queue.put(mp_drawing)
+        # queue.put(mp_drawing)
         queue.put(stage_images)
 
         '''queue.put(mp_pose, exercise_instructions_list, instructions_list, alert_wrong_images, instruction_alert_data_list,
@@ -166,14 +180,13 @@ class EstimationScreen(QMainWindow):
 
 class WorkoutEstimationThread(QThread):
     CameraImageUpdate = pyqtSignal(QImage)  # For trainee camera
-    GoalImageUpdate = pyqtSignal(QImage)  # For trainee goal posture
-    WrongPostureImageUpdate = pyqtSignal(QImage)  # For trainee wrong posture
+    # GoalImageUpdate = pyqtSignal(QImage)  # For trainee goal posture
+    PostureImageUpdate = pyqtSignal(QImage)  # For trainee wrong posture
     RepetitionCounterUpdate = pyqtSignal(int)  # For repetition update
 
-    def __init__(self, exercise_id, repetition_num, parameters_queue, parameters_thread):
+    def __init__(self, repetition_num, parameters_queue, parameters_thread):
         QThread.__init__(self)
-        self.exercise_id = exercise_id
-        self.repetition_num = repetition_num
+        self.repetition_num = int(repetition_num)
         self.parameters_queue = parameters_queue
         self.parameters_thread = parameters_thread
         self.score = 100
@@ -214,28 +227,30 @@ class WorkoutEstimationThread(QThread):
 
         # Fetch data from thread and wait until all data has been fetched
         self.parameters_thread.join()
-        mp_pose = self.parameters_queue.get()
+        # mp_pose = self.parameters_queue.get()
         exercise_instructions_list = self.parameters_queue.get()
         instructions_list = self.parameters_queue.get()
         alert_wrong_images = self.parameters_queue.get()
         instruction_alert_data_list = self.parameters_queue.get()
         exercise_stages = self.parameters_queue.get()
-        mp_drawing = self.parameters_queue.get()
+        # mp_drawing = self.parameters_queue.get()
         stage_images = self.parameters_queue.get()
         print("data fetched")
 
         # start estimation
-        #cap = cv2.VideoCapture(0)
+        # cap = cv2.VideoCapture(0)
 
         # Exercise counter variables
         repetition_counter = 0
         repetition_direction = 1
+
         # Setup mediapipe instance
         with mp_pose.Pose(min_detection_confidence=0.9, min_tracking_confidence=0.5) as pose:
             while cap.isOpened():
+                time.sleep(33 / 1000)
                 # Reset Image flags
                 update_posture_image_flag = False
-                update_goal_image_flag = False
+                # update_goal_image_flag = False
 
                 # Read webcam image
                 ret, frame = cap.read()
@@ -250,7 +265,7 @@ class WorkoutEstimationThread(QThread):
                 error_edges = []  # will be translated to set when drawing connections
                 alerts_array = []  # contains all alerts that showed during the frame analysis
                 # Make detection
-                results = pose.process(camera_image)
+                results = pose.process(camera_image)  ##########CRASH
 
                 # Recolor back to BGR
                 camera_image.flags.writeable = True
@@ -420,7 +435,7 @@ class WorkoutEstimationThread(QThread):
 
                     if successful_exercise_instructions_in_current_stage == total_num_of_exercise_instructions_in_stage:
                         current_stage += repetition_direction
-                        update_goal_image_flag = True
+                        # update_goal_image_flag = True
 
                     if current_stage == exercise_stages:
                         if repetition_direction == 1:
@@ -455,7 +470,37 @@ class WorkoutEstimationThread(QThread):
                 # CameraImagePic = ConvertToQtFormat.scaled(600, 600, Qt.KeepAspectRatio)
                 self.CameraImageUpdate.emit(CameraImagePic)
 
-                if update_goal_image_flag:
+                if update_posture_image_flag:
+                    # Wrong posture image update
+                    posture_image_to_display = cv2.cvtColor(wrong_posture_image_to_display, cv2.COLOR_BGR2RGB)
+                else:
+                    # Next stage posture
+                    posture_image_to_display = stage_images[current_stage + repetition_direction - 1]
+
+                posture_image_to_display = cv2.resize(posture_image_to_display,
+                                                      (IMAGE_WIDTH, IMAGE_HEIGHT))
+                posture_image_to_display = cv2.cvtColor(posture_image_to_display, cv2.COLOR_BGR2RGB)
+                posture_image_to_display = QImage(posture_image_to_display.data,
+                                                  posture_image_to_display.shape[1],
+                                                  posture_image_to_display.shape[0], QImage.Format_RGB888)
+                self.PostureImageUpdate.emit(posture_image_to_display)
+
+                # BACKUP
+                '''if update_goal_image_flag:
+                                    # Goal Posture image update
+                                    goal_pose_image = stage_images[current_stage + repetition_direction - 1]
+                                    goal_pose_image = cv2.cvtColor(goal_pose_image, cv2.COLOR_BGR2RGB)
+                                    # Resize image
+                                    goal_pose_image = cv2.resize(goal_pose_image, (IMAGE_WIDTH, IMAGE_HEIGHT))
+
+                                    # Goal image update
+                                    GoalImagePic = QImage(goal_pose_image.data, goal_pose_image.shape[1],
+                                                          goal_pose_image.shape[0], QImage.Format_RGB888)
+                                    # GoalImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
+                                    self.GoalImageUpdate.emit(GoalImagePic)'''
+
+                # BACKUP
+                ''' else:
                     # Goal Posture image update
                     goal_pose_image = stage_images[current_stage + repetition_direction - 1]
                     goal_pose_image = cv2.cvtColor(goal_pose_image, cv2.COLOR_BGR2RGB)
@@ -467,33 +512,16 @@ class WorkoutEstimationThread(QThread):
                                           goal_pose_image.shape[0], QImage.Format_RGB888)
                     # GoalImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
                     self.GoalImageUpdate.emit(GoalImagePic)
-
-                if update_posture_image_flag:
-                    # Wrong posture image update
-                    wrong_posture_image_to_display = cv2.cvtColor(wrong_posture_image_to_display, cv2.COLOR_BGR2RGB)
-                    # Resize image
-                    wrong_posture_image_to_display = cv2.resize(wrong_posture_image_to_display,
-                                                                (IMAGE_WIDTH, IMAGE_HEIGHT))
-
-                    # Wrong posture image update
-                    WrongImagePic = QImage(wrong_posture_image_to_display.data,
-                                           wrong_posture_image_to_display.shape[1],
-                                           wrong_posture_image_to_display.shape[0], QImage.Format_RGB888)
-                    # WrongImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
-                    self.WrongPostureImageUpdate.emit(WrongImagePic)
+'''
 
                 error_list = list(set(error_list))  # make sure there are no copies
                 if repetition_counter == self.repetition_num:
                     self.score = exercise_score
                     break
 
-            cap.release()
-            '''for item in error_list:
-                    print(f"Alert id : {item.alertId}, Alert rep :{item.repNumber}, Alert stage : {item.stageNumber}")
-                print(exercise_score)'''
-            self.quit()
-# my_est(1,5)
+        cap.release()
 
+        # self.quit()
 
 # ToDo:  '''
 #  2.1  Update both DB (Alon & Ofir)

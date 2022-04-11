@@ -16,8 +16,10 @@ class LoginScreen(QMainWindow):
         self.btnLogin.clicked.connect(self.btnLoginAction)
 
     def btnLoginAction(self):
-        res = DBConnection.getUser('a')
-        current_user = User(*res[0])
+        # res = DBConnection.getUser('a')
+        # current_user = User(*res[0])
+        current_user = User(user_id=2, password='a', first_name='a', last_name='a', email='a', type='trainee',
+                            phoneNumber='0546590043')
         myapp = App(current_user)
         myapp.show()
-        self.close()
+        '''self.close()'''

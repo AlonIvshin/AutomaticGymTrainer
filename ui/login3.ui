@@ -200,7 +200,7 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
      <rect>
       <x>320</x>
       <y>10</y>
-      <width>131</width>
+      <width>301</width>
       <height>61</height>
      </rect>
     </property>
@@ -218,7 +218,7 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>21</height>
+     <height>26</height>
     </rect>
    </property>
   </widget>

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1000</width>
-    <height>900</height>
+    <height>700</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,9 +21,9 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repCurrent">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>450</y>
-      <width>131</width>
+      <x>210</x>
+      <y>620</y>
+      <width>161</width>
       <height>41</height>
      </rect>
     </property>
@@ -37,34 +37,12 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
      <string>Rep Counter</string>
     </property>
    </widget>
-   <widget class="QLabel" name="lbl_userGoal">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>0</y>
-      <width>200</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Times New Roman</family>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="mouseTracking">
-     <bool>false</bool>
-    </property>
-    <property name="text">
-     <string>Goal posture</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="lbl_userErrors">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>460</y>
-      <width>121</width>
+      <x>60</x>
+      <y>20</y>
+      <width>291</width>
       <height>21</height>
      </rect>
     </property>
@@ -75,14 +53,14 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
      </font>
     </property>
     <property name="text">
-     <string>Your errors</string>
+     <string>Label to be texted</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_repCurrentValue">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>450</y>
+      <x>400</x>
+      <y>620</y>
       <width>121</width>
       <height>41</height>
      </rect>
@@ -100,8 +78,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repGoalValue">
     <property name="geometry">
      <rect>
-      <x>660</x>
-      <y>490</y>
+      <x>400</x>
+      <y>660</y>
       <width>121</width>
       <height>41</height>
      </rect>
@@ -119,9 +97,9 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repGoal">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>490</y>
-      <width>131</width>
+      <x>210</x>
+      <y>660</y>
+      <width>161</width>
       <height>41</height>
      </rect>
     </property>
@@ -138,8 +116,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_webcamImage">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>40</y>
+      <x>560</x>
+      <y>100</y>
       <width>400</width>
       <height>400</height>
      </rect>
@@ -156,32 +134,11 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
      <bool>true</bool>
     </property>
    </widget>
-   <widget class="QLabel" name="lbl_goalImage">
+   <widget class="QLabel" name="lbl_postureImage">
     <property name="geometry">
      <rect>
-      <x>90</x>
-      <y>40</y>
-      <width>400</width>
-      <height>400</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Im Here</string>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="lbl_errorImage">
-    <property name="geometry">
-     <rect>
-      <x>90</x>
-      <y>490</y>
+      <x>40</x>
+      <y>100</y>
       <width>400</width>
       <height>400</height>
      </rect>
