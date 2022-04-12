@@ -7,16 +7,17 @@ from app import App
 from workoutEstimation import EstimationScreen
 
 
-'''class Login(QDialog):
-    def __init__(self):
+class Login(QDialog):
+    def __init__(self,widget):
         super().__init__()
         self.ui = loadUi("./ui/login.ui", self)
         self.bt_click.clicked.connect(self.openCreateAccountWindow)
         self.bt_login.clicked.connect(self.login)
-        self.bt_estimation.clicked.connect(self.gotoEstimation)
         self.lbl_fields.hide()
         self.lbl_loged.hide()
         self.lbl_incorrect.hide()
+
+        self.widget = widget
 
     def openCreateAccountWindow(self):
         ca = CreateAcc()
@@ -54,23 +55,24 @@ from workoutEstimation import EstimationScreen
             # creating instance of current_user and open main app
             res = DBConnection.getUser(self.i_email.text())
             current_user = User(*res[0])
-            myapp = App(current_user)
-            myapp.show()
+            myapp = App(current_user, self.widget)
+            self.widget.addWidget(myapp)
+            self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
+
+            #myapp = App(current_user)
+            #myapp.show()
             self.close()
 
         else:
             print("failed to login")
 
-    def gotoEstimation(self):
-        self.workoutEstimationWindow = EstimationScreen(exercise_id=1, repetition_num=5)
-        self.workoutEstimationWindow.show()
-'''
 
-class Login(QMainWindow):
+
+'''class Login(QMainWindow):
     def __init__(self, widget):
         super().__init__()
         self.ui = loadUi("./ui/login3.ui", self)
-        self.setFixedSize(1000, 700)
+        self.setFixedSize(1200, 800)
 
         self.bt_click.clicked.connect(self.openCreateAccountWindow)
         self.bt_login.clicked.connect(self.login)
@@ -125,4 +127,4 @@ class Login(QMainWindow):
             #self.close()
 
         else:
-            print("failed to login")
+            print("failed to login")'''

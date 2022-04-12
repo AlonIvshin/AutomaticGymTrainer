@@ -2,7 +2,6 @@ import sys
 
 from PyQt5 import QtWidgets
 
-import ofirLogin
 import welcomscreen
 from PyQt5.QtWidgets import QApplication
 from Utils import DBConnection
@@ -24,7 +23,7 @@ if __name__ == '__main__':
     myapp.show()'''
 
     '''current_user = User(user_id=2, password='a', first_name='a', last_name='a', email='a', type='trainee',
-                        phoneNumber='0546590043')
+                        phone_number='0546590043')
     myapp = App(current_user)'''
     '''myapp.show()'''
     widget = QtWidgets.QStackedWidget()

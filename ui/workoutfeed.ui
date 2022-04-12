@@ -33,6 +33,9 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
       <pointsize>16</pointsize>
      </font>
     </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 255, 255)</string>
+    </property>
     <property name="text">
      <string>Rep Counter</string>
     </property>
@@ -51,6 +54,9 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
       <family>Times New Roman</family>
       <pointsize>16</pointsize>
      </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 255, 255)</string>
     </property>
     <property name="text">
      <string>Label to be texted</string>
@@ -108,6 +114,9 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
       <family>Times New Roman</family>
       <pointsize>16</pointsize>
      </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color:rgb(255, 255, 255)</string>
     </property>
     <property name="text">
      <string>Rep Goal</string>

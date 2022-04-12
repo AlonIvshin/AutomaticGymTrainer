@@ -34,7 +34,7 @@ class EstimationScreen(QMainWindow):
     def __init__(self, exercise_id, repetition_num, widget):
         super().__init__()
         self.ui = uic.loadUi("./ui/workoutfeed.ui", self)
-        self.setFixedSize(1000, 700)
+        self.setFixedSize(1200, 800)
         self.exercise_id = exercise_id
         self.repetition_num = repetition_num
 
@@ -247,7 +247,6 @@ class WorkoutEstimationThread(QThread):
         # Setup mediapipe instance
         with mp_pose.Pose(min_detection_confidence=0.9, min_tracking_confidence=0.5) as pose:
             while cap.isOpened():
-                time.sleep(33 / 1000)
                 # Reset Image flags
                 update_posture_image_flag = False
                 # update_goal_image_flag = False

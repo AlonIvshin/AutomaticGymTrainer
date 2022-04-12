@@ -12,7 +12,7 @@ def getImageFromLink(url):
 
 
 def calculateScore(deviation):
-    return max(1, deviation / 50)
+    return max(1, deviation / 10)
 
 
 def calculateAngle(vertex1, vertex2, vertex3, axis):
