@@ -32,7 +32,7 @@ class App(QMainWindow):
         e_id = self.i_eid.text()
         r_num = self.i_repsnum.text()
         if isnumeric(e_id) and isnumeric(r_num):
-            self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num,widget = self.widget)
+            self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num, widget=self.widget, user_id=self.current_user.user_id)
             self.widget.addWidget(self.workoutEstimationWindow)
             self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
 

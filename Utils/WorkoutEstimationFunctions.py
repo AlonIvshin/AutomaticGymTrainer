@@ -40,3 +40,29 @@ def calculateAngle(vertex1, vertex2, vertex3, axis):
     if angle > 180.0:
         angle = 360 - angle
     return angle
+
+
+'''
+Types:
+first,second - TriggeredAlert
+return: True if equals, False otherwise
+'''
+
+
+def compareTraineeTriggeredAlerts(first, second):
+    if first.alertId > second.alertId:
+        return 1
+    if first.alertId < second.alertId:
+        return -1
+    # alertId is equals in both sides
+    if first.stageNumber > second.stageNumber:
+        return 1
+    if first.stageNumber < second.stageNumber:
+        return -1
+    # stageNumber is equal in both sides
+    if first.repNumber > second.repNumber:
+        return 1
+    if first.repNumber < second.repNumber:
+        return -1
+    # both sides are the same element
+    return 0
