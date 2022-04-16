@@ -4,40 +4,65 @@ from PyQt5.uic import loadUi
 from ClassObjects.Feedback import Feedback
 
 
-def loadMyScore(feedback_id):
-    return str(DBConnection.getFeedbackScore(feedback_id))
+def setAmericanScore(num):
+    str = ''
+    if int(num) < 55:
+        str = 'F'
+    if int(num) > 54:
+        str = 'E'
+    if int(num) > 64:
+        str = 'D'
+    if int(num) > 74:
+        str = 'C'
+    if int(num) > 84:
+        str = 'B'
+    if int(num) > 89:
+        str = 'A'
+    if int(num) > 94:
+        str = 'A+'
+    return str
 
-Objects = [Feedback(*x) for x in res]
 
 class WorkoutHistory(QMainWindow):
     def __init__(self, user_id):
         super().__init__()
         self.ui = loadUi("./ui/workouthistory.ui", self)
+        for num in range(1, 4):
+            name = getattr(self.ui, 'lbl_name{}'.format(num))
+            reps = getattr(self.ui, 'lbl_reps{}'.format(num))
+            date = getattr(self.ui, 'lbl_date{}'.format(num))
+            score = getattr(self.ui, 'lbl_score{}'.format(num))
+            img = getattr(self.ui, 'image{}'.format(num))
+            name.hide()
+            reps.hide()
+            date.hide()
+            score.hide()
+            img.hide()
+        self.loadData(1)  # need to change to user id
 
-    def getFeedbacks(self, user_id):
+    def loadData(self, user_id):
         res = DBConnection.getCurrentUserFeedbacks(user_id)
+        allfeedbacks = [Feedback(*x) for x in res]
+        if len(allfeedbacks) > 0:  # we want to see in the table feedbacks only from the 4th feedback (need to be > 3)
+            for row_number, row_data in enumerate(res[3:]):  # res[3:]
+                self.table.insertRow(row_number)
+                for column_number, data in enumerate(row_data):
+                    self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+        # presenting the 3 first feedbacks
+        for index, feed in enumerate(allfeedbacks):
+            name = getattr(self.ui, 'lbl_name{}'.format(index + 1))
+            reps = getattr(self.ui, 'lbl_reps{}'.format(index + 1))
+            date = getattr(self.ui, 'lbl_date{}'.format(index + 1))
+            score = getattr(self.ui, 'lbl_score{}'.format(index + 1))
+            img = getattr(self.ui, 'image{}'.format(index + 1))
 
+            name.setText(str(feed.exercise_name))
+            reps.setText(str(feed.reps))
+            date.setText(str(feed.date))
+            score.setText(setAmericanScore(feed.score))
 
-    def loadData(self,feedback_id):
-        res = DBConnection.getFeedbackLogData(feedback_id)
-        for row_number, row_data in enumerate(res):
-            self.tb_mistakes.insertRow(row_number)
-            for column_number, data in enumerate(row_data):
-                self.tb_mistakes.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-
-    def setAmericanScore(self):
-        if int(self.lbl_score.text()) < 55:
-            self.lbl_american_score.setText('F')
-        if int(self.lbl_score.text()) > 54:
-            self.lbl_american_score.setText('E')
-        if int(self.lbl_score.text()) > 64:
-            self.lbl_american_score.setText('D')
-        if int(self.lbl_score.text()) > 74:
-            self.lbl_american_score.setText('C')
-        if int(self.lbl_score.text()) > 84:
-            self.lbl_american_score.setText('B')
-        if int(self.lbl_score.text()) > 89:
-            self.lbl_american_score.setText('A')
-        if int(self.lbl_score.text()) > 94:
-            self.lbl_american_score.setText('A+')
-
+            name.show()
+            reps.show()
+            date.show()
+            img.show()
+            score.show()

@@ -20,7 +20,7 @@ class Feedback(QMainWindow):
         self.loadData(feedback_id)
         self.setAmericanScore()
 
-    def loadData(self,feedback_id):
+    def loadData(self, feedback_id):
         res = DBConnection.getFeedbackLogData(feedback_id)
         for row_number, row_data in enumerate(res):
             self.tb_mistakes.insertRow(row_number)

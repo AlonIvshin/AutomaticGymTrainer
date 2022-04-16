@@ -12,6 +12,8 @@ from PyQt5.uic import loadUi
 from ClassObjects.Alerts import Alerts
 from ClassObjects.EnumClasses import *
 from ClassObjects.ExerciseInstruction import ExerciseInstruction
+from ClassObjects.Feedback import Feedback
+from ClassObjects.FeedbackLog import FeedbackLog
 from ClassObjects.Instruction import Instruction
 from ClassObjects.TriggeredAlerts import TriggeredAlerts
 from Utils import DBConnection
@@ -19,6 +21,7 @@ from Utils.WorkoutEstimationFunctions import *
 from cv2 import cv2
 import threading
 import queue
+import functools  # for custom comprator
 
 # Constants
 NUMBER_OF_FRAMES_BETWEEN_SCORE = 15  # Ofir
@@ -31,7 +34,7 @@ mp_pose = mp.solutions.pose
 
 # QWidget
 class EstimationScreen(QMainWindow):
-    def __init__(self, exercise_id, repetition_num, widget):
+    def __init__(self, exercise_id, repetition_num, widget, user_id):
         super().__init__()
         self.ui = uic.loadUi("./ui/workoutfeed.ui", self)
         self.setFixedSize(1200, 800)
@@ -42,6 +45,7 @@ class EstimationScreen(QMainWindow):
         self.fetch_data_thread = None
 
         self.widget = widget
+        self.user_id = user_id
 
         # Set thread
         # self.parameters_for_thread = list(self.SetUpExerciseData())
@@ -52,7 +56,7 @@ class EstimationScreen(QMainWindow):
 
         self.WorkoutEstimation = WorkoutEstimationThread(repetition_num=self.repetition_num,
                                                          parameters_thread=self.fetch_data_thread,
-                                                         parameters_queue=self.parameters_queue)
+                                                         parameters_queue=self.parameters_queue,estimation_screen = self)
 
         # For camera feed
         self.WorkoutEstimation.CameraImageUpdate.connect(self.CameraImageUpdateSlot)
@@ -84,17 +88,14 @@ class EstimationScreen(QMainWindow):
     def UpdateRepetitionLabel(self, rep_counter):
         self.lbl_repCurrentValue.setText(str(rep_counter))
 
-    '''def activatePostureProccess(self,pose,Image,image_queue):
-        while image_queue
-        results = pose.process(Image)
-        if image_queue.qsize() == 1:
-            image_queue.get()
-        image_queue.put(results)'''
+    def getUserId(self):
+        return self.user_id
+
+    def getExerciseId(self):
+        return self.exercise_id
 
     def SetUpExerciseData(self, queue):
         # Get relevant data from DB:
-        mp_drawing = mp.solutions.drawing_utils
-        mp_pose = mp.solutions.pose
 
         # extracting exercise instruction data from db:
         res = DBConnection.getAllExerciseInstructionData(self.exercise_id)
@@ -164,13 +165,11 @@ class EstimationScreen(QMainWindow):
         for alert in instruction_alert_data_list:
             alert_wrong_images.append(getImageFromLink(alert.alert_wrong_posture_image_link))
 
-        # queue.put(mp_pose)
         queue.put(exercise_instructions_list)
         queue.put(instructions_list)
         queue.put(alert_wrong_images)
         queue.put(instruction_alert_data_list)
         queue.put(exercise_stages)
-        # queue.put(mp_drawing)
         queue.put(stage_images)
 
         '''queue.put(mp_pose, exercise_instructions_list, instructions_list, alert_wrong_images, instruction_alert_data_list,
@@ -184,12 +183,13 @@ class WorkoutEstimationThread(QThread):
     PostureImageUpdate = pyqtSignal(QImage)  # For trainee wrong posture
     RepetitionCounterUpdate = pyqtSignal(int)  # For repetition update
 
-    def __init__(self, repetition_num, parameters_queue, parameters_thread):
+    def __init__(self, repetition_num, parameters_queue, parameters_thread, estimation_screen):
         QThread.__init__(self)
         self.repetition_num = int(repetition_num)
         self.parameters_queue = parameters_queue
         self.parameters_thread = parameters_thread
         self.score = 100
+        self.estimation_screen = estimation_screen
 
     def run(self):  # estimation // my_est
         # current stage variable
@@ -200,7 +200,7 @@ class WorkoutEstimationThread(QThread):
         exercise_score = 100  # exercise score
         exercise_score_frame_counter = 0  # each NUMBER_OF_FRAMES_BETWEEN_SCORE frames we calculate the score
         wrong_posture_image_to_display = getImageFromLink('https://i.imgur.com/9Prp4Da.jpg')
-        error_list = []  # contains list triggeredAlerts
+        triggered_error_list = []  # contains list triggeredAlerts
 
         # cap = video that is captured through the web camera
         cap = cv2.VideoCapture(0)
@@ -323,7 +323,7 @@ class WorkoutEstimationThread(QThread):
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
                                 # Save alerts that triggered during the exercise
-                                error_list.append(
+                                triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
                                 wrong_posture_image_to_display = alert_wrong_images[
@@ -346,7 +346,7 @@ class WorkoutEstimationThread(QThread):
                                     error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
                                     # Save alerts that triggered during the exercise
-                                    error_list.append(
+                                    triggered_error_list.append(
                                         TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                         repNumber=repetition_counter))
                                     wrong_posture_image_to_display = alert_wrong_images[
@@ -368,7 +368,7 @@ class WorkoutEstimationThread(QThread):
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
                                 # Save alerts that triggered during the exercise
-                                error_list.append(
+                                triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
                                 wrong_posture_image_to_display = alert_wrong_images[
@@ -390,7 +390,7 @@ class WorkoutEstimationThread(QThread):
                                     error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
                                     # Save alerts that triggered during the exercise
-                                    error_list.append(
+                                    triggered_error_list.append(
                                         TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                         repNumber=repetition_counter))
                                     wrong_posture_image_to_display = alert_wrong_images[
@@ -414,7 +414,7 @@ class WorkoutEstimationThread(QThread):
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
                                 # Save alerts that triggered during the exercise
-                                error_list.append(
+                                triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
                                 wrong_posture_image_to_display = alert_wrong_images[
@@ -484,43 +484,50 @@ class WorkoutEstimationThread(QThread):
                                                   posture_image_to_display.shape[0], QImage.Format_RGB888)
                 self.PostureImageUpdate.emit(posture_image_to_display)
 
-                # BACKUP
-                '''if update_goal_image_flag:
-                                    # Goal Posture image update
-                                    goal_pose_image = stage_images[current_stage + repetition_direction - 1]
-                                    goal_pose_image = cv2.cvtColor(goal_pose_image, cv2.COLOR_BGR2RGB)
-                                    # Resize image
-                                    goal_pose_image = cv2.resize(goal_pose_image, (IMAGE_WIDTH, IMAGE_HEIGHT))
-
-                                    # Goal image update
-                                    GoalImagePic = QImage(goal_pose_image.data, goal_pose_image.shape[1],
-                                                          goal_pose_image.shape[0], QImage.Format_RGB888)
-                                    # GoalImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
-                                    self.GoalImageUpdate.emit(GoalImagePic)'''
-
-                # BACKUP
-                ''' else:
-                    # Goal Posture image update
-                    goal_pose_image = stage_images[current_stage + repetition_direction - 1]
-                    goal_pose_image = cv2.cvtColor(goal_pose_image, cv2.COLOR_BGR2RGB)
-                    # Resize image
-                    goal_pose_image = cv2.resize(goal_pose_image, (IMAGE_WIDTH, IMAGE_HEIGHT))
-
-                    # Goal image update
-                    GoalImagePic = QImage(goal_pose_image.data, goal_pose_image.shape[1],
-                                          goal_pose_image.shape[0], QImage.Format_RGB888)
-                    # GoalImagePic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
-                    self.GoalImageUpdate.emit(GoalImagePic)
-'''
-
-                error_list = list(set(error_list))  # make sure there are no copies
+                # ToDo: set doesnt work - need to create my own compare
                 if repetition_counter == self.repetition_num:
+                    # ToDo: Delete self.score
+                    exercise_score = max(exercise_score, 0)
                     self.score = exercise_score
+
                     break
 
+        # Note:
+        '''
+        Changed Feedback class
+        '''
         cap.release()
+        # Sort triggered error list and delete copies:
+        triggered_error_list.sort(key=functools.cmp_to_key(compareTraineeTriggeredAlerts))
 
-        # self.quit()
+        triggered_error_list_no_dup = [triggered_error_list[0]]
+        for item in triggered_error_list:
+            if compareTraineeTriggeredAlerts(item, triggered_error_list_no_dup[-1]) != 0:  # if not equal
+                triggered_error_list_no_dup.append(item)
+
+        # Insert errors to table
+        # Create feedback
+        user_id = self.estimation_screen.getUserId()
+        exercise_id = self.estimation_screen.getExerciseId()
+        # -1 for place holder
+        exercise_feedback = Feedback(feedback_id=-1, user_id=user_id, exercise_id=exercise_id, date=datetime.now(),
+                                     score=exercise_score, reps=self.repetition_num)
+        # Insert new feedback
+        feedback_id = DBConnection.createFeedBack(exercise_feedback)
+        # set feedback id with correct feedback id that was returned from query
+        exercise_feedback.feedback_id = feedback_id
+
+        # Create logs for the feedback
+        error_list_logs = []
+        for item in triggered_error_list_no_dup:
+            # -1 for placeholder - auto increment in DB
+            current_error_log = FeedbackLog(log_id=-1, feedback_id=feedback_id, alert_id=item.alertId,
+                                            stage_number=item.stageNumber, rep_number=item.repNumber)
+            error_list_logs.append(current_error_log)
+
+        DBConnection.createNewFeedbackLogs(error_list_logs)
+
+        self.quit()
 
 # ToDo:  '''
 #  2.1  Update both DB (Alon & Ofir)

@@ -8,27 +8,22 @@ from Utils import DBConnection
 from ClassObjects.User import User
 from app import App
 from login import Login
+import workouthistory
 
 from workoutEstimation import EstimationScreen
 
 if __name__ == '__main__':
     app = QApplication([])
-    '''#welcome = welcomscreen.WelcomeScreen()
-    choose = chooseexercise.ChooseExerciseScreen()
-    choose.show()
-    #welcome.show()'''
-    '''res = DBConnection.getUser('ofirvaknin55@gmail.com')
-    current_user = User(*res[0])
-    myapp = App(current_user)
-    myapp.show()'''
 
-    '''current_user = User(user_id=2, password='a', first_name='a', last_name='a', email='a', type='trainee',
-                        phone_number='0546590043')
-    myapp = App(current_user)'''
-    '''myapp.show()'''
     widget = QtWidgets.QStackedWidget()
     welcome = welcomscreen.WelcomeScreen(widget)
     widget.addWidget(welcome)
     widget.show()
+
+    '''widget = QtWidgets.QStackedWidget()
+    welcome = workouthistory.WorkoutHistory(widget)
+    widget.addWidget(welcome)
+    widget.show()'''
+
 
     sys.exit(app.exec_())

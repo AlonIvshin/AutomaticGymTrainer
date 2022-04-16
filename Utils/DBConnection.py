@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="AutomaticGymTrainerLocal",
+                database="mytrainer",
                 user="postgres",
-                password="012net")
+                password="root")
         return self.con
 
 
@@ -27,6 +27,7 @@ def getAllExerciseInstructionData(exerciseId):
     cur.close()
     return res
 
+
 # QUERY 2: getting exercise's stages number
 def getAllExerciseStages(exerciseId):
     cur = con.cursor()
@@ -34,6 +35,7 @@ def getAllExerciseStages(exerciseId):
     res = cur.fetchall()
     cur.close()
     return res
+
 
 # QUERY 3: getting all instruction's data of the exercise
 def getAllInstructionData(exerciseId):
@@ -46,7 +48,8 @@ def getAllInstructionData(exerciseId):
     cur.close()
     return res
 
- # QUERY 4: getting all alert's data of the exercise
+
+# QUERY 4: getting all alert's data of the exercise
 def getAllAlertsData(exerciseId):
     cur = con.cursor()
     cur.execute('''select a.alert_id,a.instruction_id,a.alert_text,a.alert_wrong_posture_image_link
@@ -57,6 +60,7 @@ def getAllAlertsData(exerciseId):
     cur.close()
     return res
 
+
 # QUERY 5: geting exercie id name and target in order to fill a table
 def getExerciesNamesAndTarget():
     cur = con.cursor()
@@ -64,6 +68,7 @@ def getExerciesNamesAndTarget():
     res = cur.fetchall()
     cur.close
     return res
+
 
 # QUERY 6: insert new trainee user
 def insertIntoUsers(password, first_name, last_name, email, phone_number):
@@ -77,6 +82,7 @@ def insertIntoUsers(password, first_name, last_name, email, phone_number):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 7: check if the email address is already in use
 def isEmailExist(email):
     try:
@@ -88,6 +94,7 @@ def isEmailExist(email):
         return res[0][0]
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+
 
 # QUERY 8: check id user login input is correct
 def checkLoginData(email, password):
@@ -101,6 +108,7 @@ def checkLoginData(email, password):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 9: check if this email is loged in
 def checkIfAlreadyLogedin(email):
     try:
@@ -113,18 +121,21 @@ def checkIfAlreadyLogedin(email):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 10: change logged_in to 1
 def changeToLoggedIn(email):
     try:
         cur = con.cursor()
-        cur.execute("UPDATE users SET logged_in = 0 WHERE email = %s;", (email,)) #''' OFIRRRRRRRRRRRRRRRRRRR ALON OFIR'''
+        cur.execute("UPDATE users SET logged_in = 0 WHERE email = %s;",
+                    (email,))  # ''' OFIRRRRRRRRRRRRRRRRRRR ALON OFIR'''
         con.commit()
         cur.close()
         return True
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
- # QUERY 11: get user data
+
+# QUERY 11: get user data
 def getUser(email):
     try:
         cur = con.cursor()
@@ -137,6 +148,7 @@ def getUser(email):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 12: get all images for specific exercise
 def getExerciseImages(exerciseId):
     cur = con.cursor()
@@ -145,6 +157,7 @@ def getExerciseImages(exerciseId):
     res = cur.fetchall()
     cur.close()
     return res
+
 
 # QUERY 13: change logged_in to 0
 def logOutCurrentUser(user_id):
@@ -157,6 +170,7 @@ def logOutCurrentUser(user_id):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 14: get Youtube video id
 def getVideoId(exercise_id):
     try:
@@ -167,6 +181,7 @@ def getVideoId(exercise_id):
         return res[0][0]
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
+
 
 # QUERY 15: get user data
 def getExerciseDescription(exercise_id):
@@ -179,6 +194,7 @@ def getExerciseDescription(exercise_id):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 16: get feedback score
 def getFeedbackScore(feedback_id):
     try:
@@ -190,6 +206,7 @@ def getFeedbackScore(feedback_id):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 17: receiving all feedback log data during the workout session
 def getFeedbackLogData(feedback_id):
     cur = con.cursor()
@@ -199,16 +216,79 @@ def getFeedbackLogData(feedback_id):
     cur.close
     return res
 
-# QUERY 18: get all feedbacks data needed of the current user
+
+# QUERY 18: get all feedbacks data needed of the current user ordered by date
 def getCurrentUserFeedbacks(current_user):
     try:
         cur = con.cursor()
         cur.execute('''select f.feedback_id, e.exercise_name, f.date, f.score, f.reps from feedbacks as f
                         join exercises as e on f.exercise_id = e.exercise_id
-                        where user_id = %s;''', str(current_user))
+                        where user_id = %s order by date DESC;''', (current_user,))
         res = cur.fetchall()
         cur.close()
         return res
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+# QUERY 19: get how many workouts the user preformed
+def getWorkoutsQuantity(current_user):
+    try:
+        cur = con.cursor()
+        cur.execute('''select count(*) from feedbacks as f
+                         join exercises as e on f.exercise_id = e.exercise_id
+                         where user_id = %s;''', (current_user,))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+# QUERY 20: get users workouts AVG
+def getWorkoutsAVG(current_user):
+    try:
+        cur = con.cursor()
+        cur.execute('''select cast(avg(score) as decimal(10,2)) from feedbacks as f
+                         join exercises as e on f.exercise_id = e.exercise_id
+                         where user_id = %s;''', (current_user,))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+# QUERY 21: create new feedback
+def createFeedBack(feedback):
+    feedback_id = 0
+    try:
+        cur = con.cursor()
+        sql = '''INSERT INTO feedbacks (user_id, exercise_id, date, score, reps)
+    VALUES (%s,%s,%s,%s,%s) RETURNING feedback_id;'''
+        cur.execute(sql, (
+            feedback.user_id, feedback.exercise_id, feedback.date, feedback.score, feedback.reps))
+        con.commit()
+        feedback_id = int(cur.fetchall()[0][0])
+        cur.close()
+        return feedback_id
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+
+# QUERY 22: insert logs to feedback
+def createNewFeedbackLogs(error_list_logs):
+    # Pre-process data to a proper string format
+
+    sql = "INSERT INTO feedbacks_logs (feedback_id, alert_id, stage_number, rep_number) VALUES "
+    for item in error_list_logs:
+        sql = sql + f"({item.feedback_id},{item.alert_id},{item.stage_number},{item.rep_number}),"
+    sql = sql[:-1]  # to remove last ','
+    try:
+        cur = con.cursor()
+        cur.execute(sql)
+        con.commit()
+        cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
