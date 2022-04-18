@@ -4,13 +4,15 @@ from createacc import CreateAcc
 from Utils import DBConnection
 from ClassObjects.User import User
 from app import App
-from workoutEstimation import EstimationScreen
+from PyQt5 import QtWidgets
+
 
 
 class Login(QDialog):
     def __init__(self,widget):
         super().__init__()
         self.ui = loadUi("./ui/login.ui", self)
+        self.i_password.setEchoMode(QtWidgets.QLineEdit.Password)
         self.bt_click.clicked.connect(self.openCreateAccountWindow)
         self.bt_login.clicked.connect(self.login)
         self.lbl_fields.hide()

@@ -7,7 +7,7 @@ from numpy.core.defchararray import isnumeric
 
 from WatchExerciseInstructions import WatchExerciseInstructions
 from workoutEstimation import EstimationScreen, WorkoutEstimationThread
-from ClassObjects.Feedback import Feedback,FeedbackHistory
+from ClassObjects.Feedback import Feedback, FeedbackHistory
 
 
 def setAmericanScore(num):
@@ -28,37 +28,36 @@ def setAmericanScore(num):
         str = 'A+'
     return str
 
-class App(QMainWindow):
+
+class AdminApp(QMainWindow):
     def __init__(self, current_user, widget):
         super().__init__()
-        self.ui = loadUi("./ui/app.ui", self)
+        self.ui = loadUi("./ui/appAdmin.ui", self)
         self.setFixedSize(1200, 800)
         self.current_user = current_user
         self.tabWidget.setCurrentIndex(0)  # sets default tab
-        #Main
-        self.lbl_welcome.setText('Welcome ' + current_user.first_name + ' ' + current_user.last_name)  # greating user
-        self.lbl_workouts_num.setText(str(DBConnection.getWorkoutsQuantity(current_user.user_id)) + ' workout sessions')
-        self.lbl_avg.setText(str(DBConnection.getWorkoutsAVG(current_user.user_id)))
-        #Choose Exercise
-        self.bt_start.clicked.connect(self.startEstimationFunction)
-        self.bt_watch.clicked.connect(self.openInstructionsWindow)
-        self.loaddata()
-        # self.table.setFixedWidth(self.table.columnWidth(0) + self.table.columnWidth(1)+ self.table.ver)
-        self.tb_ce.setColumnWidth(1, 80)
-        self.tb_ce.setColumnWidth(0, 10)
-        self.tb_ce.setColumnWidth(2, 200)
-        self.tb_ce.setColumnHidden(0, True)
-        self.tb_ce.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.tb_ce.clicked.connect(self.doubleClicked_table)
+        # Main
+        self.lbl_welcome.setText('Welcome ' + current_user.first_name + ' ' + current_user.last_name)  # greeting user
+        # Choose Exercise
+        self.bt_editExercise.clicked.connect(self.editExercise)  # Should open new window to edit basic information of the exercise
+        self.bt_addExercise.clicked.connect(self.addExercise)
+        self.bt_deleteExercise.clicked.connect(self.deleteExercise)
+        self.loaddata()  # load all exercises
+        self.table.setColumnWidth(1, 80)
+        self.table.setColumnWidth(0, 10)
+        self.table.setColumnWidth(2, 200)
+        self.table.setColumnHidden(0, True)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.table.clicked.connect(self.doubleClicked_table)
         self.workoutEstimationWindow = None
-        self.lbl_alert.hide()
+        self.label_messagesMngExercise.hide()
         self.widget = widget
-        self.i_eid.hide()
-        self.label_3.hide()
-        self.lbl_chosen.hide()
+        #self.i_eid.hide()
+        #self.label_3.hide()
+        #self.lbl_chosen.hide()
 
-        #Workout History
-        for num in range(1, 4):
+        # Workout History
+        ''' for num in range(1, 4):
             name = getattr(self.ui, 'lbl_name{}'.format(num))
             reps = getattr(self.ui, 'lbl_reps{}'.format(num))
             date = getattr(self.ui, 'lbl_date{}'.format(num))
@@ -68,18 +67,28 @@ class App(QMainWindow):
             reps.hide()
             date.hide()
             score.hide()
-            img.hide()
-        self.loadDataHistory(self.current_user.user_id)  # need to change to user id
+            img.hide()'''
+        #self.loadDataHistory(self.current_user.user_id)  # need to change to user id
+
+    def editExercise(self):
+        pass
+
+    def addExercise(self):
+        pass
+
+    def deleteExercise(self):
+        pass
 
     def startEstimationFunction(self):
         e_id = self.i_eid.text()
         r_num = self.i_repsnum.text()
         if isnumeric(e_id) and isnumeric(r_num):
-            self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num, widget = self.widget, user_id=self.current_user.user_id)
+            self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num, widget=self.widget,
+                                                            user_id=self.current_user.user_id)
             self.widget.addWidget(self.workoutEstimationWindow)
             self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
-            #self.workoutEstimationWindow.show()
-            #self.close() #Problem here
+            # self.workoutEstimationWindow.show()
+            # self.close() #Problem here
 
             # self.bt_start.clicked.connect(lambda: EstimationScreen(e_id, r_num))
 
@@ -87,26 +96,25 @@ class App(QMainWindow):
             self.lbl_alert.show()
             self.lbl_chosen.hide()
 
+    # Loads data to manage exercises tab (exercise name, main body part)
     def loaddata(self):
         res = DBConnection.getExerciesNamesAndTarget()
         for row_number, row_data in enumerate(res):
-            self.tb_ce.insertRow(row_number)
+            self.table.insertRow(row_number)
             for column_number, data in enumerate(row_data):
-                self.tb_ce.setItem(row_number, column_number, QTableWidgetItem(str(data)))
+                self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
-    def loadDataHistory(self, user_id):
-        #workout history
+    '''def loadDataHistory(self, user_id):
+        # workout history
         res = DBConnection.getCurrentUserFeedbacks(user_id)
         allfeedbacks = [FeedbackHistory(*x) for x in res]
-        pre_table_range = len(res)
-        if len(res) > 3:  # we want to see in the table feedbacks only from the 4th feedback (need to be > 3)
-            pre_table_range = 3
+        if len(allfeedbacks) > 3:  # we want to see in the table feedbacks only from the 4th feedback (need to be > 3)
             for row_number, row_data in enumerate(res[3:]):  # res[3:]
                 self.table.insertRow(row_number)
                 for column_number, data in enumerate(row_data):
                     self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
         # presenting the 3 first feedbacks
-        for index, feed in enumerate(allfeedbacks[:pre_table_range]):
+        for index, feed in enumerate(allfeedbacks):
             name = getattr(self.ui, 'lbl_name{}'.format(index + 1))
             reps = getattr(self.ui, 'lbl_reps{}'.format(index + 1))
             date = getattr(self.ui, 'lbl_date{}'.format(index + 1))
@@ -122,7 +130,7 @@ class App(QMainWindow):
             reps.show()
             date.show()
             img.show()
-            score.show()
+            score.show()'''
 
     def doubleClicked_table(self):
         index = self.tb_ce.currentIndex()
@@ -134,14 +142,14 @@ class App(QMainWindow):
         self.lbl_chosen.setText(txt + " is chosen")
         self.lbl_chosen.show()
 
-    def openInstructionsWindow(self):
+    '''def openInstructionsWindow(self):
         if self.i_eid.text() != '':
             vid_id = DBConnection.getVideoId(self.i_eid.text())
             ins = WatchExerciseInstructions(vid_id, self.i_eid.text())
             ins.show()
             self.lbl_alert.hide()
         else:
-            self.lbl_alert.show()
+            self.lbl_alert.show()'''
 
     '''def closeEvent(self, event):
         print("The user: " + self.current_user.first_name + ' ' + self.current_user.last_name + ' ' + "logged out!")

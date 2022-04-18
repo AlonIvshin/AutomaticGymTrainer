@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="mytrainer",
+                database="AutomaticGymTrainerLocal",
                 user="postgres",
-                password="root")
+                password="012net")
         return self.con
 
 
@@ -196,10 +196,10 @@ def getExerciseDescription(exercise_id):
 
 
 # QUERY 16: get feedback score
-def getFeedbackScore(feedback_id):
+def getFeedbackScore(feedback_id): # OFIR
     try:
         cur = con.cursor()
-        cur.execute("select score from feedbacks where feedback_id = %s;", str(feedback_id))
+        cur.execute(f"select score from feedbacks where feedback_id = {feedback_id};")
         res = cur.fetchall()
         cur.close()
         return res[0][0]
@@ -210,8 +210,8 @@ def getFeedbackScore(feedback_id):
 # QUERY 17: receiving all feedback log data during the workout session
 def getFeedbackLogData(feedback_id):
     cur = con.cursor()
-    cur.execute('''select alert_text,stage_number,rep_number from alerts as a
-                    Join feedbacks_logs as f on a.alert_id = f.alert_id where feedback_id = %s;''', str(feedback_id))
+    cur.execute(f'''select alert_text,stage_number,rep_number from alerts as a 
+                    Join feedbacks_logs as f on a.alert_id = f.alert_id where feedback_id = {feedback_id};''')
     res = cur.fetchall()
     cur.close
     return res

@@ -27,7 +27,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
      <rect>
       <x>470</x>
       <y>60</y>
-      <width>450</width>
+      <width>261</width>
       <height>81</height>
      </rect>
     </property>
@@ -41,7 +41,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QWidget" name="horizontalLayoutWidget">
     <property name="geometry">
      <rect>
-      <x>410</x>
+      <x>430</x>
       <y>180</y>
       <width>361</width>
       <height>231</height>
@@ -52,7 +52,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QTextBrowser" name="lbl_txt">
     <property name="geometry">
      <rect>
-      <x>150</x>
+      <x>240</x>
       <y>440</y>
       <width>900</width>
       <height>192</height>

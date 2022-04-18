@@ -1,13 +1,15 @@
-import time
+import functools  # for custom comparator
+import queue
+import threading
 from datetime import datetime
+
 import mediapipe as mp
 from PyQt5 import uic
-
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 # for PyQT worker threads
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QMainWindow
-from PyQt5.uic import loadUi
+from PyQt5.QtWidgets import QMainWindow, QPlainTextEdit
+from cv2 import cv2
 
 from ClassObjects.Alerts import Alerts
 from ClassObjects.EnumClasses import *
@@ -18,10 +20,7 @@ from ClassObjects.Instruction import Instruction
 from ClassObjects.TriggeredAlerts import TriggeredAlerts
 from Utils import DBConnection
 from Utils.WorkoutEstimationFunctions import *
-from cv2 import cv2
-import threading
-import queue
-import functools  # for custom comprator
+from score import FeedbackScreen
 
 # Constants
 NUMBER_OF_FRAMES_BETWEEN_SCORE = 15  # Ofir
@@ -50,13 +49,15 @@ class EstimationScreen(QMainWindow):
         # Set thread
         # self.parameters_for_thread = list(self.SetUpExerciseData())
         self.parameters_queue = queue.Queue()
-        self.fetch_data_thread = threading.Thread(target=self.SetUpExerciseData, args=[self.parameters_queue])
+        self.fetch_data_thread = threading.Thread(target=self.SetUpExerciseData, args=[self.parameters_queue],
+                                                  daemon=True)
         self.fetch_data_thread.daemon = True
         self.fetch_data_thread.start()
 
         self.WorkoutEstimation = WorkoutEstimationThread(repetition_num=self.repetition_num,
                                                          parameters_thread=self.fetch_data_thread,
-                                                         parameters_queue=self.parameters_queue,estimation_screen = self)
+                                                         parameters_queue=self.parameters_queue, estimation_screen=self,
+                                                         widget=self.widget)
 
         # For camera feed
         self.WorkoutEstimation.CameraImageUpdate.connect(self.CameraImageUpdateSlot)
@@ -70,8 +71,19 @@ class EstimationScreen(QMainWindow):
         self.lbl_repCurrentValue.setText('0')
         self.WorkoutEstimation.RepetitionCounterUpdate.connect(self.UpdateRepetitionLabel)
 
-        self.WorkoutEstimation.daemon = True
+        # Move forward to next screen when trainee finished the exericse:
+        self.WorkoutEstimation.ScoreScreenReadyUpdate.connect(self.ScoreScreenReadyUpdateSlot)
+
+        # Set alerts for user to review
+        self.WorkoutEstimation.TriggeredAlertsUpdate.connect(self.TriggeredAlertsUpdateSlot)
+
+        self.WorkoutEstimation.daemon = True  # Not working
         self.WorkoutEstimation.start()
+
+    def ScoreScreenReadyUpdateSlot(self, feedback_id):
+        FeedbackScreen_holder = FeedbackScreen(feedback_id=str(feedback_id), widget=self.widget)
+        self.widget.addWidget(FeedbackScreen_holder)
+        self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
 
     def CameraImageUpdateSlot(self, Image):
         self.lbl_webcamImage.setPixmap(QPixmap.fromImage(Image))
@@ -88,6 +100,13 @@ class EstimationScreen(QMainWindow):
     def UpdateRepetitionLabel(self, rep_counter):
         self.lbl_repCurrentValue.setText(str(rep_counter))
 
+    def TriggeredAlertsUpdateSlot(self, triggered_alerts_for_last_rep):  # Receives an array that has all texts
+        txt = ''
+        for item in triggered_alerts_for_last_rep:
+            txt += item + '\n'
+        self.txt_TriggeredAlerts.clear()
+        self.txt_TriggeredAlerts.insertPlainText(str(txt))
+
     def getUserId(self):
         return self.user_id
 
@@ -96,7 +115,6 @@ class EstimationScreen(QMainWindow):
 
     def SetUpExerciseData(self, queue):
         # Get relevant data from DB:
-
         # extracting exercise instruction data from db:
         res = DBConnection.getAllExerciseInstructionData(self.exercise_id)
         exerciseInstructionId, instructionId1, exerciseInstructionAlertId, deviationPositive, deviationNegative, instructionStage, exerciseInstructionType, alertDeviationTrigger, alertExtendedId = zip(
@@ -179,17 +197,20 @@ class EstimationScreen(QMainWindow):
 
 class WorkoutEstimationThread(QThread):
     CameraImageUpdate = pyqtSignal(QImage)  # For trainee camera
-    # GoalImageUpdate = pyqtSignal(QImage)  # For trainee goal posture
+    # GoalImageUpdate = pyqtSignal(QImage)           # For trainee goal posture
     PostureImageUpdate = pyqtSignal(QImage)  # For trainee wrong posture
     RepetitionCounterUpdate = pyqtSignal(int)  # For repetition update
+    ScoreScreenReadyUpdate = pyqtSignal(object)  # For moving towards next screen, notifying the GUI thread
+    TriggeredAlertsUpdate = pyqtSignal(object)  # For updating alerts in the GUI text box
 
-    def __init__(self, repetition_num, parameters_queue, parameters_thread, estimation_screen):
+    def __init__(self, repetition_num, parameters_queue, parameters_thread, estimation_screen, widget):
         QThread.__init__(self)
         self.repetition_num = int(repetition_num)
         self.parameters_queue = parameters_queue
         self.parameters_thread = parameters_thread
         self.score = 100
         self.estimation_screen = estimation_screen
+        self.widget = widget
 
     def run(self):  # estimation // my_est
         # current stage variable
@@ -262,7 +283,7 @@ class WorkoutEstimationThread(QThread):
                 camera_image.flags.writeable = False
 
                 error_edges = []  # will be translated to set when drawing connections
-                alerts_array = []  # contains all alerts that showed during the frame analysis
+                triggered_error_list_text = []  # contains all alerts that showed during the frame analysis
                 # Make detection
                 results = pose.process(camera_image)  ##########CRASH
 
@@ -310,7 +331,8 @@ class WorkoutEstimationThread(QThread):
                         starting_angle = current_instruction.angle  # starting angle value
                         tested_angle = calculateAngle(vertex1_coordinates, vertex2_coordinates, vertex3_coordinates,
                                                       E_InstructionAxis[
-                                                          current_instruction.instructionAxis].value)  # calculating the current angle
+                                                          current_instruction.instructionAxis].value)  # calculating
+                        # the current angle
 
                         deviation_trigger_value = E_AlertDeviationTrigger[
                             exercise_instruction_loop.alertDeviationTrigger].value
@@ -318,7 +340,7 @@ class WorkoutEstimationThread(QThread):
                         if deviation_trigger_value == E_AlertDeviationTrigger.POSITIVE.value:
                             # check for deviation trigger
                             if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle:
-                                alerts_array.append(current_instruction.instructionAlertData.alertText)
+                                triggered_error_list_text.append(current_instruction.instructionAlertData.alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -339,7 +361,7 @@ class WorkoutEstimationThread(QThread):
                             # check for extended deviation
                             if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
                                 if starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 >= tested_angle:
-                                    alerts_array.append(
+                                    triggered_error_list_text.append(
                                         instruction_alert_data_list[
                                             exercise_instruction_loop.alertExtendedId].alertText)
                                     error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
@@ -363,7 +385,7 @@ class WorkoutEstimationThread(QThread):
                             continue
                         elif deviation_trigger_value == E_AlertDeviationTrigger.NEGATIVE.value:
                             if tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
-                                alerts_array.append(current_instruction.instructionAlertData.alertText)
+                                triggered_error_list_text.append(current_instruction.instructionAlertData.alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -383,7 +405,7 @@ class WorkoutEstimationThread(QThread):
 
                             if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
                                 if starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1 <= tested_angle:
-                                    alerts_array.append(
+                                    triggered_error_list_text.append(
                                         instruction_alert_data_list[
                                             exercise_instruction_loop.alertExtendedId].alertText)
                                     error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
@@ -409,7 +431,7 @@ class WorkoutEstimationThread(QThread):
                         elif deviation_trigger_value == E_AlertDeviationTrigger.BOTH.value:
                             if tested_angle - exercise_instruction_loop.deviationPositive > starting_angle or \
                                     tested_angle - exercise_instruction_loop.deviationNegative < starting_angle:
-                                alerts_array.append(current_instruction.instructionAlertData.alertText)
+                                triggered_error_list_text.append(current_instruction.instructionAlertData.alertText)
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -484,18 +506,14 @@ class WorkoutEstimationThread(QThread):
                                                   posture_image_to_display.shape[0], QImage.Format_RGB888)
                 self.PostureImageUpdate.emit(posture_image_to_display)
 
-                # ToDo: set doesnt work - need to create my own compare
+                self.TriggeredAlertsUpdate.emit(triggered_error_list_text)
+
                 if repetition_counter == self.repetition_num:
                     # ToDo: Delete self.score
                     exercise_score = max(exercise_score, 0)
                     self.score = exercise_score
-
                     break
 
-        # Note:
-        '''
-        Changed Feedback class
-        '''
         cap.release()
         # Sort triggered error list and delete copies:
         triggered_error_list.sort(key=functools.cmp_to_key(compareTraineeTriggeredAlerts))
@@ -509,7 +527,7 @@ class WorkoutEstimationThread(QThread):
         # Create feedback
         user_id = self.estimation_screen.getUserId()
         exercise_id = self.estimation_screen.getExerciseId()
-        # -1 for place holder
+        # -1 for placeholder
         exercise_feedback = Feedback(feedback_id=-1, user_id=user_id, exercise_id=exercise_id, date=datetime.now(),
                                      score=exercise_score, reps=self.repetition_num)
         # Insert new feedback
@@ -525,12 +543,14 @@ class WorkoutEstimationThread(QThread):
                                             stage_number=item.stageNumber, rep_number=item.repNumber)
             error_list_logs.append(current_error_log)
 
+        # Insert all logs to DB
         DBConnection.createNewFeedbackLogs(error_list_logs)
 
+        # Notify GUI score screen is ready
+        self.ScoreScreenReadyUpdate.emit(feedback_id)
         self.quit()
 
 # ToDo:  '''
-#  2.1  Update both DB (Alon & Ofir)
 #  3.3  See how we move forward to next page after this page closes
 #  3.4  Add default case if flag has do not changed for mistake image
 #  4.   Update default image

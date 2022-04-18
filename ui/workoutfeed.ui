@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1000</width>
-    <height>700</height>
+    <width>1200</width>
+    <height>800</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,20 +21,24 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repCurrent">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>620</y>
+      <x>640</x>
+      <y>560</y>
       <width>161</width>
       <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Times New Roman</family>
-      <pointsize>16</pointsize>
+      <family>MS Shell Dlg 2</family>
+      <pointsize>15</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color:rgb(255, 255, 255)</string>
+     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>Rep Counter</string>
@@ -43,7 +47,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_userErrors">
     <property name="geometry">
      <rect>
-      <x>60</x>
+      <x>150</x>
       <y>20</y>
       <width>291</width>
       <height>21</height>
@@ -51,12 +55,16 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
     </property>
     <property name="font">
      <font>
-      <family>Times New Roman</family>
-      <pointsize>16</pointsize>
+      <family>MS Shell Dlg 2</family>
+      <pointsize>15</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color:rgb(255, 255, 255)</string>
+     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>Label to be texted</string>
@@ -65,8 +73,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repCurrentValue">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>620</y>
+      <x>780</x>
+      <y>560</y>
       <width>121</width>
       <height>41</height>
      </rect>
@@ -84,8 +92,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repGoalValue">
     <property name="geometry">
      <rect>
-      <x>400</x>
-      <y>660</y>
+      <x>780</x>
+      <y>600</y>
       <width>121</width>
       <height>41</height>
      </rect>
@@ -103,20 +111,24 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repGoal">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>660</y>
+      <x>640</x>
+      <y>600</y>
       <width>161</width>
       <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Times New Roman</family>
-      <pointsize>16</pointsize>
+      <family>MS Shell Dlg 2</family>
+      <pointsize>15</pointsize>
+      <weight>50</weight>
+      <italic>false</italic>
+      <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color:rgb(255, 255, 255)</string>
+     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>Rep Goal</string>
@@ -125,8 +137,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_webcamImage">
     <property name="geometry">
      <rect>
-      <x>560</x>
-      <y>100</y>
+      <x>670</x>
+      <y>70</y>
       <width>400</width>
       <height>400</height>
      </rect>
@@ -146,8 +158,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_postureImage">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>100</y>
+      <x>140</x>
+      <y>90</y>
       <width>400</width>
       <height>400</height>
      </rect>
@@ -162,6 +174,33 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
     </property>
     <property name="scaledContents">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QPlainTextEdit" name="txt_TriggeredAlerts">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>570</y>
+      <width>511</width>
+      <height>221</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_Alert">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>520</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>Alerts</string>
     </property>
    </widget>
   </widget>
