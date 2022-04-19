@@ -297,6 +297,19 @@ def createNewFeedbackLogs(error_list_logs):
         print(error)
 
 
+# ALON - to change name
+def getImageForFeedback(feedback_id):
+    try:
+        cur = con.cursor()
+        cur.execute('''select s.image from stage_images as s
+            join feedbacks as f on s.exercise_id = f.exercise_id where f.feedback_id = %s
+            limit 1''', (feedback_id,))
+        res = cur.fetchall()
+        cur.close()
+        return res[0][0]
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
 # QUERY 23: Get exercise
 def getExercise(eid):
     cur = con.cursor()
@@ -339,3 +352,12 @@ def modifyExercise(exercise):
     con.commit()
     cur.close()
     return True
+
+
+# QUERY 27: get all instructions
+def getAllInstructions():
+    cur = con.cursor()
+    sql = '''select * FROM instructions'''
+    cur.execute(sql)
+    res = cur.fetchall()
+    return res

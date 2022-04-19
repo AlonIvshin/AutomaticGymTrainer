@@ -1,11 +1,15 @@
 import threading
 
+import requests
+from PyQt5.QtGui import QImage, QPixmap
+
 from Utils import DBConnection
 from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView
 from numpy.core.defchararray import isnumeric
 
 from WatchExerciseInstructions import WatchExerciseInstructions
+from score import FeedbackScreen
 from workoutEstimation import EstimationScreen, WorkoutEstimationThread
 from ClassObjects.Feedback import Feedback,FeedbackHistory
 
@@ -113,10 +117,18 @@ class App(QMainWindow):
             score = getattr(self.ui, 'lbl_score{}'.format(index + 1))
             img = getattr(self.ui, 'image{}'.format(index + 1))
 
+            img.mousePressEvent = (lambda x: self.doubleClicked_Image(allfeedbacks[index].feedback_id))
+
             name.setText(str(feed.exercise_name))
             reps.setText("Number of reps: " + str(feed.reps))
             date.setText(str(feed.date))
             score.setText(setAmericanScore(feed.score))
+
+            img.setScaledContents(True)
+            image = QImage()
+            image.loadFromData(requests.get(DBConnection.getImageForFeedback(feed.feedback_id)).content)
+            img.setPixmap(QPixmap(image))
+
 
             name.show()
             reps.show()
@@ -124,12 +136,20 @@ class App(QMainWindow):
             img.show()
             score.show()
 
+            self.bt_watch_2.clicked.connect(self.doubleClicked_Image)
+
+    def doubleClicked_Image(self):
+        feedback_id = 14
+        score = FeedbackScreen(str(feedback_id), self.widget)
+        self.widget.addWidget(score)
+        self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
+
     def doubleClicked_table(self):
         index = self.tb_ce.currentIndex()
-        newIndex = self.tb_ce.model().index(index.row(), 0)
-        newIndex2 = self.tb_ce.model().index(index.row(), 1)
-        eid = self.tb_ce.model().data(newIndex)  # we can pass eid to the model
-        txt = self.tb_ce.model().data(newIndex2)
+        newIndex = self.tb_ce.exerciseModel().index(index.row(), 0)
+        newIndex2 = self.tb_ce.exerciseModel().index(index.row(), 1)
+        eid = self.tb_ce.exerciseModel().exerciseData(newIndex)  # we can pass eid to the model
+        txt = self.tb_ce.exerciseModel().exerciseData(newIndex2)
         self.i_eid.setText(eid)
         self.lbl_chosen.setText(txt + " is chosen")
         self.lbl_chosen.show()

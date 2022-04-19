@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
-    <height>800</height>
+    <width>1222</width>
+    <height>859</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -469,16 +469,6 @@ font: 75 36pt &quot;MS Shell Dlg 2&quot;;</string>
          </property>
         </column>
        </widget>
-       <widget class="QOpenGLWidget" name="image3">
-        <property name="geometry">
-         <rect>
-          <x>930</x>
-          <y>250</y>
-          <width>161</width>
-          <height>151</height>
-         </rect>
-        </property>
-       </widget>
        <widget class="QLabel" name="lbl_reps2">
         <property name="geometry">
          <rect>
@@ -494,16 +484,6 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
         </property>
         <property name="text">
          <string>total reps</string>
-        </property>
-       </widget>
-       <widget class="QOpenGLWidget" name="image1">
-        <property name="geometry">
-         <rect>
-          <x>30</x>
-          <y>250</y>
-          <width>161</width>
-          <height>151</height>
-         </rect>
         </property>
        </widget>
        <widget class="QLabel" name="label_10">
@@ -523,16 +503,6 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
          <string>More of your workouts:</string>
         </property>
        </widget>
-       <widget class="QOpenGLWidget" name="image2">
-        <property name="geometry">
-         <rect>
-          <x>470</x>
-          <y>250</y>
-          <width>161</width>
-          <height>151</height>
-         </rect>
-        </property>
-       </widget>
        <widget class="QLabel" name="label">
         <property name="geometry">
          <rect>
@@ -546,7 +516,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
          <string notr="true">font: 75 36pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
         </property>
         <property name="text">
-         <string>Your recent workouts</string>
+         <string>Your recently workouts</string>
         </property>
        </widget>
        <widget class="QLabel" name="lbl_reps1">
@@ -633,6 +603,45 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
         </property>
         <property name="text">
          <string>total reps</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="image1">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>250</y>
+          <width>161</width>
+          <height>151</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>IMAGE</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="image2">
+        <property name="geometry">
+         <rect>
+          <x>470</x>
+          <y>250</y>
+          <width>161</width>
+          <height>151</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>IMAGE</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="image3">
+        <property name="geometry">
+         <rect>
+          <x>930</x>
+          <y>250</y>
+          <width>161</width>
+          <height>151</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>IMAGE</string>
         </property>
        </widget>
       </widget>
