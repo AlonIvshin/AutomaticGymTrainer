@@ -17,6 +17,10 @@ class getInstanceDBConnection:
 con = getInstanceDBConnection().getConnectionInstance()
 
 
+def closeConnection():
+    con.close()
+
+
 def getAllExerciseInstructionData(exerciseId):
     cur = con.cursor()
     cur.execute('''select e.exercise_instruction_id,e.instruction_id,e.alert_id,e.deviation_positive,e.deviation_negative,
@@ -196,7 +200,7 @@ def getExerciseDescription(exercise_id):
 
 
 # QUERY 16: get feedback score
-def getFeedbackScore(feedback_id): # OFIR
+def getFeedbackScore(feedback_id):  # OFIR
     try:
         cur = con.cursor()
         cur.execute(f"select score from feedbacks where feedback_id = {feedback_id};")
@@ -293,5 +297,45 @@ def createNewFeedbackLogs(error_list_logs):
         print(error)
 
 
-def closeConnection():
-    con.close()
+# QUERY 23: Get exercise
+def getExercise(eid):
+    cur = con.cursor()
+    cur.execute(f'''select * from exercises where exercise_id = {eid}''')
+    res = cur.fetchall()
+    cur.close
+    return res
+
+
+# QUERY 24: Insert new exercise
+def addNewExercise(exercise):
+    cur = con.cursor()
+
+    #sql = '''INSERT INTO feedbacks (user_id, exercise_id, date, score, reps) VALUES (%s,%s,%s,%s,%s) RETURNING feedback_id;'''
+
+    sql = f'''INSERT INTO exercises (exercise_name, video, description, num_of_stages, main_target) 
+        VALUES ('{exercise.exercise_name}','{exercise.video}','{exercise.description}','{exercise.num_of_stages}','{exercise.main_target}');'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True  # for successes
+
+
+# QUERY 25: Get max stage instruction in a given exercise
+def getMaxStageInExercise(exercise_id):
+    cur = con.cursor()
+    sql = f'''select max(instruction_stage) from exercises_instructions where exercises_instructions.exercise_id = {exercise_id}; '''
+    cur.execute(sql)
+    res = cur.fetchall()
+    if res[0][0] == None:
+        return 0
+    return res[0][0]
+
+
+# QUERY 26: modify existing exercise
+def modifyExercise(exercise):
+    cur = con.cursor()
+    sql = f'''UPDATE exercises SET exercise_name = '{exercise.exercise_name}', video = '{exercise.video}', description = '{exercise.description}', num_of_stages = '{exercise.num_of_stages}', main_target = '{exercise.main_target}' WHERE exercise_id = {exercise.exercise_id}; '''
+    cur.execute(sql)
+    con.commit()
+    cur.close()
+    return True

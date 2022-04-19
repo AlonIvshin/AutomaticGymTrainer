@@ -493,7 +493,7 @@ class WorkoutEstimationThread(QThread):
 
                 if update_posture_image_flag:
                     # Wrong posture image update
-                    posture_image_to_display = cv2.cvtColor(wrong_posture_image_to_display, cv2.COLOR_BGR2RGB)
+                    posture_image_to_display = wrong_posture_image_to_display
                 else:
                     # Next stage posture
                     posture_image_to_display = stage_images[current_stage + repetition_direction - 1]
