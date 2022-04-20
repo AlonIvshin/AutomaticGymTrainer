@@ -62,6 +62,7 @@ class App(QMainWindow):
         self.lbl_chosen.hide()
 
         #Workout History
+        self.table.doubleClicked.connect(self.doubleClicked_FeedbackTable) # << MEARGE ME 190422
         for num in range(1, 4):
             name = getattr(self.ui, 'lbl_name{}'.format(num))
             reps = getattr(self.ui, 'lbl_reps{}'.format(num))
@@ -117,7 +118,9 @@ class App(QMainWindow):
             score = getattr(self.ui, 'lbl_score{}'.format(index + 1))
             img = getattr(self.ui, 'image{}'.format(index + 1))
 
-            img.mousePressEvent = (lambda x: self.doubleClicked_Image(allfeedbacks[index].feedback_id))
+            # << MEARGE ME 190422
+            #img.mousePressEvent = (lambda x: self.doubleClicked_Image(allfeedbacks[index].feedback_id))
+            # << END MEARGE ME 190422
 
             name.setText(str(feed.exercise_name))
             reps.setText("Number of reps: " + str(feed.reps))
@@ -136,23 +139,37 @@ class App(QMainWindow):
             img.show()
             score.show()
 
-            self.bt_watch_2.clicked.connect(self.doubleClicked_Image)
+        # << MEARGE ME 190422
+           #self.bt_watch_2.clicked.connect(self.doubleClicked_Image)
+        if len(res) > 0:
+            self.image1.mousePressEvent = (lambda x: self.doubleClicked_Image(allfeedbacks[0].feedback_id))
+        if len(res) > 1:
+            self.image2.mousePressEvent = (lambda x: self.doubleClicked_Image(allfeedbacks[1].feedback_id))
+        if len(res) > 2:
+            self.image3.mousePressEvent = (lambda x: self.doubleClicked_Image(allfeedbacks[2].feedback_id))
+            # << MEARGE ME 190422 END
 
-    def doubleClicked_Image(self):
-        feedback_id = 14
+    def doubleClicked_Image(self, feedback_id):
         score = FeedbackScreen(str(feedback_id), self.widget)
         self.widget.addWidget(score)
         self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
 
     def doubleClicked_table(self):
         index = self.tb_ce.currentIndex()
-        newIndex = self.tb_ce.exerciseModel().index(index.row(), 0)
-        newIndex2 = self.tb_ce.exerciseModel().index(index.row(), 1)
-        eid = self.tb_ce.exerciseModel().exerciseData(newIndex)  # we can pass eid to the model
-        txt = self.tb_ce.exerciseModel().exerciseData(newIndex2)
+        newIndex = self.tb_ce.model().index(index.row(), 0) # << MEARGE ME 190422
+        newIndex2 = self.tb_ce.model().index(index.row(), 1)# << MEARGE ME 190422
+        eid = self.tb_ce.model().data(newIndex)  # we can pass eid to the model # << MEARGE ME 190422
+        txt = self.tb_ce.model().data(newIndex2) # << MEARGE ME 190422
         self.i_eid.setText(eid)
         self.lbl_chosen.setText(txt + " is chosen")
         self.lbl_chosen.show()
+
+
+    def doubleClicked_FeedbackTable(self): # << MEARGE ME 190422
+        index = self.table.currentIndex()
+        newIndex = self.table.model().index(index.row(), 0)
+        fid = self.table.model().data(newIndex)  # we can pass eid to the model
+        self.doubleClicked_Image(fid)
 
     def openInstructionsWindow(self):
         if self.i_eid.text() != '':

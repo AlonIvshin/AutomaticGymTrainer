@@ -235,7 +235,7 @@ class WorkoutEstimationThread(QThread):
             cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                         cv2.LINE_AA)  # adding timer text
 
-            ConvertToQtFormat = QImage(camera_image.exerciseData, camera_image.shape[1], camera_image.shape[0],
+            ConvertToQtFormat = QImage(camera_image.data, camera_image.shape[1], camera_image.shape[0],
                                        QImage.Format_RGB888)
             Pic = ConvertToQtFormat.scaled(IMAGE_WIDTH, IMAGE_HEIGHT, Qt.KeepAspectRatio)
             self.CameraImageUpdate.emit(Pic)
@@ -486,7 +486,7 @@ class WorkoutEstimationThread(QThread):
                                           (IMAGE_WIDTH, IMAGE_HEIGHT))
 
                 # Camera image update
-                CameraImagePic = QImage(camera_image.exerciseData, camera_image.shape[1],
+                CameraImagePic = QImage(camera_image.data, camera_image.shape[1],
                                         camera_image.shape[0], QImage.Format_RGB888)
                 # CameraImagePic = ConvertToQtFormat.scaled(600, 600, Qt.KeepAspectRatio)
                 self.CameraImageUpdate.emit(CameraImagePic)
@@ -501,7 +501,7 @@ class WorkoutEstimationThread(QThread):
                 posture_image_to_display = cv2.resize(posture_image_to_display,
                                                       (IMAGE_WIDTH, IMAGE_HEIGHT))
                 posture_image_to_display = cv2.cvtColor(posture_image_to_display, cv2.COLOR_BGR2RGB)
-                posture_image_to_display = QImage(posture_image_to_display.exerciseData,
+                posture_image_to_display = QImage(posture_image_to_display.data,
                                                   posture_image_to_display.shape[1],
                                                   posture_image_to_display.shape[0], QImage.Format_RGB888)
                 self.PostureImageUpdate.emit(posture_image_to_display)
@@ -510,6 +510,7 @@ class WorkoutEstimationThread(QThread):
 
                 if repetition_counter == self.repetition_num:
                     # ToDo: Delete self.score
+                    #       Set when there are no alerts at all
                     exercise_score = max(exercise_score, 0)
                     self.score = exercise_score
                     break
