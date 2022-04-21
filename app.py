@@ -99,6 +99,9 @@ class App(QMainWindow):
             for column_number, data in enumerate(row_data):
                 self.tb_ce.setItem(row_number, column_number, QTableWidgetItem(str(data)))
 
+    def loadMain(self,user_id):
+        self.lbl_workouts_num.setText(str(DBConnection.getWorkoutsQuantity(user_id)) + ' workout sessions')
+        self.lbl_avg.setText(str(DBConnection.getWorkoutsAVG(user_id)))
     def loadDataHistory(self, user_id):
         #workout history
         res = DBConnection.getCurrentUserFeedbacks(user_id)

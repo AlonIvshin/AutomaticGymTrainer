@@ -110,6 +110,19 @@ class AdminApp(QMainWindow):
         self.table_instructionsMngInstructions.clicked.connect(self.manageInstructionsTableClicked)
         self.label_messagesMngInstructions.hide()
 
+        # Tab #5 - Mange Alerts
+        self.loadInstructionsDataForAlerts()
+        self.tb_instructionsMngAlerts.setColumnHidden(0, True)
+        self.tb_instructionsMngAlerts.clicked.connect(self.instructionsAlertsTablePressed)
+        self.tb_instructionsMngAlerts.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
+        self.tb_alertsMngAlerts.clicked.connect(self.alertsTablePressed)
+        self.bt_clearFormMngAlerts.clicked.connect(self.clearLabelsAndTextMngAlerts)
+        self.bt_addAlertMngAlerts.clicked.connect(self.addAlert)
+        self.selected_instructionAlerts_id = -1
+        self.selected_alert_id = -1
+        self.bt_deleteAlertMngAlerts.clicked.connect(self.deleteAlert)
+        self.bt_updateAlertMngAlerts.clicked.connect(self.updateAlert)
+
     # Load image to Tab #2
     def loadCoordinatesImage(self):
         vertexes_image_url = 'https://i.imgur.com/C5eBW20.png'
@@ -214,7 +227,8 @@ class AdminApp(QMainWindow):
         vertex2 = VertexesEnum(self.comboBox_vertex2MngInstructions.currentIndex()).name
         vertex3 = VertexesEnum(self.comboBox_vertex3MngInstructions.currentIndex()).name
 
-        instruction = Instruction(self.selected_instruction_id, vertex1, vertex2, vertex3, self.lineEdit_angleMngInstructions.text()
+        instruction = Instruction(self.selected_instruction_id, vertex1, vertex2, vertex3,
+                                  self.lineEdit_angleMngInstructions.text()
                                   , self.plainTextEdit_descriptionMngInstructions.toPlainText(),
                                   str(self.comboBox_axisMngInstructions.currentText()))
 
@@ -360,6 +374,144 @@ class AdminApp(QMainWindow):
         for item in ['XY', 'XZ', 'YZ']:
             self.comboBox_axisMngInstructions.addItem(item)
 
+    # alon
+    def loadInstructionsDataForAlerts(self):
+        headers = ['', 'Vertex1', 'Vertex2', 'Vertex3', 'Angle', 'Description', 'Axis']
+        self.instructionAlertsData = DBConnection.getAllInstructions()
+        self.instructionAlertsData = sorted(self.instructionAlertsData,
+                                            key=lambda x: x[0])  # Sort data by instruction id
+        self.instructionAlertsModel = TableModel(self.instructionAlertsData)
+        self.instructionAlertsModel.setHeaderList(headers)
+        self.instructionAlerts_proxy_model = QSortFilterProxyModel()
+        self.instructionAlerts_proxy_model.setFilterKeyColumn(-1)  # Search all columns.
+        self.instructionAlerts_proxy_model.setSourceModel(self.instructionAlertsModel)
+        self.instructionAlerts_proxy_model.sort(0, Qt.AscendingOrder)
+        self.tb_instructionsMngAlerts.setModel(self.instructionAlerts_proxy_model)
+        # You can choose the type of search by connecting to a different slot here.
+        # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
+        # self.lineEdit_searchBarManageInstructions.textChanged.connect(self.instruction_proxy_model.setFilterFixedString)
+
+    def instructionsAlertsTablePressed(self):
+        index = self.tb_instructionsMngAlerts.currentIndex()
+        newIndex = self.tb_instructionsMngAlerts.model().index(index.row(), 0)
+
+        self.selected_instructionAlerts_id = self.tb_instructionsMngAlerts.model().data(
+            newIndex)  # we can pass eid to the model
+        self.lineEdit_instructionIdMngAlerts.setText(str(self.selected_instructionAlerts_id))
+        # self.label_messagesMngInstructions.show()
+
+        self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
+        self.tb_alertsMngAlerts.setColumnHidden(0, True)
+        self.tb_alertsMngAlerts.setColumnHidden(1, True)
+        self.tb_alertsMngAlerts.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.tb_alertsMngAlerts.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+
+    def loadInstructionsAlerts(self, instruction_id):
+        headers = ['', '', 'Text', 'Link']
+        self.alertsData = DBConnection.getAlertsOfInstruction(instruction_id)
+        self.alertsData = sorted(self.alertsData, key=lambda x: x[0])  # Sort data by instruction id
+        self.alertsModel = TableModel(self.alertsData)
+        self.alertsModel.setHeaderList(headers)
+        self.alerts_proxy_model = QSortFilterProxyModel()
+        self.alerts_proxy_model.setFilterKeyColumn(-1)  # Search all columns.
+        self.alerts_proxy_model.setSourceModel(self.alertsModel)
+        self.alerts_proxy_model.sort(0, Qt.AscendingOrder)
+        self.tb_alertsMngAlerts.setModel(self.alerts_proxy_model)
+        # You can choose the type of search by connecting to a different slot here.
+        # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
+        # self.lineEdit_searchBarManageInstructions.textChanged.connect(self.instruction_proxy_model.setFilterFixedString)
+
+    def alertsTablePressed(self):
+        index = self.tb_alertsMngAlerts.currentIndex()
+        newIndex = self.tb_alertsMngAlerts.model().index(index.row(), 2)
+        newIndex2 = self.tb_alertsMngAlerts.model().index(index.row(), 3)
+        newIndex3 = self.tb_alertsMngAlerts.model().index(index.row(), 0)
+
+        self.selected_alerts_txt = self.tb_alertsMngAlerts.model().data(
+            newIndex)
+        self.selected_alerts_link = self.tb_alertsMngAlerts.model().data(
+            newIndex2)
+        self.selected_alert_id = self.tb_alertsMngAlerts.model().data(
+            newIndex3)
+        self.lineEdit_alertTxtMngAlerts.setText(str(self.selected_alerts_txt))
+        self.lineEdit_LinkMngAlerts.setText(str(self.selected_alerts_link))
+
+    def clearLabelsAndTextMngAlerts(self):
+        self.lineEdit_instructionIdMngAlerts.setText('')
+        self.lineEdit_alertTxtMngAlerts.setText('')
+        self.lineEdit_LinkMngAlerts.setText('')
+        self.tb_instructionsMngAlerts.clearSelection()
+        self.tb_alertsMngAlerts.clearSelection()
+        self.selected_instructionAlerts_id = -1
+        self.label_messagesMngAlerts.hide()
+        self.alerts_proxy_model.setSourceModel(None)
+        self.loadInstructionsDataForAlerts()
+
+    def checkEmptyFieldMngAlert(self):
+        return self.lineEdit_instructionIdMngAlerts.text() == '' or self.lineEdit_alertTxtMngAlerts.text() == '' or self.lineEdit_LinkMngAlerts.text() == ''
+
+    def addAlert(self):
+        if self.checkEmptyFieldMngAlert():
+            self.label_messagesMngAlerts.setText("Make sure all fields are filled")
+            self.label_messagesMngAlerts.show()
+            return
+        if not self.lineEdit_instructionIdMngAlerts.text().isdigit():
+            self.label_messagesMngAlerts.setText("Instruction id should be a number")
+            self.label_messagesMngAlerts.show()
+            return
+        if DBConnection.checkIfInstructionExistAlerts(self.selected_instructionAlerts_id):
+            self.label_messagesMngAlerts.setText("Wrong instruction id make sure this number exist!")
+            self.label_messagesMngAlerts.show()
+            return
+        if DBConnection.checkIfAlertExist(self.selected_instructionAlerts_id,self.lineEdit_alertTxtMngAlerts.text(), self.lineEdit_LinkMngAlerts.text()):
+            self.label_messagesMngAlerts.setText("Alert with same text and link for this instruction already exist!")
+            self.label_messagesMngAlerts.show()
+            return
+        res = DBConnection.addNewAlert(self.selected_instructionAlerts_id,
+                                       self.lineEdit_alertTxtMngAlerts.text(), self.lineEdit_LinkMngAlerts.text())
+        if res:
+            self.label_messagesMngAlerts.setText("Alert added")
+            self.label_messagesMngAlerts.show()
+            self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
+
+    def deleteAlert(self):
+        if self.selected_alert_id == -1:
+            self.label_messagesMngAlerts.setText("Please select alert from the second table")
+            self.label_messagesMngAlerts.show()
+            return
+        res = DBConnection.delAlert(self.selected_alert_id)
+        if res:
+            self.label_messagesMngAlerts.setText("Alert deleted")
+            self.label_messagesMngAlerts.show()
+            self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
+
+    def updateAlert(self):
+        if self.selected_alert_id == -1:
+            self.label_messagesMngAlerts.setText("Please select alert from the second table")
+            self.label_messagesMngAlerts.show()
+            return
+        if self.checkEmptyFieldMngAlert():
+            self.label_messagesMngAlerts.setText("Make sure all fields are filled")
+            self.label_messagesMngAlerts.show()
+            return
+        if not self.lineEdit_instructionIdMngAlerts.text().isdigit():
+            self.label_messagesMngAlerts.setText("Instruction id should be a number")
+            self.label_messagesMngAlerts.show()
+            return
+        if DBConnection.checkIfInstructionExistAlerts(self.selected_instructionAlerts_id):
+            self.label_messagesMngAlerts.setText("Wrong instruction id make sure this number exist!")
+            self.label_messagesMngAlerts.show()
+            return
+        if DBConnection.checkIfAlertExist(self.selected_instructionAlerts_id, self.lineEdit_alertTxtMngAlerts.text(),
+                                          self.lineEdit_LinkMngAlerts.text()):
+            self.label_messagesMngAlerts.setText("Alert with same text and link for this instruction already exist!")
+            self.label_messagesMngAlerts.show()
+            return
+        res = DBConnection.modifyAlert(self.selected_alert_id, self.lineEdit_alertTxtMngAlerts.text(), self.lineEdit_LinkMngAlerts.text())
+        if res:
+            self.label_messagesMngAlerts.setText("Alert Updated")
+            self.label_messagesMngAlerts.show()
+            self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
 
 '''def openInstructionsWindow(self):
     if self.i_eid.text() != '':

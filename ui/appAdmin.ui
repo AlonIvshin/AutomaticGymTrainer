@@ -45,7 +45,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab_landingPage">
        <attribute name="title">
@@ -77,7 +77,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
          <rect>
           <x>90</x>
           <y>350</y>
-          <width>301</width>
+          <width>351</width>
           <height>61</height>
          </rect>
         </property>
@@ -899,34 +899,11 @@ background-color: rgb(205, 236, 255);</string>
        <attribute name="title">
         <string>Manage Alerts</string>
        </attribute>
-       <widget class="QTableWidget" name="tableWidget">
-        <property name="geometry">
-         <rect>
-          <x>420</x>
-          <y>240</y>
-          <width>256</width>
-          <height>192</height>
-         </rect>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <column>
-         <property name="text">
-          <string>Description</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Image link</string>
-         </property>
-        </column>
-       </widget>
        <widget class="QLabel" name="label">
         <property name="geometry">
          <rect>
-          <x>390</x>
-          <y>90</y>
+          <x>20</x>
+          <y>20</y>
           <width>391</width>
           <height>71</height>
          </rect>
@@ -938,39 +915,27 @@ background-color: rgb(205, 236, 255);</string>
          <string>Manage alerts</string>
         </property>
        </widget>
-       <widget class="QComboBox" name="comboBox_4">
-        <property name="geometry">
-         <rect>
-          <x>570</x>
-          <y>190</y>
-          <width>101</width>
-          <height>31</height>
-         </rect>
-        </property>
-        <item>
-         <property name="text">
-          <string>Instruction</string>
-         </property>
-        </item>
-       </widget>
        <widget class="QLabel" name="label_4">
         <property name="geometry">
          <rect>
-          <x>430</x>
-          <y>180</y>
-          <width>161</width>
+          <x>30</x>
+          <y>90</y>
+          <width>191</width>
           <height>51</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
         </property>
         <property name="text">
          <string>Choose instruction</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="bt_delete_7">
+       <widget class="QPushButton" name="bt_addAlertMngAlerts">
         <property name="geometry">
          <rect>
-          <x>420</x>
-          <y>510</y>
+          <x>410</x>
+          <y>610</y>
           <width>181</width>
           <height>41</height>
          </rect>
@@ -984,11 +949,11 @@ background-color: rgb(205, 236, 255);</string>
          <string>Add alert</string>
         </property>
        </widget>
-       <widget class="QPushButton" name="bt_delete_9">
+       <widget class="QPushButton" name="bt_deleteAlertMngAlerts">
         <property name="geometry">
          <rect>
-          <x>420</x>
-          <y>570</y>
+          <x>410</x>
+          <y>670</y>
           <width>181</width>
           <height>41</height>
          </rect>
@@ -1002,24 +967,27 @@ background-color: rgb(205, 236, 255);</string>
          <string>Delete alert</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_5">
+       <widget class="QLabel" name="label_messagesMngAlerts">
         <property name="geometry">
          <rect>
-          <x>420</x>
-          <y>620</y>
-          <width>91</width>
+          <x>30</x>
+          <y>730</y>
+          <width>841</width>
           <height>31</height>
          </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 10pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
         </property>
         <property name="text">
          <string>messages</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_6">
+       <widget class="QLineEdit" name="lineEdit_LinkMngAlerts">
         <property name="geometry">
          <rect>
-          <x>430</x>
-          <y>480</y>
+          <x>30</x>
+          <y>690</y>
           <width>158</width>
           <height>20</height>
          </rect>
@@ -1031,11 +999,11 @@ background-color: rgb(205, 236, 255);</string>
          <string>Link</string>
         </property>
        </widget>
-       <widget class="QLineEdit" name="lineEdit_5">
+       <widget class="QLineEdit" name="lineEdit_alertTxtMngAlerts">
         <property name="geometry">
          <rect>
-          <x>430</x>
-          <y>440</y>
+          <x>30</x>
+          <y>650</y>
           <width>158</width>
           <height>20</height>
          </rect>
@@ -1044,7 +1012,101 @@ background-color: rgb(205, 236, 255);</string>
          <string/>
         </property>
         <property name="placeholderText">
-         <string>Description</string>
+         <string>alert's text</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_instructionIdMngAlerts">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>610</y>
+          <width>158</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string>instruction id</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bt_updateAlertMngAlerts">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>610</y>
+          <width>181</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+        </property>
+        <property name="text">
+         <string>Update alert</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bt_clearFormMngAlerts">
+        <property name="geometry">
+         <rect>
+          <x>210</x>
+          <y>670</y>
+          <width>181</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+        </property>
+        <property name="text">
+         <string>Clear Form</string>
+        </property>
+       </widget>
+       <widget class="QTableView" name="tb_instructionsMngAlerts">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>140</y>
+          <width>1131</width>
+          <height>192</height>
+         </rect>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+       </widget>
+       <widget class="QTableView" name="tb_alertsMngAlerts">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>390</y>
+          <width>1131</width>
+          <height>192</height>
+         </rect>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_6">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>340</y>
+          <width>431</width>
+          <height>51</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 14pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Choose Alert to edit or create a new one:</string>
         </property>
        </widget>
       </widget>

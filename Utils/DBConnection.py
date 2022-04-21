@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="AutomaticGymTrainerLocal",
+                database="mytrainer",
                 user="postgres",
-                password="012net")
+                password="root")
         return self.con
 
 
@@ -310,6 +310,7 @@ def getImageForFeedback(feedback_id):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+
 # QUERY 23: Get exercise
 def getExercise(eid):
     cur = con.cursor()
@@ -360,6 +361,7 @@ def getAllInstructions():
     cur.close()
     return res
 
+
 # QUERY 28: get specific instruction
 def getInstruction(instruction_id):
     cur = con.cursor()
@@ -368,6 +370,7 @@ def getInstruction(instruction_id):
     res = cur.fetchall()
     cur.close()
     return res
+
 
 # QUERY 29: get specific instruction
 def addNewInstruction(instruction):
@@ -403,3 +406,64 @@ def modifyExercise(instruction):
     cur.close()
     return True
 
+
+# QUERY 32: get all the alerts of the desired instruction
+def getAlertsOfInstruction(instruction_id):
+    cur = con.cursor()
+    sql = f'''select * from alerts where instruction_id = {instruction_id}'''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close()
+    return res
+
+
+# QUERY 33: Adds new alert
+def addNewAlert(instruction_id, txt, link):
+    cur = con.cursor()
+    sql = f'''INSERT INTO alerts (instruction_id, alert_text, alert_wrong_posture_image_link) 
+           VALUES ('{instruction_id}','{txt}','{link}');'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True  # for successes
+
+
+# QUERY 34: checks if this instruction exist
+def checkIfInstructionExistAlerts(instruction_id):
+    cur = con.cursor()
+    sql = f'''SELECT * from instructions where instruction_id='{instruction_id}'  '''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close
+    return res == []
+
+
+# QUERY 35: checks if this alert exist for particular instruction
+def checkIfAlertExist(instruction_id, alert_text, link):
+    cur = con.cursor()
+    sql = f'''SELECT * from alerts where instruction_id='{instruction_id}' and alert_text='{alert_text}' and 
+        alert_wrong_posture_image_link ='{link}' '''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close
+    return res != []
+
+
+# QUERY 37 drops row from alerts
+def delAlert(alert_id):
+    cur = con.cursor()
+    sql = f'''DELETE FROM alerts WHERE alert_id = '{alert_id}';'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True  # for successes
+
+
+# QUERY 38 update alert
+def modifyAlert(alert_id, alert_text, link):
+    cur = con.cursor()
+    sql = f'''UPDATE alerts SET alert_text='{alert_text}', alert_wrong_posture_image_link='{link}' WHERE alert_id = '{alert_id}'; '''
+    cur.execute(sql)
+    con.commit()
+    cur.close()
+    return True

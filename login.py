@@ -4,6 +4,7 @@ from createacc import CreateAcc
 from Utils import DBConnection
 from ClassObjects.User import User
 from app import App
+from appAdmin import AdminApp
 from PyQt5 import QtWidgets
 
 
@@ -57,9 +58,17 @@ class Login(QDialog):
             # creating instance of current_user and open main app
             res = DBConnection.getUser(self.i_email.text())
             current_user = User(*res[0])
-            myapp = App(current_user, self.widget)
-            self.widget.addWidget(myapp)
-            self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
+            if current_user.type == 'trainee':
+                myapp = App(current_user, self.widget)
+                self.widget.addWidget(myapp)
+                self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
+            elif current_user.type == 'admin':
+                myapp = AdminApp(current_user, self.widget)
+                self.widget.addWidget(myapp)
+                self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
+            else:
+                print("Login Error")
+                exit(1)
 
             #myapp = App(current_user)
             #myapp.show()
