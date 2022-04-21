@@ -82,6 +82,7 @@ class EstimationScreen(QMainWindow):
 
     def ScoreScreenReadyUpdateSlot(self, feedback_id):
         FeedbackScreen_holder = FeedbackScreen(feedback_id=str(feedback_id), widget=self.widget)
+        self.widget.removeWidget(self.widget.currentWidget())
         self.widget.addWidget(FeedbackScreen_holder)
         self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
 

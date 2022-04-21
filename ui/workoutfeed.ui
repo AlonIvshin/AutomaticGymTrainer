@@ -21,8 +21,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repCurrent">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>560</y>
+      <x>590</x>
+      <y>480</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -44,37 +44,11 @@ color: rgb(255, 255, 255);</string>
      <string>Rep Counter</string>
     </property>
    </widget>
-   <widget class="QLabel" name="lbl_userErrors">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>20</y>
-      <width>291</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>MS Shell Dlg 2</family>
-      <pointsize>15</pointsize>
-      <weight>50</weight>
-      <italic>false</italic>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
-color: rgb(255, 255, 255);</string>
-    </property>
-    <property name="text">
-     <string>Label to be texted</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="lbl_repCurrentValue">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>560</y>
+      <x>740</x>
+      <y>480</y>
       <width>121</width>
       <height>41</height>
      </rect>
@@ -86,14 +60,14 @@ color: rgb(255, 255, 255);</string>
      </font>
     </property>
     <property name="text">
-     <string/>
+     <string>REP VAL</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_repGoalValue">
     <property name="geometry">
      <rect>
-      <x>780</x>
-      <y>600</y>
+      <x>1030</x>
+      <y>480</y>
       <width>121</width>
       <height>41</height>
      </rect>
@@ -105,14 +79,14 @@ color: rgb(255, 255, 255);</string>
      </font>
     </property>
     <property name="text">
-     <string/>
+     <string>REP GOAL</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_repGoal">
     <property name="geometry">
      <rect>
-      <x>640</x>
-      <y>600</y>
+      <x>910</x>
+      <y>480</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -134,34 +108,13 @@ color: rgb(255, 255, 255);</string>
      <string>Rep Goal</string>
     </property>
    </widget>
-   <widget class="QLabel" name="lbl_webcamImage">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>70</y>
-      <width>400</width>
-      <height>400</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>16</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Im Here</string>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="QLabel" name="lbl_postureImage">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>90</y>
-      <width>400</width>
-      <height>400</height>
+      <x>10</x>
+      <y>50</y>
+      <width>585</width>
+      <height>421</height>
      </rect>
     </property>
     <property name="font">
@@ -170,7 +123,7 @@ color: rgb(255, 255, 255);</string>
      </font>
     </property>
     <property name="text">
-     <string>Im Here</string>
+     <string>Rulla</string>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -179,18 +132,21 @@ color: rgb(255, 255, 255);</string>
    <widget class="QPlainTextEdit" name="txt_TriggeredAlerts">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>570</y>
-      <width>511</width>
+      <x>10</x>
+      <y>540</y>
+      <width>1171</width>
       <height>221</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;color:rgb(186, 0, 0)</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_Alert">
     <property name="geometry">
      <rect>
-      <x>110</x>
-      <y>520</y>
+      <x>10</x>
+      <y>500</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -201,6 +157,27 @@ color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>Alerts</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_webcamImage">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>50</y>
+      <width>585</width>
+      <height>421</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>16</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>MyCam</string>
+    </property>
+    <property name="scaledContents">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>

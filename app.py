@@ -132,7 +132,6 @@ class App(QMainWindow):
             image.loadFromData(requests.get(DBConnection.getImageForFeedback(feed.feedback_id)).content)
             img.setPixmap(QPixmap(image))
 
-
             name.show()
             reps.show()
             date.show()

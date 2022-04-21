@@ -322,9 +322,6 @@ def getExercise(eid):
 # QUERY 24: Insert new exercise
 def addNewExercise(exercise):
     cur = con.cursor()
-
-    #sql = '''INSERT INTO feedbacks (user_id, exercise_id, date, score, reps) VALUES (%s,%s,%s,%s,%s) RETURNING feedback_id;'''
-
     sql = f'''INSERT INTO exercises (exercise_name, video, description, num_of_stages, main_target) 
         VALUES ('{exercise.exercise_name}','{exercise.video}','{exercise.description}','{exercise.num_of_stages}','{exercise.main_target}');'''
     cur.execute(sql)
@@ -360,4 +357,49 @@ def getAllInstructions():
     sql = '''select * FROM instructions'''
     cur.execute(sql)
     res = cur.fetchall()
+    cur.close()
     return res
+
+# QUERY 28: get specific instruction
+def getInstruction(instruction_id):
+    cur = con.cursor()
+    sql = f'''select * FROM instructions where instruction_id = {instruction_id}'''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close()
+    return res
+
+# QUERY 29: get specific instruction
+def addNewInstruction(instruction):
+    cur = con.cursor()
+    sql = f'''INSERT INTO instructions (vertex1, vertex2, vertex3, angle, description,instruction_axis) 
+           VALUES ('{instruction.vertex1}','{instruction.vertex2}','{instruction.vertex3}','{instruction.angle}','{instruction.description}','{instruction.instructionAxis}');'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True  # for successes
+
+
+# QUERY 30: check if instruction exist
+def checkIfInstructionExist(instruction):
+    cur = con.cursor()
+    sql = f'''SELECT * from instructions where vertex1='{instruction.vertex1}' and vertex2='{instruction.vertex2}' and 
+    vertex3 ='{instruction.vertex3}' and angle = '{instruction.angle}' and description = '{instruction.description}' and
+    instruction_axis = '{instruction.instructionAxis}' '''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close
+    return res != []
+
+
+# QUERY 31: modify existing instruction
+def modifyExercise(instruction):
+    cur = con.cursor()
+    sql = f'''UPDATE instructions SET vertex1='{instruction.vertex1}', vertex2='{instruction.vertex2}', 
+    vertex3 ='{instruction.vertex3}', angle = '{instruction.angle}', description = '{instruction.description}',
+    instruction_axis = '{instruction.instructionAxis}' WHERE instruction_id = {instruction.instructionId}; '''
+    cur.execute(sql)
+    con.commit()
+    cur.close()
+    return True
+

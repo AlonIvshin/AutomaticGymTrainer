@@ -1,19 +1,16 @@
-import threading
-import urllib
-
 import PyQt5.QtCore as QtCore
 import cv2
+import mediapipe.python.solutions.pose_connections
 from PyQt5.QtCore import QAbstractTableModel, QSortFilterProxyModel
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtWidgets import QMainWindow, QHeaderView, QComboBox
+from PyQt5.uic import loadUi
 
 from ClassObjects.Exercise import Exercise
+from ClassObjects.Instruction import Instruction
 from Utils import DBConnection, WorkoutEstimationFunctions
-from PyQt5.uic import loadUi
-from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem, QHeaderView, QTableView, QLineEdit, QWidget, QComboBox,QLabel
-from numpy.core.defchararray import isnumeric
-
-from workoutEstimation import EstimationScreen, WorkoutEstimationThread
-from PyQt5.QtCore import Qt
+from mediapipe.python.solutions.pose import PoseLandmark as VertexesEnum
 
 
 def setAmericanScore(num):
@@ -77,40 +74,53 @@ class AdminApp(QMainWindow):
         # Tab #1 - Greetings
         self.lbl_welcome.setText('Welcome ' + current_user.first_name + ' ' + current_user.last_name)  # greeting user
 
-        # Tab #2 - Exercise operations
-        self.bt_addExerciseMngExercises.clicked.connect(self.addExercise)
-        self.bt_deleteExerciseMngExercises.clicked.connect(self.deleteExercise)
-        self.bt_clearFormMngExercises.clicked.connect(self.clearLabelsAndTextMngExercise)
-        self.bt_saveChangesMngExercises.clicked.connect(self.saveEditedExercise)
+        # Tab #2
+        '''
+        1. Set functions
+        2. Load Tables and set table view
+        3. Set labels and exercise id
+        '''
+        self.bt_addExerciseMngExercises.clicked.connect(self.addExercise)  # Finished
+        self.bt_deleteExerciseMngExercises.clicked.connect(self.deleteExercise)  # ToDo
+        self.bt_clearFormMngExercises.clicked.connect(self.clearLabelsAndTextMngExercise)  # Finished
+        self.bt_saveChangesMngExercises.clicked.connect(self.saveEditedExercise)  # Finished
+
         self.loadExercisesData()
-        self.table_exercisesMngExercises.setColumnWidth(1, 80)
-        self.table_exercisesMngExercises.setColumnWidth(0, 10)
-        self.table_exercisesMngExercises.setColumnWidth(2, 200)
+        self.selected_exercise_id = -1
+
         self.table_exercisesMngExercises.setColumnHidden(0, True)
         self.table_exercisesMngExercises.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.table_exercisesMngExercises.clicked.connect(self.manageExerciseTableClicked)
-        self.workoutEstimationWindow = None
         self.label_messagesMngExercises.hide()
-        self.selected_exercise_id = -1
 
         # Tab #3 - Manage instructions
-        # Set label image
+        self.loadCoordinatesImage()  # load image
+        self.initManageInstructionsComboBoxs()  # set combo boxes
+
+        self.bt_addInstructionMngInstructions.clicked.connect(self.addInstruction)  # Finished
+        # self.bt_deleteInstructionMngInstructions.clicked.connect(self.deleteInstruction)
+        self.bt_clearInstructionMngInstructions.clicked.connect(self.clearLabelsAndTextMngInstructions)  # Finished
+        self.bt_saveInstructionMngInstructions.clicked.connect(self.saveEditedInstruction)  # Finished
+
+        self.loadInstructionsData()
+        self.selected_instruction_id = -1
+
+        self.table_instructionsMngInstructions.setColumnHidden(0, True)
+        self.table_instructionsMngInstructions.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.table_instructionsMngInstructions.clicked.connect(self.manageInstructionsTableClicked)
+        self.label_messagesMngInstructions.hide()
+
+    # Load image to Tab #2
+    def loadCoordinatesImage(self):
         vertexes_image_url = 'https://i.imgur.com/C5eBW20.png'
         vertexes_image = WorkoutEstimationFunctions.getImageFromLink(vertexes_image_url)
-        vertexes_image = cv2.resize(vertexes_image, (400, 400))
+        vertexes_image = cv2.resize(vertexes_image, (528, 300))
         vertexes_image = cv2.cvtColor(vertexes_image, cv2.COLOR_BGR2RGB)
         vertexes_image = QImage(vertexes_image,
                                 vertexes_image.shape[1],
                                 vertexes_image.shape[0], QImage.Format_RGB888)
         self.label_bodykeypointsMngInstructions.setPixmap(QPixmap.fromImage(vertexes_image))
         self.label_bodykeypointsMngInstructions.show()
-
-        self.bt_addInstructionMngInstructions.clicked.connect(self.addInstruction)
-        # self.bt_deleteInstructionMngInstructions.clicked.connect(self.deleteExercise)
-        self.bt_clearInstructionMngInstructions.clicked.connect(self.clearLabelsAndTextMngInstructions)
-        # self.bt_saveInstructionMngInstructions.clicked.connect(self.saveEditedExercise)
-        self.loadInstructionData()
-        self.selected_instruction_id = -1
 
     def loadExercisesData(self):
         headers = ['', 'Exercise Name', 'Main body part']
@@ -127,12 +137,10 @@ class AdminApp(QMainWindow):
         # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
         self.lineEdit_searchBarMngExercises.textChanged.connect(self.exercise_proxy_model.setFilterFixedString)
 
-    def loadInstructionData(self):
-        headers = ['','Vertex1', 'Vertex2', 'Vertex3', 'Angle', 'Description', 'Axis']
+    def loadInstructionsData(self):
+        headers = ['', 'Vertex1', 'Vertex2', 'Vertex3', 'Angle', 'Description', 'Axis']
         self.instructionData = DBConnection.getAllInstructions()
-        self.instructionData = sorted(self.instructionData, key=lambda x: x[1])  # Sort data by exercise name
-        for index in range(len(self.instructionData)): # to remove instruction index duplication in the table
-            self.instructionData[index] = self.instructionData[index][1:]
+        self.instructionData = sorted(self.instructionData, key=lambda x: x[0])  # Sort data by instruction id
         self.instructionModel = TableModel(self.instructionData)
         self.instructionModel.setHeaderList(headers)
         self.instruction_proxy_model = QSortFilterProxyModel()
@@ -157,16 +165,19 @@ class AdminApp(QMainWindow):
         self.lineEdit_angleMngInstructions.setText('')
         self.plainTextEdit_descriptionMngInstructions.clear()
         # How to set default value for combo box
-        self.comboBox_vertex1MngInstructions.setText('')
-        self.comboBox_vertex2MngInstructions.setText('')
-        self.comboBox_vertex3MngInstructions.setText('')
-        self.comboBox_axisMngInstructions.setText('')
+        self.comboBox_vertex1MngInstructions.setCurrentIndex(0)
+        self.comboBox_vertex2MngInstructions.setCurrentIndex(0)
+        self.comboBox_vertex3MngInstructions.setCurrentIndex(0)
+        self.comboBox_axisMngInstructions.setCurrentIndex(0)
         self.label_messagesMngInstructions.setText('')
         self.selected_instruction_id = -1
 
     # Check if there are any empty fields
     def checkEmptyFieldMngExercise(self):
         return self.lineEdit_enameMngExercises.text() == '' or self.lineEdit_videolinkMngExercises.text() == '' or self.plainTextEdit_descriptionMngExercises.toPlainText() == '' or self.lineEdit_stagenumMngExercises.text() == '' or self.lineEdit_mainTargetMngExercises.text() == ''
+
+    def checkEmptyFieldMngInstruction(self):
+        return self.lineEdit_angleMngInstructions.text() == '' or self.plainTextEdit_descriptionMngInstructions.toPlainText() == ''
 
     # Save changes done with edit exercise
     def saveEditedExercise(self):
@@ -186,22 +197,91 @@ class AdminApp(QMainWindow):
                                 self.lineEdit_stagenumMngExercises.text()
                                 , self.lineEdit_mainTargetMngExercises.text())
             self.exercise = exercise
-
             res = DBConnection.modifyExercise(exercise)
+            self.label_messagesMngExercises.setText("Exercise updated")
+            self.label_messagesMngExercises.show()
+            self.loadExercisesData()
 
-    def editExercise(self):
-        if self.selected_exercise_id == -1:
+    def saveEditedInstruction(self):
+        if self.selected_instruction_id == -1:
+            self.label_messagesMngInstructions.setText("Please choose instruction")
+            self.label_messagesMngInstructions.show()
+            return
+        if self.checkEmptyFieldMngInstruction():
+            self.label_messagesMngInstructions.setText("Make sure all fields are filled")
+
+        vertex1 = VertexesEnum(self.comboBox_vertex1MngInstructions.currentIndex()).name
+        vertex2 = VertexesEnum(self.comboBox_vertex2MngInstructions.currentIndex()).name
+        vertex3 = VertexesEnum(self.comboBox_vertex3MngInstructions.currentIndex()).name
+
+        instruction = Instruction(self.selected_instruction_id, vertex1, vertex2, vertex3, self.lineEdit_angleMngInstructions.text()
+                                  , self.plainTextEdit_descriptionMngInstructions.toPlainText(),
+                                  str(self.comboBox_axisMngInstructions.currentText()))
+
+        if DBConnection.checkIfInstructionExist(instruction=instruction):
+            self.label_messagesMngInstructions.setText("Instruction already exist")
+            self.label_messagesMngInstructions.show()
+            return
+        else:
+            self.instruction = instruction
+            res = DBConnection.modifyExercise(instruction)
+            self.loadInstructionsData()
+            self.label_messagesMngInstructions.setText("Instruction updated")
+            self.label_messagesMngInstructions.show()
+
+    def loadExerciseToScreenFields(self):
+        '''if self.selected_exercise_id == -1:
             self.label_messagesMngExercises.setText("Please choose exercise")
             self.label_messagesMngExercises.show()
         else:
-            res = DBConnection.getExercise(self.selected_exercise_id)
-            self.exercise = Exercise(*res[0])
-            exercise = self.exercise
-            self.lineEdit_enameMngExercises.setText(str(exercise.exercise_name))
-            self.plainTextEdit_descriptionMngExercises.setPlainText(str(exercise.description))
-            self.lineEdit_stagenumMngExercises.setText(str(exercise.num_of_stages))
-            self.lineEdit_videolinkMngExercises.setText(str(exercise.video))
-            self.lineEdit_mainTargetMngExercises.setText(str(exercise.main_target))
+        ^ Might be useless ^
+        '''
+
+        res = DBConnection.getExercise(self.selected_exercise_id)
+        self.exercise = Exercise(*res[0])
+        exercise = self.exercise
+        self.lineEdit_enameMngExercises.setText(str(exercise.exercise_name))
+        self.plainTextEdit_descriptionMngExercises.setPlainText(str(exercise.description))
+        self.lineEdit_stagenumMngExercises.setText(str(exercise.num_of_stages))
+        self.lineEdit_videolinkMngExercises.setText(str(exercise.video))
+        self.lineEdit_mainTargetMngExercises.setText(str(exercise.main_target))
+
+    def loadInstructionsToScreenFields(self):
+        '''if self.selected_instruction_id == -1:
+            self.label_messagesMngInstructions.setText("Please choose exercise")
+            self.label_messagesMngExercises.show()
+        else:
+        ^ Might be useless ^
+        '''
+        res = DBConnection.getInstruction(self.selected_instruction_id)
+        self.instruction = Instruction(*res[0])
+        instruction = self.instruction
+
+        # Set combo boxes
+        pose_index = VertexesEnum[instruction.vertex1].value
+        index = self.comboBox_vertex1MngInstructions.findText(instruction.vertex1 + f" {pose_index}",
+                                                              Qt.MatchFixedString)
+        if index >= 0:
+            self.comboBox_vertex1MngInstructions.setCurrentIndex(index)
+
+        pose_index = VertexesEnum[instruction.vertex2].value
+        index = self.comboBox_vertex2MngInstructions.findText(instruction.vertex2 + f" {pose_index}",
+                                                              Qt.MatchFixedString)
+        if index >= 0:
+            self.comboBox_vertex2MngInstructions.setCurrentIndex(index)
+
+        pose_index = VertexesEnum[instruction.vertex3].value
+        index = self.comboBox_vertex3MngInstructions.findText(instruction.vertex3 + f" {pose_index}",
+                                                              Qt.MatchFixedString)
+        if index >= 0:
+            self.comboBox_vertex3MngInstructions.setCurrentIndex(index)
+
+        index = self.comboBox_axisMngInstructions.findText(instruction.instructionAxis, Qt.MatchFixedString)
+        if index >= 0:
+            self.comboBox_axisMngInstructions.setCurrentIndex(index)
+
+        self.lineEdit_angleMngInstructions.setText(str(instruction.angle))
+        self.plainTextEdit_descriptionMngInstructions.setPlainText(str(instruction.description))
 
     def addExercise(self):
         if self.checkEmptyFieldMngExercise():
@@ -219,88 +299,66 @@ class AdminApp(QMainWindow):
             self.loadExercisesData()
 
     def addInstruction(self):
-        if self.checkEmptyFieldMngExercise():
+        if self.checkEmptyFieldMngInstruction():
             self.label_messagesMngExercises.setText("Make sure all fields are filled")
             self.label_messagesMngExercises.show()
             return
-        exercise = Exercise(-1, self.lineEdit_enameMngExercises.text(), self.lineEdit_videolinkMngExercises.text(),
-                            self.plainTextEdit_descriptionMngExercises.toPlainText(),
-                            self.lineEdit_stagenumMngExercises.text()
-                            , self.lineEdit_mainTargetMngExercises.text())
-        res = DBConnection.addNewExercise(exercise)
+        vertex1 = VertexesEnum(self.comboBox_vertex1MngInstructions.currentIndex()).name
+        vertex2 = VertexesEnum(self.comboBox_vertex2MngInstructions.currentIndex()).name
+        vertex3 = VertexesEnum(self.comboBox_vertex3MngInstructions.currentIndex()).name
+
+        instruction = Instruction(-1, vertex1, vertex2, vertex3, self.lineEdit_angleMngInstructions.text()
+                                  , self.plainTextEdit_descriptionMngInstructions.toPlainText(),
+                                  str(self.comboBox_axisMngInstructions.currentText()))
+        res = DBConnection.addNewInstruction(instruction)
         if res:
-            self.label_messagesMngExercises.setText("Exercise added")
-            self.label_messagesMngExercises.show()
-            self.loadExercisesData()
+            self.label_messagesMngInstructions.setText("Instruction added")
+            self.label_messagesMngInstructions.show()
+            self.loadInstructionsData()
 
     def deleteExercise(self):
         pass
 
-    def startEstimationFunction(self):
-        e_id = self.i_eid.text()
-        r_num = self.i_repsnum.text()
-        if isnumeric(e_id) and isnumeric(r_num):
-            self.workoutEstimationWindow = EstimationScreen(exercise_id=e_id, repetition_num=r_num, widget=self.widget,
-                                                            user_id=self.current_user.user_id)
-            self.widget.addWidget(self.workoutEstimationWindow)
-            self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
-            # self.workoutEstimationWindow.show()
-            # self.close() #Problem here
+    def deleteInstruction(self):
+        pass
 
-            # self.bt_start.clicked.connect(lambda: EstimationScreen(e_id, r_num))
-
-        else:
-            self.lbl_alert.show()
-            self.lbl_chosen.hide()
-
-    # Loads data to manage exercises tab (exercise name, main body part)
-    def loadExerciseData(self):
-        res = DBConnection.getExerciesNamesAndTarget()
-        for row_number, row_data in enumerate(res):
-            self.table_exercisesMngExercises.insertRow(row_number)
-            for column_number, data in enumerate(row_data):
-                self.table_exercisesMngExercises.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-
-    '''def loadDataHistory(self, user_id):
-        # workout history
-        res = DBConnection.getCurrentUserFeedbacks(user_id)
-        allfeedbacks = [FeedbackHistory(*x) for x in res]
-        if len(allfeedbacks) > 3:  # we want to see in the table feedbacks only from the 4th feedback (need to be > 3)
-            for row_number, row_data in enumerate(res[3:]):  # res[3:]
-                self.table.insertRow(row_number)
-                for column_number, data in enumerate(row_data):
-                    self.table.setItem(row_number, column_number, QTableWidgetItem(str(data)))
-        # presenting the 3 first feedbacks
-        for index, feed in enumerate(allfeedbacks):
-            name = getattr(self.ui, 'lbl_name{}'.format(index + 1))
-            reps = getattr(self.ui, 'lbl_reps{}'.format(index + 1))
-            date = getattr(self.ui, 'lbl_date{}'.format(index + 1))
-            score = getattr(self.ui, 'lbl_score{}'.format(index + 1))
-            img = getattr(self.ui, 'image{}'.format(index + 1))
-    
-            name.setText(str(feed.exercise_name))
-            reps.setText("Number of reps: " + str(feed.reps))
-            date.setText(str(feed.date))
-            score.setText(setAmericanScore(feed.score))
-    
-            name.show()
-            reps.show()
-            date.show()
-            img.show()
-            score.show()'''
-
+    # load data when exercise table is clicked
     def manageExerciseTableClicked(self):
         index = self.table_exercisesMngExercises.currentIndex()
-        newIndex = self.table_exercisesMngExercises.exerciseModel().index(index.row(), 0)
-        newIndex2 = self.table_exercisesMngExercises.exerciseModel().index(index.row(), 1)
+        newIndex = self.table_exercisesMngExercises.model().index(index.row(), 0)
+        newIndex2 = self.table_exercisesMngExercises.model().index(index.row(), 1)
 
-        self.selected_exercise_id = self.table_exercisesMngExercises.exerciseModel().exerciseData(
+        self.selected_exercise_id = self.table_exercisesMngExercises.model().data(
             newIndex)  # we can pass eid to the model
-        txt = self.table_exercisesMngExercises.exerciseModel().exerciseData(newIndex2)
+        txt = self.table_exercisesMngExercises.model().data(newIndex2)
         self.label_messagesMngExercises.setText(txt + " is chosen")
         self.label_messagesMngExercises.show()
 
-        self.editExercise()
+        self.loadExerciseToScreenFields()
+
+    # load data when instruction table is clicked
+    # Change row index when clicked on table
+    def manageInstructionsTableClicked(self):
+        index = self.table_instructionsMngInstructions.currentIndex()
+        newIndex = self.table_instructionsMngInstructions.model().index(index.row(), 0)
+        newIndex2 = self.table_instructionsMngInstructions.model().index(index.row(), 1)
+
+        self.selected_instruction_id = self.table_instructionsMngInstructions.model().data(
+            newIndex)  # we can pass eid to the model
+        # txt = self.table_instructionsMngInstructions.model().data(newIndex2)
+        self.label_messagesMngInstructions.setText(f"row #{self.selected_instruction_id} is chosen")
+        self.label_messagesMngInstructions.show()
+
+        self.loadInstructionsToScreenFields()
+
+    def initManageInstructionsComboBoxs(self):
+        for item in VertexesEnum:  # VertexesEnum imported
+            self.comboBox_vertex1MngInstructions.addItem(item.name + " " + str(item.value))
+            self.comboBox_vertex2MngInstructions.addItem(item.name + " " + str(item.value))
+            self.comboBox_vertex3MngInstructions.addItem(item.name + " " + str(item.value))
+
+        for item in ['XY', 'XZ', 'YZ']:
+            self.comboBox_axisMngInstructions.addItem(item)
 
 
 '''def openInstructionsWindow(self):

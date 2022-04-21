@@ -26,6 +26,8 @@ if __name__ == '__main__':
     widget.addWidget(welcome)
     widget.show()
 
+    # ToDo: press on click crash
+
     '''widget = QtWidgets.QStackedWidget()
     welcome = workouthistory.WorkoutHistory(widget)
     widget.addWidget(welcome)

@@ -23,6 +23,18 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="accessibleName">
@@ -33,7 +45,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_landingPage">
        <attribute name="title">
@@ -175,6 +187,9 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
           <width>601</width>
           <height>192</height>
          </rect>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
         </property>
        </widget>
        <widget class="QLineEdit" name="lineEdit_enameMngExercises">
@@ -318,7 +333,7 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QLabel" name="label_header">
         <property name="geometry">
          <rect>
-          <x>190</x>
+          <x>70</x>
           <y>20</y>
           <width>441</width>
           <height>71</height>
@@ -334,9 +349,9 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QLineEdit" name="lineEdit_searchBarManageInstructions">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>70</x>
           <y>110</y>
-          <width>741</width>
+          <width>641</width>
           <height>31</height>
          </rect>
         </property>
@@ -355,10 +370,10 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QLabel" name="label_bodykeypointsMngInstructions">
         <property name="geometry">
          <rect>
-          <x>750</x>
-          <y>80</y>
-          <width>450</width>
-          <height>450</height>
+          <x>550</x>
+          <y>400</y>
+          <width>528</width>
+          <height>300</height>
          </rect>
         </property>
         <property name="text">
@@ -371,22 +386,25 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QComboBox" name="comboBox_vertex1MngInstructions">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>410</y>
-          <width>69</width>
+          <x>70</x>
+          <y>400</y>
+          <width>161</width>
           <height>22</height>
          </rect>
         </property>
         <property name="editable">
          <bool>false</bool>
         </property>
+        <property name="currentText">
+         <string/>
+        </property>
        </widget>
        <widget class="QComboBox" name="comboBox_vertex2MngInstructions">
         <property name="geometry">
          <rect>
-          <x>90</x>
-          <y>410</y>
-          <width>69</width>
+          <x>70</x>
+          <y>430</y>
+          <width>161</width>
           <height>22</height>
          </rect>
         </property>
@@ -397,9 +415,9 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QComboBox" name="comboBox_vertex3MngInstructions">
         <property name="geometry">
          <rect>
-          <x>170</x>
-          <y>410</y>
-          <width>69</width>
+          <x>70</x>
+          <y>460</y>
+          <width>161</width>
           <height>22</height>
          </rect>
         </property>
@@ -410,8 +428,8 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QLabel" name="label_messagesMngInstructions">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>690</y>
+          <x>70</x>
+          <y>730</y>
           <width>421</width>
           <height>41</height>
          </rect>
@@ -427,8 +445,8 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QPushButton" name="bt_deleteInstructionMngInstructions">
         <property name="geometry">
          <rect>
-          <x>250</x>
-          <y>530</y>
+          <x>320</x>
+          <y>450</y>
           <width>181</width>
           <height>41</height>
          </rect>
@@ -445,8 +463,8 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QPushButton" name="bt_addInstructionMngInstructions">
         <property name="geometry">
          <rect>
-          <x>250</x>
-          <y>480</y>
+          <x>320</x>
+          <y>400</y>
           <width>181</width>
           <height>41</height>
          </rect>
@@ -463,18 +481,21 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QTableView" name="table_instructionsMngInstructions">
         <property name="geometry">
          <rect>
-          <x>10</x>
+          <x>70</x>
           <y>150</y>
-          <width>741</width>
+          <width>641</width>
           <height>241</height>
          </rect>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
         </property>
        </widget>
        <widget class="QPlainTextEdit" name="plainTextEdit_descriptionMngInstructions">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>490</y>
+          <x>70</x>
+          <y>550</y>
           <width>231</width>
           <height>171</height>
          </rect>
@@ -486,9 +507,9 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QComboBox" name="comboBox_axisMngInstructions">
         <property name="geometry">
          <rect>
-          <x>170</x>
-          <y>450</y>
-          <width>69</width>
+          <x>70</x>
+          <y>490</y>
+          <width>161</width>
           <height>22</height>
          </rect>
         </property>
@@ -499,8 +520,8 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QLineEdit" name="lineEdit_angleMngInstructions">
         <property name="geometry">
          <rect>
-          <x>10</x>
-          <y>450</y>
+          <x>70</x>
+          <y>520</y>
           <width>113</width>
           <height>20</height>
          </rect>
@@ -512,8 +533,8 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QPushButton" name="bt_saveInstructionMngInstructions">
         <property name="geometry">
          <rect>
-          <x>250</x>
-          <y>580</y>
+          <x>320</x>
+          <y>500</y>
           <width>181</width>
           <height>41</height>
          </rect>
@@ -524,14 +545,14 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;
 background-color: rgb(205, 236, 255);</string>
         </property>
         <property name="text">
-         <string>Save instruction</string>
+         <string>Update instruction</string>
         </property>
        </widget>
        <widget class="QPushButton" name="bt_clearInstructionMngInstructions">
         <property name="geometry">
          <rect>
-          <x>250</x>
-          <y>630</y>
+          <x>320</x>
+          <y>550</y>
           <width>181</width>
           <height>41</height>
          </rect>
@@ -542,7 +563,7 @@ font: 75 14pt &quot;MS Shell Dlg 2&quot;;
 background-color: rgb(205, 236, 255);</string>
         </property>
         <property name="text">
-         <string>Clear instruction</string>
+         <string>Clear form</string>
         </property>
        </widget>
       </widget>
@@ -558,6 +579,9 @@ background-color: rgb(205, 236, 255);</string>
           <width>731</width>
           <height>171</height>
          </rect>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
         </property>
         <column>
          <property name="text">
@@ -770,6 +794,9 @@ background-color: rgb(205, 236, 255);</string>
           <height>192</height>
          </rect>
         </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
         <column>
          <property name="text">
           <string>Description</string>
@@ -881,6 +908,9 @@ background-color: rgb(205, 236, 255);</string>
           <height>192</height>
          </rect>
         </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
         <column>
          <property name="text">
           <string>Description</string>
@@ -936,38 +966,6 @@ background-color: rgb(205, 236, 255);</string>
          <string>Choose instruction</string>
         </property>
        </widget>
-       <widget class="QWidget" name="formLayoutWidget_3">
-        <property name="geometry">
-         <rect>
-          <x>420</x>
-          <y>450</y>
-          <width>160</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <layout class="QFormLayout" name="formLayout_3">
-         <item row="1" column="0" colspan="2">
-          <widget class="QLineEdit" name="lineEdit_6">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="placeholderText">
-            <string>Link</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="0" colspan="2">
-          <widget class="QLineEdit" name="lineEdit_5">
-           <property name="text">
-            <string/>
-           </property>
-           <property name="placeholderText">
-            <string>Description</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
        <widget class="QPushButton" name="bt_delete_7">
         <property name="geometry">
          <rect>
@@ -1015,6 +1013,38 @@ background-color: rgb(205, 236, 255);</string>
         </property>
         <property name="text">
          <string>messages</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_6">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>480</y>
+          <width>158</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string>Link</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="lineEdit_5">
+        <property name="geometry">
+         <rect>
+          <x>430</x>
+          <y>440</y>
+          <width>158</width>
+          <height>20</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string>Description</string>
         </property>
        </widget>
       </widget>
