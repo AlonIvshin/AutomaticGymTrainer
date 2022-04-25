@@ -1,0 +1,88 @@
+QTabWidget::pane { /* The tab widget frame */
+    border-top: 0px solid #C2C7CB;
+    position: absolute;
+    top: -0.5em;
+}
+
+QTabWidget::tab-bar {
+    alignment: center;
+}
+
+/* Style the tab using the tab sub-control. Note that
+    it reads QTabBar _not_ QTabWidget */
+QTabBar::tab {
+    /* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #E1E1E1, stop: 0.4 #DDDDDD,
+                                stop: 0.5 #D8D8D8, stop: 1.0 #D3D3D3); */
+    background: #060666;
+    color: #bdbfc0;
+    /*border: 2px solid #C4C4C3;*/
+    /* border-bottom-color: #C2C7CB; *//* same as the pane color */
+	border-left: 0px solid #808080;
+	border-right: 2px solid #808080;
+	border-top: 0px solid #808080;
+	border-bottom: 3px solid #808080;
+    min-width: 8ex;
+	width: 384px;
+	height: 27px;
+	font: 75 10pt "MS Shell Dlg 2";
+
+}
+
+QTabBar::tab::last {
+	border-right: 0px solid #808080;
+}
+
+QTabBar::tab:hover {
+     /* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #1D699D, stop: 0.4 #1D699D,
+                                stop: 0.5 #1D699D, stop: 1.0 #1D699D); */
+    /*background:#C2C7CB;
+	color: black;*/
+	border-left: 0px solid #808080;
+	border-right: 2px solid #808080;
+	border-top: 0px solid #2AA5BD;
+	border-bottom: 3px solid #2AA5BD;
+}
+
+QTabBar::tab:selected {
+     /* background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+                                stop: 0 #1D699D, stop: 0.4 #1D699D,
+                                stop: 0.5 #1D699D, stop: 1.0 #1D699D); */
+    /*background:#C2C7CB;
+	color: black;*/
+	border-left: 0px solid #808080;
+	border-right: 2px solid #808080;
+	border-top: 0px solid #F8A500;
+	border-bottom: 3px solid #F8A500;
+}
+
+
+QTabBar::tear {
+    image: url(tear_indicator.png);
+}
+
+QTabBar::scroller { /* the width of the scroll buttons */
+    width: 20px;
+}
+
+QTabBar QToolButton { /* the scroll buttons are tool buttons */
+    border-image: url(scrollbutton.png) 2;
+    border-width: 2px;
+}
+
+QTabBar QToolButton::right-arrow { /* the arrow mark in the tool buttons */
+    image: url(rightarrow.png);
+}
+
+QTabBar QToolButton::left-arrow {
+    image: url(leftarrow.png);
+}
+
+QTabBar::close-button {
+    image: url(close.png)
+    subcontrol-position: left;
+}
+QTabBar::close-button:hover {
+    image: url(close-hover.png)
+}

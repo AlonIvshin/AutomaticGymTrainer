@@ -467,3 +467,17 @@ def modifyAlert(alert_id, alert_text, link):
     con.commit()
     cur.close()
     return True
+
+
+# QUERY 39: insert specific exercise  instruction
+def addNewExerciseInstruction(exercise_instruction):
+    cur = con.cursor()
+    sql = f'''INSERT INTO exercises_instructions (exercise_id, instruction_id, alert_id, deviation_positive, deviation_negative,instruction_stage,exercise_instruction_type,alert_deviation_trigger,alert_extended_id) 
+           VALUES ('{exercise_instruction.exerciseId}',
+           '{exercise_instruction.instructionId}','{exercise_instruction.alertId}','{exercise_instruction.deviationPositive}',
+           '{exercise_instruction.deviationNegative}','{exercise_instruction.instructionStage}','{exercise_instruction.exerciseInstructionType}',
+           '{exercise_instruction.alertDeviationTrigger}','{exercise_instruction.alertExtendedId}');'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True  # for successes

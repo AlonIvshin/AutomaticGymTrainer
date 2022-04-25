@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QMainWindow, QHeaderView, QComboBox
 from PyQt5.uic import loadUi
-
+from ClassObjects.ExerciseInstruction import ExerciseInstruction
 from ClassObjects.Exercise import Exercise
 from ClassObjects.Instruction import Instruction
 from Utils import DBConnection, WorkoutEstimationFunctions
@@ -66,7 +66,11 @@ class AdminApp(QMainWindow):
         super().__init__()
         self.exercise = None
         self.ui = loadUi("./ui/appAdmin.ui", self)
-        self.setFixedSize(1200, 800)
+        # LOAD TAB WIDGET CSS FILE
+        with open('ui/tab2.css', "r") as fh:
+            tw = fh.read()
+            self.tabWidget.setStyleSheet(tw)
+        self.setFixedSize(1920, 1000)
         self.current_user = current_user
         self.tabWidget.setCurrentIndex(0)  # sets default tab
         self.widget = widget
@@ -110,6 +114,56 @@ class AdminApp(QMainWindow):
         self.table_instructionsMngInstructions.clicked.connect(self.manageInstructionsTableClicked)
         self.label_messagesMngInstructions.hide()
 
+        # Tab #4 - Edit exercises (instructions)
+        # image loaded with loadCoordinates function - no need to recall
+        self.loadExerciseToComboBoxExerciseInstructions()
+        self.comboBox_selectExerciseMngExerciseInstructions.currentIndexChanged.connect(
+            self.mngExerciseInstructionExerciseSelected)
+
+        self.loadInstructionsDataForExerciseInstructionTab()  # for
+
+        self.loadDevTriggerToComboBoxExerciseInstructions()
+        self.comboBox_alertDevTriggerMngExerciseInstructions.currentIndexChanged.connect(
+            self.mngExerciseInstructionAlertDevTriggerSelected)
+
+        self.loadInstructionTypeToComboBoxExerciseInstructions()
+        self.comboBox_instructionTypeMngExerciseInstructions.currentIndexChanged.connect(
+            self.mngExerciseInstructionInstructionTypeSelected)
+
+        self.table_instructionsMngExerciseInstructions.setColumnHidden(0, True)
+        self.table_instructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
+        self.table_instructionsMngExerciseInstructions.setColumnWidth(1, 100)
+        self.table_instructionsMngExerciseInstructions.setColumnWidth(2, 100)
+        self.table_instructionsMngExerciseInstructions.setColumnWidth(3, 100)
+        self.table_instructionsMngExerciseInstructions.setColumnWidth(4, 50)
+        self.table_instructionsMngExerciseInstructions.setColumnWidth(6, 50)
+
+        self.table_instructionsMngExerciseInstructions.clicked.connect(
+            self.manageInstructionTableClickedMngExerciseInstruction)
+        self.table_AlertsMngExerciseInstructions.clicked.connect(
+            self.manageAlertTableClickedMngExerciseInstruction)  # set alert Id for later uses (such as add e. instruction)
+        self.table_extendedAlertsMngExerciseInstructions.clicked.connect(
+            self.manageExtendedAlertTableClickedMngExerciseInstruction)  # set extended alert id for later uses
+
+        self.selected_instruction_id_MngExerciseInstruction = -1  # Set indexes for selected rows in tables
+        self.selected_alert_id_MngExerciseInstruction = -1
+
+        self.bt_addExerciseInstructionMngExerciseInstructions.clicked.connect(
+            self.addExerciseInsturctionMngExerciseInstruction)
+
+        # self.table_instructionsMngExerciseInstructions.clicked.connect(self.manageInstructionsTableClicked)
+        self.label_selectedAlertMngExerciseInstructions.hide()
+        self.label_selectedExtendedAlertMngExerciseInstructions.hide()
+        self.label_msgMngExerciseInstructions.hide()
+
+
+
+
+
+
+
+
+
         # Tab #5 - Mange Alerts
         self.loadInstructionsDataForAlerts()
         self.tb_instructionsMngAlerts.setColumnHidden(0, True)
@@ -124,6 +178,7 @@ class AdminApp(QMainWindow):
         self.bt_updateAlertMngAlerts.clicked.connect(self.updateAlert)
 
     # Load image to Tab #2
+    # Load posture image for who needes it
     def loadCoordinatesImage(self):
         vertexes_image_url = 'https://i.imgur.com/C5eBW20.png'
         vertexes_image = WorkoutEstimationFunctions.getImageFromLink(vertexes_image_url)
@@ -132,8 +187,10 @@ class AdminApp(QMainWindow):
         vertexes_image = QImage(vertexes_image,
                                 vertexes_image.shape[1],
                                 vertexes_image.shape[0], QImage.Format_RGB888)
-        self.label_bodykeypointsMngInstructions.setPixmap(QPixmap.fromImage(vertexes_image))
+        self.label_bodykeypointsMngInstructions.setPixmap(QPixmap.fromImage(vertexes_image))  # For tab #3
+        self.label_bodykeypointsMngExerciseInstructions.setPixmap(QPixmap.fromImage(vertexes_image))  # For tab #4
         self.label_bodykeypointsMngInstructions.show()
+        self.label_bodykeypointsMngExerciseInstructions.show()
 
     def loadExercisesData(self):
         headers = ['', 'Exercise Name', 'Main body part']
@@ -149,6 +206,278 @@ class AdminApp(QMainWindow):
         # You can choose the type of search by connecting to a different slot here.
         # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
         self.lineEdit_searchBarMngExercises.textChanged.connect(self.exercise_proxy_model.setFilterFixedString)
+
+    def manageInstructionTableClickedMngExerciseInstruction(self):
+        index = self.table_instructionsMngExerciseInstructions.currentIndex()
+        newIndex = self.table_instructionsMngExerciseInstructions.model().index(index.row(), 0)
+        newIndex2 = self.table_instructionsMngExerciseInstructions.model().index(index.row(), 1)
+
+        self.selectedInstructionExerciseInstruction = self.table_instructionsMngExerciseInstructions.model().data(
+            newIndex)  # contains the index of the selected instruction
+
+        self.selected_instruction_id_MngExerciseInstruction = self.selectedInstructionExerciseInstruction  # save selected instruction id for later uses (such as add)
+        self.label_selectedInstructionMngExerciseInstructions.setText(
+            f"Selected instruction {self.selected_instruction_id_MngExerciseInstruction}")
+        '''txt = self.table_instructionsMngExerciseInstructions.model().data(newIndex2)
+        self.label_messagesMngExercises.setText(txt + " is chosen")
+        self.label_messagesMngExercises.show()'''
+        '''self.loadExerciseToScreenFields()'''
+        self.selected_alert_id_MngExerciseInstruction = -1  # reset selected alert id
+        self.selected_extended_id_MngExerciseInstruction = -1  # reset selected alert id
+        self.label_selectedAlertMngExerciseInstructions.setText("")
+        self.loadAlertsForSelectedInstruction(self.table_extendedAlertsMngExerciseInstructions)
+        self.loadAlertsForSelectedInstruction(self.table_AlertsMngExerciseInstructions)
+        self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+
+    # For first table in tab #4 - Edit exercise
+    def loadInstructionsDataForExerciseInstructionTab(self):
+        headers = ['', 'Vertex1', 'Vertex2', 'Vertex3', 'Angle', 'Description', 'Axis']
+        self.instructionsMngExerciseInstructionsData = DBConnection.getAllInstructions()
+        self.instructionsMngExerciseInstructionsData = sorted(self.instructionsMngExerciseInstructionsData,
+                                                              key=lambda x: x[0])  # Sort data by instruction id
+        self.instructionsMngExerciseInstructionsModel = TableModel(self.instructionsMngExerciseInstructionsData)
+        self.instructionsMngExerciseInstructionsModel.setHeaderList(headers)
+        self.instructionMngExerciseInstruction_proxy_model = QSortFilterProxyModel()
+        self.instructionMngExerciseInstruction_proxy_model.setFilterKeyColumn(-1)  # Search all columns.
+        self.instructionMngExerciseInstruction_proxy_model.setSourceModel(self.instructionsMngExerciseInstructionsModel)
+        self.instructionMngExerciseInstruction_proxy_model.sort(0, Qt.AscendingOrder)
+        self.table_instructionsMngExerciseInstructions.setModel(self.instructionMngExerciseInstruction_proxy_model)
+        # You can choose the type of search by connecting to a different slot here.
+        # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
+        self.lineEdit_searchBarInstructionManageExerciseInstructions.textChanged.connect(
+            self.instructionMngExerciseInstruction_proxy_model.setFilterFixedString)
+        '''lineEdit_searchBarExerciseInstructionBarManageExerciseInstructions'''
+
+    # For alerts table in tab  #4 - Edit exercise
+    def loadAlertsForSelectedInstruction(self, table):
+        headers = ['', '', 'Text', 'Link']
+        self.alertsDataMngExerciseInstructions = DBConnection.getAlertsOfInstruction(
+            self.selectedInstructionExerciseInstruction)
+        '''if self.alertsDataMngExerciseInstructions == []:
+            self.alertsDataMngExerciseInstructions = [""]'''
+
+        self.alertsDataMngExerciseInstructions = sorted(self.alertsDataMngExerciseInstructions,
+                                                        key=lambda x: x[0])  # Sort data by instruction id
+        if self.alertsDataMngExerciseInstructions == []:
+            self.alertsDataMngExerciseInstructions = [""]
+        self.alertsModelMngExerciseInstructions = TableModel(self.alertsDataMngExerciseInstructions)
+        self.alertsModelMngExerciseInstructions.setHeaderList(headers)
+        self.alertsMngExerciseInstructions_proxy_model = QSortFilterProxyModel()
+        self.alertsMngExerciseInstructions_proxy_model.setFilterKeyColumn(-1)  # Search all columns.
+        self.alertsMngExerciseInstructions_proxy_model.setSourceModel(self.alertsModelMngExerciseInstructions)
+        self.alertsMngExerciseInstructions_proxy_model.sort(0, Qt.AscendingOrder)
+        table.setModel(self.alertsMngExerciseInstructions_proxy_model)
+        self.lineEdit_searchBarAlertsManageExerciseInstructions.textChanged.connect(
+            self.alertsMngExerciseInstructions_proxy_model.setFilterFixedString)
+
+        table.setColumnHidden(0, True)
+        table.setColumnHidden(1, True)
+
+    # tab  # 4 - Edit exercise
+    def manageAlertTableClickedMngExerciseInstruction(self):
+        index = self.table_AlertsMngExerciseInstructions.currentIndex()
+        newIndex = self.table_AlertsMngExerciseInstructions.model().index(index.row(), 0)
+        newIndex2 = self.table_AlertsMngExerciseInstructions.model().index(index.row(), 1)
+
+        self.selectedAlertExerciseInstruction = self.table_AlertsMngExerciseInstructions.model().data(
+            newIndex)  # contains the index of the selected instruction
+
+        self.selected_alert_id_MngExerciseInstruction = self.selectedAlertExerciseInstruction  # save selected instruction id for later uses (such as add)
+        self.label_selectedAlertMngExerciseInstructions.setText(
+            f"Selected alert {self.selected_alert_id_MngExerciseInstruction}")
+        self.label_selectedAlertMngExerciseInstructions.show()
+
+    # tab  # 4
+    def manageExtendedAlertTableClickedMngExerciseInstruction(self):
+        index = self.table_extendedAlertsMngExerciseInstructions.currentIndex()
+        newIndex = self.table_extendedAlertsMngExerciseInstructions.model().index(index.row(), 0)
+        newIndex2 = self.table_extendedAlertsMngExerciseInstructions.model().index(index.row(), 1)
+
+        self.selectedExtendedAlertExerciseInstruction = self.table_extendedAlertsMngExerciseInstructions.model().data(
+            newIndex)  # contains the index of the selected instruction
+
+        self.selected_extended_alert_id_MngExerciseInstruction = self.selectedAlertExerciseInstruction  # save selected instruction id for later uses (such as add)
+        self.label_selectedExtendedAlertMngExerciseInstructions.setText(
+            f"Selected extended alert {self.selected_extended_alert_id_MngExerciseInstruction}")
+        self.label_selectedExtendedAlertMngExerciseInstructions.show()
+
+    # TAB 4 - Loads trigger types into the combo box
+    def loadDevTriggerToComboBoxExerciseInstructions(self):
+        self.selected_trigger_id_MngExerciseInstructions = -1
+        self.comboBox_alertDevTriggerMngExerciseInstructions.addItem("Select trigger")
+        for item in ['Both', 'Negative', 'Positive']:
+            self.comboBox_alertDevTriggerMngExerciseInstructions.addItem(item)
+
+    # TAB 4 - Loads instruction types into the combo box
+    def loadInstructionTypeToComboBoxExerciseInstructions(self):
+        self.selected_instruction_type_id_MngExerciseInstructions = -1
+        self.comboBox_instructionTypeMngExerciseInstructions.addItem("Select instruction type")
+        for item in ['Dynamic', 'Static']:
+            self.comboBox_instructionTypeMngExerciseInstructions.addItem(item)
+
+    # tab  # 4 - Edit exercise
+    def loadExerciseToComboBoxExerciseInstructions(self):
+        self.ExerciseInstructionsExerciseComboBoxData = res = DBConnection.getExerciesNamesAndTarget()
+        self.selected_exercise_id_MngExerciseInstructions = -1
+        self.comboBox_selectExerciseMngExerciseInstructions.addItem("Select exercise")
+        for item in res:
+            self.comboBox_selectExerciseMngExerciseInstructions.addItem(item[1])
+
+    # tab  # 4
+    def mngExerciseInstructionExerciseSelected(self, index):
+        """ Need to load to combo box """
+        '''comboBox_selectExerciseMngExerciseInstructions'''
+        '''table_ExerciseInstructionsMngExerciseInstructions'''
+
+        ''' need to get exercise from combo box index'''
+        if index == 0:
+            return
+        self.selected_exercise_id_MngExerciseInstructions = self.ExerciseInstructionsExerciseComboBoxData[index - 1][
+            0]  # index -1 = initial index is select exercise
+        self.loadExerciseInstructionsForSelectedExercise(
+            self.selected_exercise_id_MngExerciseInstructions)  # load instructions
+
+    # tab  # 4
+    def mngExerciseInstructionAlertDevTriggerSelected(self, index):
+        self.selected_trigger_id_MngExerciseInstructions = index - 1
+        print("trigger " + str(self.selected_trigger_id_MngExerciseInstructions))
+
+    # tab  # 4
+    def mngExerciseInstructionInstructionTypeSelected(self, index):
+        self.selected_instruction_type_id_MngExerciseInstructions = index - 1
+        print("type  " + str(self.selected_instruction_type_id_MngExerciseInstructions))
+
+    # tab  # 4 - Edit exercise
+    def setLabelsForMngExerciseInstructions(self):
+        pass
+
+    # tab  # 4 - Edit exercise
+    def loadExerciseInstructionsForSelectedExercise(self, exercise_id):
+        ''' sort by instruction id '''
+        '''headers = ['Instruction ID', 'Alert text', 'Alert image', 'Positive deviation', 'Negative deviation', 'Stage',
+                   'Type', 'Trigger', 'Extended Id trigger']  # For alert text and alert image'''
+
+        headers = ['Instruction ID', 'Alert ID', 'Positive deviation', 'Negative deviation', 'Stage',
+                   'Type', 'Trigger', 'Extended Id trigger']  # For alert ID
+        self.ExerciseInstructionMngExerciseInstructionData = DBConnection.getAllExerciseInstructionData(
+            exerciseId=exercise_id)
+
+        self.ExerciseInstructionMngExerciseInstructionData = sorted(self.ExerciseInstructionMngExerciseInstructionData,
+                                                                    key=lambda x: x[2])  # Sort data by instruction id
+
+        self.ExerciseInstructionMngExerciseInstructionAlertsData = DBConnection.getAllAlertsData(exercise_id)
+        self.ExerciseInstructionMngExerciseInstructionAlertsData = sorted(
+            self.ExerciseInstructionMngExerciseInstructionAlertsData,
+            key=lambda x: x[1])  # Sort data by instruction id
+
+        self.ExerciseInstructionsWithAlertsMngExerciseInstruction = []
+        for index in range(len(self.ExerciseInstructionMngExerciseInstructionData)):
+            '''instruction_id, alert_id \ (alert text + alert image),pos dev,neg dev,stage,type,trigger,ex id??'''
+            ''' what about alert extended id'''
+            current_exe_ins = self.ExerciseInstructionMngExerciseInstructionData[index]
+            current_exe_ins_alert = self.ExerciseInstructionMngExerciseInstructionAlertsData[index]
+            '''self.ExerciseInstructionMngExerciseInstructionAlertsData[
+                current_exe_ins[2] - 1]'''  # this will get id and subtract 1 (list index starts from zero)
+            ins_id = current_exe_ins[1]
+            alert_id = current_exe_ins_alert[0]  # for alert id
+            # alert_text = current_exe_ins_alert[2]
+            # alert_img_link = current_exe_ins_alert[3]
+            alert_pos_dev = current_exe_ins[3]
+            alert_pos_neg = current_exe_ins[4]
+            stage = current_exe_ins[5]
+            type = current_exe_ins[6]
+            trigger = current_exe_ins[7]
+            extended_id = current_exe_ins[8]
+            '''to_add = [ins_id, alert_text, alert_img_link, alert_pos_dev, alert_pos_neg, stage, type, trigger,
+                      extended_id]'''  # for alert image and alert text
+            to_add = [ins_id, alert_id, alert_pos_dev, alert_pos_neg, stage, type, trigger,
+                      extended_id]  # for alert id
+            to_add = tuple(to_add)
+            self.ExerciseInstructionsWithAlertsMngExerciseInstruction.append(to_add)
+
+        # if no exercise instructions exist
+        if self.ExerciseInstructionsWithAlertsMngExerciseInstruction == []:
+            self.ExerciseInstructionsWithAlertsMngExerciseInstruction = ['']
+
+        self.ExerciseInstructionsWithAlertsMngExerciseInstructionsModel = TableModel(
+            self.ExerciseInstructionsWithAlertsMngExerciseInstruction)
+        self.ExerciseInstructionsWithAlertsMngExerciseInstructionsModel.setHeaderList(headers)
+        self.ExerciseInstructionWithAlertsMngExerciseInstruction_proxy_model = QSortFilterProxyModel()
+        self.ExerciseInstructionWithAlertsMngExerciseInstruction_proxy_model.setFilterKeyColumn(
+            -1)  # Search all columns.
+        self.ExerciseInstructionWithAlertsMngExerciseInstruction_proxy_model.setSourceModel(
+            self.ExerciseInstructionsWithAlertsMngExerciseInstructionsModel)
+        self.ExerciseInstructionWithAlertsMngExerciseInstruction_proxy_model.sort(0, Qt.AscendingOrder)
+        self.table_ExerciseInstructionsMngExerciseInstructions.setModel(
+            self.ExerciseInstructionWithAlertsMngExerciseInstruction_proxy_model)
+        # You can choose the type of search by connecting to a different slot here.
+        # see https://doc.qt.io/qt-5/qsortfilterproxymodel.html#public-slots
+        self.lineEdit_searchBarExerciseInstructionBarManageExerciseInstructions.textChanged.connect(
+            self.ExerciseInstructionWithAlertsMngExerciseInstruction_proxy_model.setFilterFixedString)
+
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(6, QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(7,QHeaderView.Stretch)
+
+        '''self.table_ExerciseInstructionsMngExerciseInstructions.setColumnHidden(0, True)
+        self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(1,
+                                                                                                       QHeaderView.Stretch)'''
+
+    # tab  # 4 - Add exercise instructions
+    def addExerciseInsturctionMngExerciseInstruction(self):
+        ins_id = self.selected_instruction_id_MngExerciseInstruction
+        alert_id = self.selected_alert_id_MngExerciseInstruction
+        if self.checkFilledAreFullMngExerciseInstructions():
+            self.label_bodykeypointsMngExerciseInstructions.setText("Please fill all the fields")
+            return
+        pos_dev = self.lineEdit_posDevMngExerciseInstructions.text()
+        neg_dev = self.lineEdit_negDevMngExerciseInstructions.text()
+        stage = self.lineEdit_stageMngExerciseInstructions.text()
+        ex_ins_type = self.comboBox_instructionTypeMngExerciseInstructions.currentText()
+        ex_ins_trigger = self.comboBox_alertDevTriggerMngExerciseInstructions.currentText()
+        exe_ins_extended_id = self.selected_extended_alert_id_MngExerciseInstruction
+        '''
+        extended ID reasons:
+        when a trainee does a movement that exceeds upper case of movment - exmaple: 
+        moving the hand towards the ceiling - the correct range is (example) 90->150, 
+        the trainee moves the hand until 175 - not good
+        '''
+
+        '''
+        both holds id in combo box
+        currentText
+        selected_trigger_id_MngExerciseInstructions 
+        selected_instruction_type_id_MngExerciseInstructions
+        '''
+        # -1 -> creates new exercise instruction
+        exe_ins = ExerciseInstruction(-1, self.selected_exercise_id_MngExerciseInstructions, ins_id, alert_id, pos_dev,
+                                      neg_dev, stage, ex_ins_type, ex_ins_trigger, exe_ins_extended_id)
+        res = DBConnection.addNewExerciseInstruction(exe_ins)
+
+        ''' Don't forget to reload the table after this line '''
+        ''' Don't forget to reload the table after this line '''
+        ''' Don't forget to reload the table after this line '''
+        ''' Don't forget to reload the table after this line '''
+        ''' Don't forget to reload the table after this line '''
+
+        # exercise id
+        self.loadExerciseInstructionsForSelectedExercise(self.selected_exercise_id_MngExerciseInstructions)
+
+    # tab  # 4 - Edit exercise
+    def checkFilledAreFullMngExerciseInstructions(self):
+        return self.lineEdit_posDevMngExerciseInstructions.text() == '' or \
+               self.lineEdit_negDevMngExerciseInstructions.text() == '' or \
+               self.lineEdit_stageMngExerciseInstructions.text() == '' or \
+               self.selected_trigger_id_MngExerciseInstructions < 0 or \
+               self.selected_instruction_type_id_MngExerciseInstructions < 0
 
     def loadInstructionsData(self):
         headers = ['', 'Vertex1', 'Vertex2', 'Vertex3', 'Angle', 'Description', 'Axis']
@@ -463,7 +792,8 @@ class AdminApp(QMainWindow):
             self.label_messagesMngAlerts.setText("Wrong instruction id make sure this number exist!")
             self.label_messagesMngAlerts.show()
             return
-        if DBConnection.checkIfAlertExist(self.selected_instructionAlerts_id,self.lineEdit_alertTxtMngAlerts.text(), self.lineEdit_LinkMngAlerts.text()):
+        if DBConnection.checkIfAlertExist(self.selected_instructionAlerts_id, self.lineEdit_alertTxtMngAlerts.text(),
+                                          self.lineEdit_LinkMngAlerts.text()):
             self.label_messagesMngAlerts.setText("Alert with same text and link for this instruction already exist!")
             self.label_messagesMngAlerts.show()
             return
@@ -507,11 +837,13 @@ class AdminApp(QMainWindow):
             self.label_messagesMngAlerts.setText("Alert with same text and link for this instruction already exist!")
             self.label_messagesMngAlerts.show()
             return
-        res = DBConnection.modifyAlert(self.selected_alert_id, self.lineEdit_alertTxtMngAlerts.text(), self.lineEdit_LinkMngAlerts.text())
+        res = DBConnection.modifyAlert(self.selected_alert_id, self.lineEdit_alertTxtMngAlerts.text(),
+                                       self.lineEdit_LinkMngAlerts.text())
         if res:
             self.label_messagesMngAlerts.setText("Alert Updated")
             self.label_messagesMngAlerts.show()
             self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
+
 
 '''def openInstructionsWindow(self):
     if self.i_eid.text() != '':
