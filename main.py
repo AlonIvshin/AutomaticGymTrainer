@@ -19,11 +19,13 @@ if __name__ == '__main__':
 
     widget = QtWidgets.QStackedWidget()
     welcome = welcomscreen.WelcomeScreen(widget)
+    #welcome.showFullScreen()
     #welcome = FeedbackScreen(feedback_id='14',widget=widget)
     #res = DBConnection.getUser('a')
     #current_user =User(*res[0])
     #welcome = AdminApp(current_user, widget)
     widget.addWidget(welcome)
+    widget.showMaximized()
     widget.show()
 
     # ToDo: press on click crash

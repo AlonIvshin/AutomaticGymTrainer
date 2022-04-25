@@ -8,7 +8,9 @@ class WelcomeScreen(QMainWindow):
     def __init__(self, widget):
         super().__init__()
         self.ui = loadUi("./ui/welcomescreen.ui", self)
-        self.setFixedSize(1200, 800)
+        self.setFixedSize(1920, 1000)
+        #self.showMaximized()
+        #super.showFullScreen()
         self.bt_login.clicked.connect(self.openLoginWindow)
         self.bt_signup.clicked.connect(self.openCreateAccountWindow)
         self.widget = widget

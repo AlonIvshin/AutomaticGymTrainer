@@ -13,12 +13,14 @@ class Login(QDialog):
     def __init__(self,widget):
         super().__init__()
         self.ui = loadUi("./ui/login.ui", self)
+        self.setFixedSize(1920, 1000)
         self.i_password.setEchoMode(QtWidgets.QLineEdit.Password)
         self.bt_click.clicked.connect(self.openCreateAccountWindow)
         self.bt_login.clicked.connect(self.login)
         self.lbl_fields.hide()
         self.lbl_loged.hide()
         self.lbl_incorrect.hide()
+        #self.showMaximized()
 
         self.widget = widget
 

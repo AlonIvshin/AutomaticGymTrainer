@@ -8,6 +8,7 @@ class CreateAcc(QDialog):
     def __init__(self):
         super().__init__()
         self.ui = loadUi("./ui/createacc.ui", self)
+        self.setFixedSize(1920, 1000)
         self.bt_confirm.clicked.connect(self.confirm)
         self.lbl_bademail.hide()
         self.lbl_badpass.hide()

@@ -36,9 +36,13 @@ class App(QMainWindow):
     def __init__(self, current_user, widget):
         super().__init__()
         self.ui = loadUi("./ui/app.ui", self)
-        self.setFixedSize(1200, 800)
+        self.setFixedSize(1920, 1000)
         self.current_user = current_user
         self.tabWidget.setCurrentIndex(0)  # sets default tab
+        # LOAD TAB WIDGET CSS FILE
+        with open('ui/tab.css', "r") as fh:
+            tw = fh.read()
+            self.tabWidget.setStyleSheet(tw)
         #Main
         self.lbl_welcome.setText('Welcome ' + current_user.first_name + ' ' + current_user.last_name)  # greating user
         self.lbl_workouts_num.setText(str(DBConnection.getWorkoutsQuantity(current_user.user_id)) + ' workout sessions')
@@ -63,6 +67,11 @@ class App(QMainWindow):
 
         #Workout History
         self.table.doubleClicked.connect(self.doubleClicked_FeedbackTable) # << MEARGE ME 190422
+        self.table.setColumnHidden(0, True)
+        self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
         for num in range(1, 4):
             name = getattr(self.ui, 'lbl_name{}'.format(num))
             reps = getattr(self.ui, 'lbl_reps{}'.format(num))

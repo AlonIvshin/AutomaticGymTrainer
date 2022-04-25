@@ -11,6 +11,7 @@ class FeedbackScreen(QMainWindow):
     def __init__(self, feedback_id, widget):  # Ofir added widget
         super().__init__()
         self.ui = loadUi("./ui/score.ui", self)
+        self.setFixedSize(1920, 1000)
         self.lbl_score.setText(loadMyScore(feedback_id))  # change arg to 'feedback_id'
         self.lbl_score.show()
         self.tb_mistakes.setColumnWidth(1, 150)

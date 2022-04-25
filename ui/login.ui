@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
-    <height>800</height>
+    <width>1920</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,9 +20,9 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>530</x>
+     <x>860</x>
      <y>70</y>
-     <width>131</width>
+     <width>200</width>
      <height>61</height>
     </rect>
    </property>
@@ -36,7 +36,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>390</x>
+     <x>750</x>
      <y>190</y>
      <width>141</width>
      <height>61</height>
@@ -53,7 +53,7 @@ color: rgb(255, 255, 255);</string>
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>390</x>
+     <x>750</x>
      <y>290</y>
      <width>141</width>
      <height>61</height>
@@ -70,7 +70,7 @@ color: rgb(255, 255, 255);</string>
   <widget class="QLineEdit" name="i_email">
    <property name="geometry">
     <rect>
-     <x>550</x>
+     <x>910</x>
      <y>200</y>
      <width>201</width>
      <height>41</height>
@@ -80,7 +80,7 @@ color: rgb(255, 255, 255);</string>
   <widget class="QLineEdit" name="i_password">
    <property name="geometry">
     <rect>
-     <x>550</x>
+     <x>910</x>
      <y>300</y>
      <width>201</width>
      <height>41</height>
@@ -90,7 +90,7 @@ color: rgb(255, 255, 255);</string>
   <widget class="QPushButton" name="bt_login">
    <property name="geometry">
     <rect>
-     <x>650</x>
+     <x>1010</x>
      <y>450</y>
      <width>141</width>
      <height>41</height>
@@ -108,7 +108,7 @@ background-color: rgb(205, 236, 255);</string>
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>550</x>
+     <x>910</x>
      <y>370</y>
      <width>161</width>
      <height>16</height>
@@ -124,7 +124,7 @@ background-color: rgb(205, 236, 255);</string>
   <widget class="QPushButton" name="bt_click">
    <property name="geometry">
     <rect>
-     <x>690</x>
+     <x>1050</x>
      <y>370</y>
      <width>91</width>
      <height>21</height>
@@ -140,7 +140,7 @@ background-color: rgb(205, 236, 255);</string>
   <widget class="QLabel" name="lbl_fields">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>730</x>
      <y>500</y>
      <width>211</width>
      <height>16</height>
@@ -157,7 +157,7 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
   <widget class="QLabel" name="lbl_incorrect">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>730</x>
      <y>530</y>
      <width>271</width>
      <height>16</height>
@@ -174,7 +174,7 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
   <widget class="QLabel" name="lbl_loged">
    <property name="geometry">
     <rect>
-     <x>370</x>
+     <x>730</x>
      <y>560</y>
      <width>441</width>
      <height>31</height>

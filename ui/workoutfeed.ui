@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
-    <height>800</height>
+    <width>1924</width>
+    <height>1000</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,8 +21,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
    <widget class="QLabel" name="lbl_repCurrent">
     <property name="geometry">
      <rect>
-      <x>590</x>
-      <y>480</y>
+      <x>1340</x>
+      <y>700</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -30,14 +30,14 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
     <property name="font">
      <font>
       <family>MS Shell Dlg 2</family>
-      <pointsize>15</pointsize>
+      <pointsize>16</pointsize>
       <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+     <string notr="true">font: 16pt &quot;MS Shell Dlg 2&quot;;
 color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
@@ -47,20 +47,24 @@ color: rgb(255, 255, 255);</string>
    <widget class="QLabel" name="lbl_repCurrentValue">
     <property name="geometry">
      <rect>
-      <x>740</x>
-      <y>480</y>
+      <x>1510</x>
+      <y>700</y>
       <width>121</width>
       <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Times New Roman</family>
+      <family>MS Shell Dlg 2</family>
       <pointsize>16</pointsize>
+      <weight>9</weight>
+      <italic>false</italic>
+      <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color:rgb(255, 170, 0)</string>
+     <string notr="true">color:rgb(255, 170, 0);
+font: 75 16pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
     <property name="text">
      <string>REP VAL</string>
@@ -69,20 +73,24 @@ color: rgb(255, 255, 255);</string>
    <widget class="QLabel" name="lbl_repGoalValue">
     <property name="geometry">
      <rect>
-      <x>1030</x>
-      <y>480</y>
+      <x>1780</x>
+      <y>700</y>
       <width>131</width>
       <height>41</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Times New Roman</family>
+      <family>MS Shell Dlg 2</family>
       <pointsize>16</pointsize>
+      <weight>9</weight>
+      <italic>false</italic>
+      <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">color:rgb(255, 170, 0)</string>
+     <string notr="true">color:rgb(255, 170, 0);
+font: 75 16pt &quot;MS Shell Dlg 2&quot;;</string>
     </property>
     <property name="text">
      <string>REP GOAL</string>
@@ -91,8 +99,8 @@ color: rgb(255, 255, 255);</string>
    <widget class="QLabel" name="lbl_repGoal">
     <property name="geometry">
      <rect>
-      <x>910</x>
-      <y>480</y>
+      <x>1650</x>
+      <y>700</y>
       <width>161</width>
       <height>41</height>
      </rect>
@@ -100,14 +108,14 @@ color: rgb(255, 255, 255);</string>
     <property name="font">
      <font>
       <family>MS Shell Dlg 2</family>
-      <pointsize>15</pointsize>
+      <pointsize>16</pointsize>
       <weight>50</weight>
       <italic>false</italic>
       <bold>false</bold>
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+     <string notr="true">font: 16pt &quot;MS Shell Dlg 2&quot;;
 color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
@@ -117,10 +125,10 @@ color: rgb(255, 255, 255);</string>
    <widget class="QLabel" name="lbl_postureImage">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>50</y>
-      <width>585</width>
-      <height>421</height>
+      <x>40</x>
+      <y>70</y>
+      <width>561</width>
+      <height>611</height>
      </rect>
     </property>
     <property name="font">
@@ -139,20 +147,20 @@ color: rgb(255, 255, 255);</string>
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>540</y>
-      <width>1171</width>
+      <y>760</y>
+      <width>1891</width>
       <height>221</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">font: 12pt &quot;MS Shell Dlg 2&quot;;color:rgb(186, 0, 0)</string>
+     <string notr="true">font: 20pt &quot;MS Shell Dlg 2&quot;;color:rgb(186, 0, 0)</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_Alert">
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>500</y>
+      <y>720</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -162,16 +170,16 @@ color: rgb(255, 255, 255);</string>
 color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
-     <string>Alerts</string>
+     <string>Alerts:</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_webcamImage">
     <property name="geometry">
      <rect>
-      <x>610</x>
-      <y>50</y>
-      <width>585</width>
-      <height>421</height>
+      <x>819</x>
+      <y>70</y>
+      <width>1061</width>
+      <height>611</height>
      </rect>
     </property>
     <property name="font">
@@ -184,6 +192,40 @@ color: rgb(255, 255, 255);</string>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_Alert_2">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>20</y>
+      <width>391</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>Next Stage / Correction Guidance:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_Alert_3">
+    <property name="geometry">
+     <rect>
+      <x>820</x>
+      <y>20</y>
+      <width>391</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 15pt &quot;MS Shell Dlg 2&quot;;
+color: rgb(255, 255, 255);</string>
+    </property>
+    <property name="text">
+     <string>My Camera :</string>
     </property>
    </widget>
   </widget>

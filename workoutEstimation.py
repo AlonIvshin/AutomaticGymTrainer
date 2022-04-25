@@ -36,7 +36,7 @@ class EstimationScreen(QMainWindow):
     def __init__(self, exercise_id, repetition_num, widget, user_id):
         super().__init__()
         self.ui = uic.loadUi("./ui/workoutfeed.ui", self)
-        self.setFixedSize(1200, 800)
+        self.setFixedSize(1920, 1000)
         self.exercise_id = exercise_id
         self.repetition_num = repetition_num
 
@@ -235,7 +235,10 @@ class WorkoutEstimationThread(QThread):
         diff = (datetime.now() - start_time).seconds  # converting into seconds
         while diff <= SET_UP_DELAY_TIME:
             ret, frame = cap.read()
+            frame = cv2.flip(frame, 1)
             camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            figureImg = cv2.imread('figure.png')
+            camera_image = cv2.addWeighted(camera_image,0.6,figureImg,0.4,0)
             cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                         cv2.LINE_AA)  # adding timer text
 
@@ -278,6 +281,7 @@ class WorkoutEstimationThread(QThread):
 
                 # Read webcam image
                 ret, frame = cap.read()
+
                 # counting that a frame was received
                 exercise_score_frame_counter += 1
 
@@ -290,7 +294,6 @@ class WorkoutEstimationThread(QThread):
                 triggered_error_list_text = []  # contains all alerts that showed during the frame analysis
                 # Make detection
                 results = pose.process(camera_image)  ##########CRASH
-
                 # Recolor back to BGR
                 camera_image.flags.writeable = True
                 camera_image = cv2.cvtColor(camera_image, cv2.COLOR_RGB2BGR)
@@ -485,6 +488,8 @@ class WorkoutEstimationThread(QThread):
 
                 # Recolor camera image
                 camera_image = cv2.cvtColor(camera_image, cv2.COLOR_BGR2RGB)
+                camera_image = cv2.flip(camera_image,1)
+
                 # Resize image
                 camera_image = cv2.resize(camera_image,
                                           (IMAGE_WIDTH, IMAGE_HEIGHT))
@@ -502,6 +507,7 @@ class WorkoutEstimationThread(QThread):
                     # Next stage posture
                     posture_image_to_display = stage_images[current_stage + repetition_direction - 1]
 
+
                 posture_image_to_display = cv2.resize(posture_image_to_display,
                                                       (IMAGE_WIDTH, IMAGE_HEIGHT))
                 posture_image_to_display = cv2.cvtColor(posture_image_to_display, cv2.COLOR_BGR2RGB)
@@ -512,7 +518,7 @@ class WorkoutEstimationThread(QThread):
 
                 self.TriggeredAlertsUpdate.emit(triggered_error_list_text)
 
-                if repetition_counter == self.repetition_num:
+                if repetition_counter == self.repetition_num or exercise_score < 55:
                     # ToDo: Delete self.score
                     #       Set when there are no alerts at all
                     exercise_score = max(exercise_score, 0)
