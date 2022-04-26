@@ -45,7 +45,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="tab_landingPage">
        <attribute name="title">
@@ -653,6 +653,9 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
           <height>171</height>
          </rect>
         </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
         </property>
@@ -698,6 +701,9 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
           <height>171</height>
          </rect>
         </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
+        </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
         </property>
@@ -721,9 +727,9 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QLabel" name="label_selectedExtendedAlertMngExerciseInstructions">
         <property name="geometry">
          <rect>
-          <x>630</x>
+          <x>660</x>
           <y>910</y>
-          <width>301</width>
+          <width>431</width>
           <height>31</height>
          </rect>
         </property>
@@ -798,6 +804,9 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
           <width>961</width>
           <height>171</height>
          </rect>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
         </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>
@@ -894,6 +903,9 @@ background-color: rgb(205, 236, 255);</string>
           <width>961</width>
           <height>171</height>
          </rect>
+        </property>
+        <property name="selectionMode">
+         <enum>QAbstractItemView::SingleSelection</enum>
         </property>
         <property name="selectionBehavior">
          <enum>QAbstractItemView::SelectRows</enum>

@@ -8,9 +8,9 @@ class getInstanceDBConnection:
         if self.con == None:
             self.con = psycopg2.connect(
                 host="127.0.0.1",
-                database="mytrainer",
+                database="AutomaticGymTrainerLocal",
                 user="postgres",
-                password="root")
+                password="012net")
         return self.con
 
 
@@ -481,3 +481,15 @@ def addNewExerciseInstruction(exercise_instruction):
     con.commit()
     cur.close
     return True  # for successes
+
+
+# QUERY 40: select alerts that contain 3 vertices
+def getAllAlertsFor3Vertices(vertex1, vertex2, vertex3):
+    cur = con.cursor()
+    sql = f'''select * from alerts where instruction_id in (
+            select instruction_id from instructions where (vertex1 = '{vertex1}' and vertex3 ='{vertex3}') or 
+            (vertex3 = '{vertex1}' and vertex1 = '{vertex3}') and vertex2 ='{vertex2}')'''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close()
+    return res

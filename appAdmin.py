@@ -177,6 +177,12 @@ class AdminApp(QMainWindow):
         self.bt_deleteAlertMngAlerts.clicked.connect(self.deleteAlert)
         self.bt_updateAlertMngAlerts.clicked.connect(self.updateAlert)
 
+    # Tab4
+    def ClearLabelsMngExerciseInstructions(self):
+        self.label_selectedAlertMngExerciseInstructions.setText("")
+        self.label_selectedExtendedAlertMngExerciseInstructions.setText("")
+        self.label_msgMngExerciseInstructions.setText("")
+
     # Load image to Tab #2
     # Load posture image for who needes it
     def loadCoordinatesImage(self):
@@ -208,6 +214,7 @@ class AdminApp(QMainWindow):
         self.lineEdit_searchBarMngExercises.textChanged.connect(self.exercise_proxy_model.setFilterFixedString)
 
     def manageInstructionTableClickedMngExerciseInstruction(self):
+        self.ClearLabelsMngExerciseInstructions()
         index = self.table_instructionsMngExerciseInstructions.currentIndex()
         newIndex = self.table_instructionsMngExerciseInstructions.model().index(index.row(), 0)
         newIndex2 = self.table_instructionsMngExerciseInstructions.model().index(index.row(), 1)
@@ -225,15 +232,13 @@ class AdminApp(QMainWindow):
         self.selected_alert_id_MngExerciseInstruction = -1  # reset selected alert id
         self.selected_extended_id_MngExerciseInstruction = -1  # reset selected alert id
         self.label_selectedAlertMngExerciseInstructions.setText("")
-        self.loadAlertsForSelectedInstruction(self.table_extendedAlertsMngExerciseInstructions)
         self.loadAlertsForSelectedInstruction(self.table_AlertsMngExerciseInstructions)
-        self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
-        self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.loadExtendedAlertsForSelectedInstruction(self.table_extendedAlertsMngExerciseInstructions)
+
 
     # For first table in tab #4 - Edit exercise
     def loadInstructionsDataForExerciseInstructionTab(self):
+        self.ClearLabelsMngExerciseInstructions()  # Hide labels
         headers = ['', 'Vertex1', 'Vertex2', 'Vertex3', 'Angle', 'Description', 'Axis']
         self.instructionsMngExerciseInstructionsData = DBConnection.getAllInstructions()
         self.instructionsMngExerciseInstructionsData = sorted(self.instructionsMngExerciseInstructionsData,
@@ -250,6 +255,7 @@ class AdminApp(QMainWindow):
         self.lineEdit_searchBarInstructionManageExerciseInstructions.textChanged.connect(
             self.instructionMngExerciseInstruction_proxy_model.setFilterFixedString)
         '''lineEdit_searchBarExerciseInstructionBarManageExerciseInstructions'''
+
 
     # For alerts table in tab  #4 - Edit exercise
     def loadAlertsForSelectedInstruction(self, table):
@@ -273,8 +279,52 @@ class AdminApp(QMainWindow):
         self.lineEdit_searchBarAlertsManageExerciseInstructions.textChanged.connect(
             self.alertsMngExerciseInstructions_proxy_model.setFilterFixedString)
 
+        if self.alertsDataMngExerciseInstructions == [""]:
+            return
+
         table.setColumnHidden(0, True)
         table.setColumnHidden(1, True)
+
+        self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+
+    # For extended alerts table in tab #4 - Edit exercise
+    def loadExtendedAlertsForSelectedInstruction(self, table):
+        headers = ['', '', 'Text', 'Link']
+        #self.alertsDataMngExerciseInstructions = DBConnection.getAlertsOfInstruction(
+         #   self.selectedInstructionExerciseInstruction)
+        row_index = self.table_instructionsMngExerciseInstructions.currentIndex()
+        vertex1_index = self.table_instructionsMngExerciseInstructions.model().index(row_index.row(), 1)
+        vertex2_index = self.table_instructionsMngExerciseInstructions.model().index(row_index.row(), 2)
+        vertex3_index = self.table_instructionsMngExerciseInstructions.model().index(row_index.row(), 3)
+
+        vertex1 = self.table_instructionsMngExerciseInstructions.model().data(vertex1_index)
+        vertex2 = self.table_instructionsMngExerciseInstructions.model().data(vertex2_index)
+        vertex3 = self.table_instructionsMngExerciseInstructions.model().data(vertex3_index)
+
+        self.ExtendedAlertsDataMngExerciseInstructions = DBConnection.getAllAlertsFor3Vertices(vertex1,vertex2,vertex3)
+        '''if self.alertsDataMngExerciseInstructions == []:
+            self.alertsDataMngExerciseInstructions = [""]'''
+
+        self.ExtendedAlertsDataMngExerciseInstructions = sorted(self.ExtendedAlertsDataMngExerciseInstructions,
+                                                        key=lambda x: x[0])  # Sort data by instruction id
+        if self.ExtendedAlertsDataMngExerciseInstructions == []:
+            self.ExtendedAlertsDataMngExerciseInstructions = [""]
+        self.ExtendedAlertsModelMngExerciseInstructions = TableModel(self.ExtendedAlertsDataMngExerciseInstructions)
+        self.ExtendedAlertsModelMngExerciseInstructions.setHeaderList(headers)
+        self.ExtendedAlertsMngExerciseInstructions_proxy_model = QSortFilterProxyModel()
+        self.ExtendedAlertsMngExerciseInstructions_proxy_model.setFilterKeyColumn(-1)  # Search all columns.
+        self.ExtendedAlertsMngExerciseInstructions_proxy_model.setSourceModel(self.ExtendedAlertsModelMngExerciseInstructions)
+        self.ExtendedAlertsMngExerciseInstructions_proxy_model.sort(0, Qt.AscendingOrder)
+        table.setModel(self.ExtendedAlertsMngExerciseInstructions_proxy_model)
+        '''self.lineEdit_searchBarAlertsManageExerciseInstructions.textChanged.connect(
+            self.alertsMngExerciseInstructions_proxy_model.setFilterFixedString)'''
+
+        table.setColumnHidden(0, True)
+        table.setColumnHidden(1, True)
+
+        self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
 
     # tab  # 4 - Edit exercise
     def manageAlertTableClickedMngExerciseInstruction(self):
@@ -299,7 +349,7 @@ class AdminApp(QMainWindow):
         self.selectedExtendedAlertExerciseInstruction = self.table_extendedAlertsMngExerciseInstructions.model().data(
             newIndex)  # contains the index of the selected instruction
 
-        self.selected_extended_alert_id_MngExerciseInstruction = self.selectedAlertExerciseInstruction  # save selected instruction id for later uses (such as add)
+        self.selected_extended_alert_id_MngExerciseInstruction = self.selectedExtendedAlertExerciseInstruction  # save selected instruction id for later uses (such as add)
         self.label_selectedExtendedAlertMngExerciseInstructions.setText(
             f"Selected extended alert {self.selected_extended_alert_id_MngExerciseInstruction}")
         self.label_selectedExtendedAlertMngExerciseInstructions.show()
