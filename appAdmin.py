@@ -102,7 +102,7 @@ class AdminApp(QMainWindow):
         self.initManageInstructionsComboBoxs()  # set combo boxes
 
         self.bt_addInstructionMngInstructions.clicked.connect(self.addInstruction)  # Finished
-        # self.bt_deleteInstructionMngInstructions.clicked.connect(self.deleteInstruction)
+        self.bt_deleteInstructionMngInstructions.clicked.connect(self.deleteInstructionMngInstructions)
         self.bt_clearInstructionMngInstructions.clicked.connect(self.clearLabelsAndTextMngInstructions)  # Finished
         self.bt_saveInstructionMngInstructions.clicked.connect(self.saveEditedInstruction)  # Finished
 
@@ -119,6 +119,7 @@ class AdminApp(QMainWindow):
         self.loadExerciseToComboBoxExerciseInstructions()
         self.comboBox_selectExerciseMngExerciseInstructions.currentIndexChanged.connect(
             self.mngExerciseInstructionExerciseSelected)
+
 
         self.loadInstructionsDataForExerciseInstructionTab()  # for
 
@@ -151,17 +152,14 @@ class AdminApp(QMainWindow):
         self.bt_addExerciseInstructionMngExerciseInstructions.clicked.connect(
             self.addExerciseInsturctionMngExerciseInstruction)
 
+        self.bt_deleteExerciseInstructionMngExerciseInstructions.clicked.connect(
+            self.deleteExerciseInstructionMngExerciseInstruction)
+
+
         # self.table_instructionsMngExerciseInstructions.clicked.connect(self.manageInstructionsTableClicked)
         self.label_selectedAlertMngExerciseInstructions.hide()
         self.label_selectedExtendedAlertMngExerciseInstructions.hide()
         self.label_msgMngExerciseInstructions.hide()
-
-
-
-
-
-
-
 
 
         # Tab #5 - Mange Alerts
@@ -236,6 +234,31 @@ class AdminApp(QMainWindow):
         self.loadExtendedAlertsForSelectedInstruction(self.table_extendedAlertsMngExerciseInstructions)
 
 
+    # for tab 3
+    def deleteInstructionMngInstructions(self):
+        if self.selected_instruction_id == -1:
+            self.label_messagesMngInstructions.setText("Please select instruction before deleting")
+            self.label_messagesMngInstructions.show()
+            return
+        res = DBConnection.getAlertsForInstruction(self.selected_instruction_id)
+        if res:
+            self.label_messagesMngInstructions.setText("Delete all alerts before deleting the instruction")
+            self.label_messagesMngInstructions.show()
+            return
+        res = DBConnection.getExerciseInstructionsForInstruction(self.selected_instruction_id)
+        if res:
+            self.label_messagesMngInstructions.setText("Delete all exercise instructions before deleting the instruction")
+            self.label_messagesMngInstructions.show()
+            return
+        res = DBConnection.deleteInstruction(self.selected_instruction_id)
+        if res:
+            self.label_messagesMngInstructions.setText("Instruction deleted")
+            self.label_messagesMngInstructions.show()
+
+            self.initManageInstructionsComboBoxs()
+            self.loadInstructionsData()
+            self.selected_instruction_id = -1
+
     # For first table in tab #4 - Edit exercise
     def loadInstructionsDataForExerciseInstructionTab(self):
         self.ClearLabelsMngExerciseInstructions()  # Hide labels
@@ -256,6 +279,8 @@ class AdminApp(QMainWindow):
             self.instructionMngExerciseInstruction_proxy_model.setFilterFixedString)
         '''lineEdit_searchBarExerciseInstructionBarManageExerciseInstructions'''
 
+        # set instruction mng clicked action
+        #self.table_instructionsMngExerciseInstructions.clicked.connect(self.InstructionSelected)
 
     # For alerts table in tab  #4 - Edit exercise
     def loadAlertsForSelectedInstruction(self, table):
@@ -308,6 +333,7 @@ class AdminApp(QMainWindow):
 
         self.ExtendedAlertsDataMngExerciseInstructions = sorted(self.ExtendedAlertsDataMngExerciseInstructions,
                                                         key=lambda x: x[0])  # Sort data by instruction id
+
         if self.ExtendedAlertsDataMngExerciseInstructions == []:
             self.ExtendedAlertsDataMngExerciseInstructions = [""]
         self.ExtendedAlertsModelMngExerciseInstructions = TableModel(self.ExtendedAlertsDataMngExerciseInstructions)
@@ -319,6 +345,10 @@ class AdminApp(QMainWindow):
         table.setModel(self.ExtendedAlertsMngExerciseInstructions_proxy_model)
         '''self.lineEdit_searchBarAlertsManageExerciseInstructions.textChanged.connect(
             self.alertsMngExerciseInstructions_proxy_model.setFilterFixedString)'''
+
+
+        if self.ExtendedAlertsDataMngExerciseInstructions == [""]:
+            return
 
         table.setColumnHidden(0, True)
         table.setColumnHidden(1, True)
@@ -415,6 +445,8 @@ class AdminApp(QMainWindow):
         self.ExerciseInstructionMngExerciseInstructionData = DBConnection.getAllExerciseInstructionData(
             exerciseId=exercise_id)
 
+        if self.ExerciseInstructionMngExerciseInstructionData == []:
+            return
         self.ExerciseInstructionMngExerciseInstructionData = sorted(self.ExerciseInstructionMngExerciseInstructionData,
                                                                     key=lambda x: x[2])  # Sort data by instruction id
 
@@ -476,17 +508,27 @@ class AdminApp(QMainWindow):
         self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(5, QHeaderView.Stretch)
         self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(6, QHeaderView.Stretch)
         self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(7,QHeaderView.Stretch)
+        self.table_ExerciseInstructionsMngExerciseInstructions.clicked.connect(self.ExerciseInstructionClickedMngExerciseInstructions)
+
+
 
         '''self.table_ExerciseInstructionsMngExerciseInstructions.setColumnHidden(0, True)
         self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(1,
                                                                                                        QHeaderView.Stretch)'''
+    def ExerciseInstructionClickedMngExerciseInstructions(self):
+        index = self.table_ExerciseInstructionsMngExerciseInstructions.currentIndex()
+        self.selected_exercise_instruction_id_MngExerciseInstructions = self.ExerciseInstructionMngExerciseInstructionData[index.row()][0]
+        self.label_msgMngExerciseInstructions.setText(f"Selected exercise instruction {self.selected_exercise_instruction_id_MngExerciseInstructions}")
+        self.label_msgMngExerciseInstructions.show()
+
 
     # tab  # 4 - Add exercise instructions
     def addExerciseInsturctionMngExerciseInstruction(self):
         ins_id = self.selected_instruction_id_MngExerciseInstruction
         alert_id = self.selected_alert_id_MngExerciseInstruction
         if self.checkFilledAreFullMngExerciseInstructions():
-            self.label_bodykeypointsMngExerciseInstructions.setText("Please fill all the fields")
+            self.label_msgMngExerciseInstructions.setText("Please fill all the fields")
+            self.label_msgMngExerciseInstructions.show()
             return
         pos_dev = self.lineEdit_posDevMngExerciseInstructions.text()
         neg_dev = self.lineEdit_negDevMngExerciseInstructions.text()
@@ -520,6 +562,24 @@ class AdminApp(QMainWindow):
 
         # exercise id
         self.loadExerciseInstructionsForSelectedExercise(self.selected_exercise_id_MngExerciseInstructions)
+
+    # tab  # 4 - delete exercise instructions
+    def deleteExerciseInstructionMngExerciseInstruction(self):
+        #self.selected_exercise_instruction_id_MngExerciseInstructions - holds exercise instruction id
+        if self.selected_exercise_instruction_id_MngExerciseInstructions == -1:
+            self.label_msgMngExerciseInstructions.setText("Please choose exercise instruction")
+            self.label_msgMngExerciseInstructions.show()
+            return
+        res = DBConnection.deleteExerciseInsturction(self.selected_exercise_instruction_id_MngExerciseInstructions)
+        if res:
+            self.label_msgMngExerciseInstructions.setText("exercise instruction deleted")
+            self.label_msgMngExerciseInstructions.show()
+            self.loadExerciseInstructionsForSelectedExercise(self.selected_exercise_id_MngExerciseInstructions)
+
+
+
+
+        pass
 
     # tab  # 4 - Edit exercise
     def checkFilledAreFullMngExerciseInstructions(self):

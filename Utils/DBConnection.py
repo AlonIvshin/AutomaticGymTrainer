@@ -493,3 +493,40 @@ def getAllAlertsFor3Vertices(vertex1, vertex2, vertex3):
     res = cur.fetchall()
     cur.close()
     return res
+
+# QUERY 41: Search if there any exisiting alerts for instruction
+def getAlertsForInstruction(instruction_id):
+    cur = con.cursor()
+    sql = f'''select * from alerts where instruction_id = '{instruction_id}'; '''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close()
+    return res != []
+
+def getExerciseInstructionsForInstruction(instruction_id):
+    cur = con.cursor()
+    sql = f'''select * from exercises_instructions where instruction_id = '{instruction_id}'; '''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close()
+    return res != []
+
+
+# QUERY 42 drops row from instructions
+def deleteInstruction(instruction_id):
+    cur = con.cursor()
+    sql = f'''DELETE FROM instructions WHERE instruction_id = '{instruction_id}';'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True  # for successes
+
+
+# QUERY 43 drop row from exercise instructions
+def deleteExerciseInsturction(exercise_instruction_id):
+    cur = con.cursor()
+    sql = f'''DELETE FROM exercises_instructions WHERE exercise_instruction_id = '{exercise_instruction_id}';'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True  # for successes
