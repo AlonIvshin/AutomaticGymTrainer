@@ -597,7 +597,7 @@ background-color: rgb(205, 236, 255);</string>
          <rect>
           <x>1380</x>
           <y>780</y>
-          <width>201</width>
+          <width>181</width>
           <height>51</height>
          </rect>
         </property>
@@ -665,7 +665,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
          <rect>
           <x>1380</x>
           <y>740</y>
-          <width>249</width>
+          <width>181</width>
           <height>20</height>
          </rect>
         </property>
@@ -681,7 +681,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
          <rect>
           <x>1380</x>
           <y>710</y>
-          <width>249</width>
+          <width>181</width>
           <height>20</height>
          </rect>
         </property>
@@ -713,7 +713,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
          <rect>
           <x>1380</x>
           <y>680</y>
-          <width>249</width>
+          <width>181</width>
           <height>20</height>
          </rect>
         </property>
@@ -849,9 +849,9 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QComboBox" name="comboBox_instructionTypeMngExerciseInstructions">
         <property name="geometry">
          <rect>
-          <x>1180</x>
+          <x>1190</x>
           <y>710</y>
-          <width>181</width>
+          <width>171</width>
           <height>21</height>
          </rect>
         </property>
@@ -859,9 +859,9 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QPushButton" name="bt_addExerciseInstructionMngExerciseInstructions">
         <property name="geometry">
          <rect>
-          <x>1170</x>
+          <x>1190</x>
           <y>780</y>
-          <width>191</width>
+          <width>171</width>
           <height>51</height>
          </rect>
         </property>
@@ -914,9 +914,9 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QComboBox" name="comboBox_alertDevTriggerMngExerciseInstructions">
         <property name="geometry">
          <rect>
-          <x>1180</x>
+          <x>1190</x>
           <y>680</y>
-          <width>181</width>
+          <width>171</width>
           <height>22</height>
          </rect>
         </property>

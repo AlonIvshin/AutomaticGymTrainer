@@ -23,10 +23,10 @@ def closeConnection():
 
 def getAllExerciseInstructionData(exerciseId):
     cur = con.cursor()
-    cur.execute('''select e.exercise_instruction_id,e.instruction_id,e.alert_id,e.deviation_positive,e.deviation_negative,
+    cur.execute(f'''select e.exercise_instruction_id,e.instruction_id,e.alert_id,e.deviation_positive,e.deviation_negative,
     e.instruction_stage,e.exercise_instruction_type,e.alert_deviation_trigger, e.alert_extended_id
     from exercises_instructions as e
-    where e.exercise_id = %s''', str(exerciseId))
+    where e.exercise_id = '{str(exerciseId)}'; ''')
     res = cur.fetchall()
     cur.close()
     return res
@@ -56,10 +56,10 @@ def getAllInstructionData(exerciseId):
 # QUERY 4: getting all alert's data of the exercise
 def getAllAlertsData(exerciseId):
     cur = con.cursor()
-    cur.execute('''select a.alert_id,a.instruction_id,a.alert_text,a.alert_wrong_posture_image_link
+    cur.execute(f'''select a.alert_id,a.instruction_id,a.alert_text,a.alert_wrong_posture_image_link
     from alerts as a
     inner join exercises_instructions as ei on a.instruction_id=ei.instruction_id
-    where ei.exercise_id = %s''', str(exerciseId))
+    where ei.exercise_id = '{ str(exerciseId)}'; ''')
     res = cur.fetchall()
     cur.close()
     return res
@@ -494,7 +494,7 @@ def getAllAlertsFor3Vertices(vertex1, vertex2, vertex3):
     cur.close()
     return res
 
-# QUERY 41: Search if there any exisiting alerts for instruction
+# QUERY 41: Search if there are any existing alerts for instruction
 def getAlertsForInstruction(instruction_id):
     cur = con.cursor()
     sql = f'''select * from alerts where instruction_id = '{instruction_id}'; '''
@@ -503,6 +503,7 @@ def getAlertsForInstruction(instruction_id):
     cur.close()
     return res != []
 
+# QUERY 42: Search if there are any existing Exercise instructions for instruction
 def getExerciseInstructionsForInstruction(instruction_id):
     cur = con.cursor()
     sql = f'''select * from exercises_instructions where instruction_id = '{instruction_id}'; '''
@@ -512,7 +513,7 @@ def getExerciseInstructionsForInstruction(instruction_id):
     return res != []
 
 
-# QUERY 42 drops row from instructions
+# QUERY 43 drops row from instructions
 def deleteInstruction(instruction_id):
     cur = con.cursor()
     sql = f'''DELETE FROM instructions WHERE instruction_id = '{instruction_id}';'''
@@ -522,7 +523,7 @@ def deleteInstruction(instruction_id):
     return True  # for successes
 
 
-# QUERY 43 drop row from exercise instructions
+# QUERY 44 drop row from exercise instructions
 def deleteExerciseInsturction(exercise_instruction_id):
     cur = con.cursor()
     sql = f'''DELETE FROM exercises_instructions WHERE exercise_instruction_id = '{exercise_instruction_id}';'''
@@ -530,3 +531,13 @@ def deleteExerciseInsturction(exercise_instruction_id):
     con.commit()
     cur.close
     return True  # for successes
+
+
+# QUERY 46
+def deleteExercise(exercise_id):
+    cur = con.cursor()
+    sql = f'''DELETE FROM exercises WHERE exercise_id = '{exercise_id}';'''
+    cur.execute(sql)
+    con.commit()
+    cur.close
+    return True
