@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1920</width>
+    <width>2224</width>
     <height>1000</height>
    </rect>
   </property>
@@ -40,12 +40,12 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
     </column>
     <column>
      <property name="text">
-      <string>Repetition Number</string>
+      <string>Stage_Number</string>
      </property>
     </column>
     <column>
      <property name="text">
-      <string>Stage_Number</string>
+      <string>Repetition Number</string>
      </property>
     </column>
    </widget>

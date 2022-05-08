@@ -259,6 +259,8 @@ class AdminApp(QMainWindow):
             # Update other tabs that use exercises:
             # Tab - Edit exercises instructions
             self.loadInstructionsDataForExerciseInstructionTab()
+            # Tab- Mange Alerts
+            self.loadInstructionsDataForAlerts()
 
 
     # For first table in tab #4 - Edit exercise
@@ -704,6 +706,8 @@ class AdminApp(QMainWindow):
             # Update other tabs that use exercises:
             # Tab - Edit exercises instructions
             self.loadInstructionsDataForExerciseInstructionTab()
+            # Tab- Manage Alerts
+            self.loadInstructionsDataForAlerts()
 
     def loadExerciseToScreenFields(self):
         '''if self.selected_exercise_id == -1:
@@ -799,6 +803,9 @@ class AdminApp(QMainWindow):
             # Update other tabs that use exercises:
             # Tab - Edit exercises instructions
             self.loadInstructionsDataForExerciseInstructionTab()
+            # Tab - Manage Alerts
+            self.loadInstructionsDataForAlerts()
+
 
     def deleteExercise(self):
 
@@ -888,6 +895,8 @@ class AdminApp(QMainWindow):
         # self.label_messagesMngInstructions.show()
 
         self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
+        if self.alertsData == [""]:
+            return
         self.tb_alertsMngAlerts.setColumnHidden(0, True)
         self.tb_alertsMngAlerts.setColumnHidden(1, True)
         self.tb_alertsMngAlerts.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
@@ -897,6 +906,8 @@ class AdminApp(QMainWindow):
         headers = ['', '', 'Text', 'Link']
         self.alertsData = DBConnection.getAlertsOfInstruction(instruction_id)
         self.alertsData = sorted(self.alertsData, key=lambda x: x[0])  # Sort data by instruction id
+        if self.alertsData == []:
+            self.alertsData = [""]
         self.alertsModel = TableModel(self.alertsData)
         self.alertsModel.setHeaderList(headers)
         self.alerts_proxy_model = QSortFilterProxyModel()
@@ -961,6 +972,10 @@ class AdminApp(QMainWindow):
             self.label_messagesMngAlerts.setText("Alert added")
             self.label_messagesMngAlerts.show()
             self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
+        self.tb_alertsMngAlerts.setColumnHidden(0, True)
+        self.tb_alertsMngAlerts.setColumnHidden(1, True)
+        self.tb_alertsMngAlerts.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.tb_alertsMngAlerts.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
 
     def deleteAlert(self):
         if self.selected_alert_id == -1:
