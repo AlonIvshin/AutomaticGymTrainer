@@ -12,6 +12,7 @@ from WatchExerciseInstructions import WatchExerciseInstructions
 from score import FeedbackScreen
 from workoutEstimation import EstimationScreen, WorkoutEstimationThread
 from ClassObjects.Feedback import Feedback,FeedbackHistory
+import webbrowser
 
 
 def setAmericanScore(num):
@@ -47,6 +48,7 @@ class App(QMainWindow):
         self.lbl_welcome.setText('Welcome ' + current_user.first_name + ' ' + current_user.last_name)  # greating user
         self.lbl_workouts_num.setText(str(DBConnection.getWorkoutsQuantity(current_user.user_id)) + ' workout sessions')
         self.lbl_avg.setText(str(DBConnection.getWorkoutsAVG(current_user.user_id)))
+        self.bt_word.clicked.connect(self.openHelpWord)
         #Choose Exercise
         self.bt_start.clicked.connect(self.startEstimationFunction)
         self.bt_watch.clicked.connect(self.openInstructionsWindow)
@@ -190,6 +192,13 @@ class App(QMainWindow):
             self.lbl_alert.hide()
         else:
             self.lbl_alert.show()
+
+
+
+    def openHelpWord(self):
+        webbrowser.open('https://docs.google.com/document/d/1S7cyPW_vhBwGGffrBhwWfTJKKJYkiSb5Jm9SXeCZ-Wg/edit?usp=sharing%27')
+
+
 
     '''def closeEvent(self, event):
         print("The user: " + self.current_user.first_name + ' ' + self.current_user.last_name + ' ' + "logged out!")

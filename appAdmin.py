@@ -179,7 +179,7 @@ class AdminApp(QMainWindow):
         self.label_msgMngExerciseInstructions.setText("")
 
     # Load image to Tab #2
-    # Load posture image for who needes it
+    # Load posture image for who needs it
     def loadCoordinatesImage(self):
         vertexes_image_url = 'https://i.imgur.com/C5eBW20.png'
         vertexes_image = WorkoutEstimationFunctions.getImageFromLink(vertexes_image_url)
@@ -255,6 +255,11 @@ class AdminApp(QMainWindow):
             self.initManageInstructionsComboBoxs()
             self.loadInstructionsData()
             self.selected_instruction_id = -1
+
+            # Update other tabs that use exercises:
+            # Tab - Edit exercises instructions
+            self.loadInstructionsDataForExerciseInstructionTab()
+
 
     # For first table in tab #4 - Edit exercise
     def loadInstructionsDataForExerciseInstructionTab(self):
@@ -400,6 +405,8 @@ class AdminApp(QMainWindow):
     def loadExerciseToComboBoxExerciseInstructions(self):
         self.ExerciseInstructionsExerciseComboBoxData = res = DBConnection.getExerciesNamesAndTarget()
         self.selected_exercise_id_MngExerciseInstructions = -1
+
+        self.comboBox_selectExerciseMngExerciseInstructions.clear()
         self.comboBox_selectExerciseMngExerciseInstructions.addItem("Select exercise")
         for item in res:
             self.comboBox_selectExerciseMngExerciseInstructions.addItem(item[1])
@@ -444,8 +451,9 @@ class AdminApp(QMainWindow):
             exerciseId=exercise_id)
 
         if self.ExerciseInstructionMngExerciseInstructionData == []:
-            return
-        self.ExerciseInstructionMngExerciseInstructionData = sorted(self.ExerciseInstructionMngExerciseInstructionData,
+            self.ExerciseInstructionMngExerciseInstructionData = [""]
+        else:
+            self.ExerciseInstructionMngExerciseInstructionData = sorted(self.ExerciseInstructionMngExerciseInstructionData,
                                                                     key=lambda x: x[2])  # Sort data by instruction id
 
         self.ExerciseInstructionMngExerciseInstructionAlertsData = DBConnection.getAllAlertsData(exercise_id)
@@ -454,29 +462,30 @@ class AdminApp(QMainWindow):
             key=lambda x: x[1])  # Sort data by instruction id
 
         self.ExerciseInstructionsWithAlertsMngExerciseInstruction = []
-        for index in range(len(self.ExerciseInstructionMngExerciseInstructionData)):
-            '''instruction_id, alert_id \ (alert text + alert image),pos dev,neg dev,stage,type,trigger,ex id??'''
-            ''' what about alert extended id'''
-            current_exe_ins = self.ExerciseInstructionMngExerciseInstructionData[index]
-            current_exe_ins_alert = self.ExerciseInstructionMngExerciseInstructionAlertsData[index]
-            '''self.ExerciseInstructionMngExerciseInstructionAlertsData[
-                current_exe_ins[2] - 1]'''  # this will get id and subtract 1 (list index starts from zero)
-            ins_id = current_exe_ins[1]
-            alert_id = current_exe_ins_alert[0]  # for alert id
-            # alert_text = current_exe_ins_alert[2]
-            # alert_img_link = current_exe_ins_alert[3]
-            alert_pos_dev = current_exe_ins[3]
-            alert_pos_neg = current_exe_ins[4]
-            stage = current_exe_ins[5]
-            type = current_exe_ins[6]
-            trigger = current_exe_ins[7]
-            extended_id = current_exe_ins[8]
-            '''to_add = [ins_id, alert_text, alert_img_link, alert_pos_dev, alert_pos_neg, stage, type, trigger,
-                      extended_id]'''  # for alert image and alert text
-            to_add = [ins_id, alert_id, alert_pos_dev, alert_pos_neg, stage, type, trigger,
-                      extended_id]  # for alert id
-            to_add = tuple(to_add)
-            self.ExerciseInstructionsWithAlertsMngExerciseInstruction.append(to_add)
+        if self.ExerciseInstructionMngExerciseInstructionData != [""]:
+            for index in range(len(self.ExerciseInstructionMngExerciseInstructionData)):
+                '''instruction_id, alert_id \ (alert text + alert image),pos dev,neg dev,stage,type,trigger,ex id??'''
+                ''' what about alert extended id'''
+                current_exe_ins = self.ExerciseInstructionMngExerciseInstructionData[index]
+                current_exe_ins_alert = self.ExerciseInstructionMngExerciseInstructionAlertsData[index]
+                '''self.ExerciseInstructionMngExerciseInstructionAlertsData[
+                    current_exe_ins[2] - 1]'''  # this will get id and subtract 1 (list index starts from zero)
+                ins_id = current_exe_ins[1]
+                alert_id = current_exe_ins_alert[0]  # for alert id
+                # alert_text = current_exe_ins_alert[2]
+                # alert_img_link = current_exe_ins_alert[3]
+                alert_pos_dev = current_exe_ins[3]
+                alert_pos_neg = current_exe_ins[4]
+                stage = current_exe_ins[5]
+                type = current_exe_ins[6]
+                trigger = current_exe_ins[7]
+                extended_id = current_exe_ins[8]
+                '''to_add = [ins_id, alert_text, alert_img_link, alert_pos_dev, alert_pos_neg, stage, type, trigger,
+                          extended_id]'''  # for alert image and alert text
+                to_add = [ins_id, alert_id, alert_pos_dev, alert_pos_neg, stage, type, trigger,
+                          extended_id]  # for alert id
+                to_add = tuple(to_add)
+                self.ExerciseInstructionsWithAlertsMngExerciseInstruction.append(to_add)
 
         # if no exercise instructions exist
         if self.ExerciseInstructionsWithAlertsMngExerciseInstruction == []:
@@ -498,6 +507,8 @@ class AdminApp(QMainWindow):
         self.lineEdit_searchBarExerciseInstructionBarManageExerciseInstructions.textChanged.connect(
             self.ExerciseInstructionWithAlertsMngExerciseInstruction_proxy_model.setFilterFixedString)
 
+        if self.ExerciseInstructionMngExerciseInstructionData == [""]:
+            return
         self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(0,
                                                                                                        QHeaderView.Stretch)
         self.table_ExerciseInstructionsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(1,
@@ -524,7 +535,7 @@ class AdminApp(QMainWindow):
     def ExerciseInstructionClickedMngExerciseInstructions(self):
         index = self.table_ExerciseInstructionsMngExerciseInstructions.currentIndex()
         self.selected_exercise_instruction_id_MngExerciseInstructions = \
-        self.ExerciseInstructionMngExerciseInstructionData[index.row()][0]
+            self.ExerciseInstructionMngExerciseInstructionData[index.row()][0]
         self.label_msgMngExerciseInstructions.setText(
             f"Selected exercise instruction {self.selected_exercise_instruction_id_MngExerciseInstructions}")
         self.label_msgMngExerciseInstructions.show()
@@ -545,7 +556,7 @@ class AdminApp(QMainWindow):
         exe_ins_extended_id = self.selected_extended_alert_id_MngExerciseInstruction
         '''
         extended ID reasons:
-        when a trainee does a movement that exceeds upper case of movment - exmaple: 
+        when a trainee does a movement that exceeds upper case of movement - example: 
         moving the hand towards the ceiling - the correct range is (example) 90->150, 
         the trainee moves the hand until 175 - not good
         '''
@@ -658,6 +669,10 @@ class AdminApp(QMainWindow):
             self.label_messagesMngExercises.show()
             self.loadExercisesData()
 
+            # Update other tabs that use exercises:
+            # Tab - Edit exercises instructions
+            self.loadExerciseToComboBoxExerciseInstructions()
+
     def saveEditedInstruction(self):
         if self.selected_instruction_id == -1:
             self.label_messagesMngInstructions.setText("Please choose instruction")
@@ -681,10 +696,14 @@ class AdminApp(QMainWindow):
             return
         else:
             self.instruction = instruction
-            res = DBConnection.modifyExercise(instruction)
+            res = DBConnection.modifyInstruction(instruction)
             self.loadInstructionsData()
             self.label_messagesMngInstructions.setText("Instruction updated")
             self.label_messagesMngInstructions.show()
+
+            # Update other tabs that use exercises:
+            # Tab - Edit exercises instructions
+            self.loadInstructionsDataForExerciseInstructionTab()
 
     def loadExerciseToScreenFields(self):
         '''if self.selected_exercise_id == -1:
@@ -755,6 +774,10 @@ class AdminApp(QMainWindow):
             self.label_messagesMngExercises.show()
             self.loadExercisesData()
 
+            # Update other tabs that use exercises:
+            # Tab - Edit exercises instructions
+            self.loadExerciseToComboBoxExerciseInstructions()
+
     def addInstruction(self):
         if self.checkEmptyFieldMngInstruction():
             self.label_messagesMngExercises.setText("Make sure all fields are filled")
@@ -772,6 +795,10 @@ class AdminApp(QMainWindow):
             self.label_messagesMngInstructions.setText("Instruction added")
             self.label_messagesMngInstructions.show()
             self.loadInstructionsData()
+
+            # Update other tabs that use exercises:
+            # Tab - Edit exercises instructions
+            self.loadInstructionsDataForExerciseInstructionTab()
 
     def deleteExercise(self):
 
@@ -791,6 +818,10 @@ class AdminApp(QMainWindow):
 
         self.selected_exercise_id = -1
         self.loadExercisesData()
+
+        # Update other tabs that use exercises:
+        # Tab - Edit exercises instructions
+        self.loadExerciseToComboBoxExerciseInstructions()
 
     # load data when exercise table is clicked
     def manageExerciseTableClicked(self):

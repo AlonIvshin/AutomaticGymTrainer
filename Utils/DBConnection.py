@@ -396,7 +396,7 @@ def checkIfInstructionExist(instruction):
 
 
 # QUERY 31: modify existing instruction
-def modifyExercise(instruction):
+def modifyInstruction(instruction):
     cur = con.cursor()
     sql = f'''UPDATE instructions SET vertex1='{instruction.vertex1}', vertex2='{instruction.vertex2}', 
     vertex3 ='{instruction.vertex3}', angle = '{instruction.angle}', description = '{instruction.description}',
