@@ -23,7 +23,7 @@ from Utils.WorkoutEstimationFunctions import *
 from score import FeedbackScreen
 
 # Constants
-NUMBER_OF_FRAMES_BETWEEN_SCORE = 15  # Ofir
+NUMBER_OF_FRAMES_BETWEEN_SCORE = 150  # Ofir
 SET_UP_DELAY_TIME = 4
 IMAGE_WIDTH = 400
 IMAGE_HEIGHT = 400
@@ -138,6 +138,10 @@ class EstimationScreen(QMainWindow):
 
         # QUERY 8: get all images for specific exercise
         all_stage_images_links = DBConnection.getExerciseImages(self.exercise_id)
+        all_stage_images_links = sorted(all_stage_images_links,key=lambda x:x[0])
+        for index in range(len(all_stage_images_links)):
+            all_stage_images_links[index] = all_stage_images_links[index][1]
+
 
         instructions_list = []
         exercise_instructions_list = []
@@ -158,9 +162,17 @@ class EstimationScreen(QMainWindow):
                 Instruction(instruction_Id, vertex1_coordinates, vertex2_coordinates, vertex3_coordinates, ang,
                             instruction_desc, axis))
 
-        # creating the relevant instructions
+        '''# creating the relevant instructions
         for item in instruction_alert_data_list:
-            instructions_list[item.alertInstructionId - 1].instructionAlertData = item
+            instructions_list[item.alertInstructionId - 1].instructionAlertData = item'''
+
+
+
+        for item in instruction_alert_data_list:
+            for index in range(len(instructions_list)):
+                if instructions_list[index].instructionId == item.alertInstructionId:
+                    instructions_list[index].instructionAlertData = item
+                    break
 
         # creating the relevant exercise instructions
         for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviation_Negative, instruction_Stage, exerciseInstruction_Type \
@@ -179,17 +191,17 @@ class EstimationScreen(QMainWindow):
         # convert all links to actual images
         stage_images = []  # change stage images to exercise images
         for image_links in all_stage_images_links:  # all_stage_images_links contains tuples
-            stage_images.append(getImageFromLink(image_links[0]))
+            stage_images.append(getImageFromLink(image_links))
 
         # Ofir
         # Get all alert images
-        alert_wrong_images = []
+        '''alert_wrong_images = []
         for alert in instruction_alert_data_list:
-            alert_wrong_images.append(getImageFromLink(alert.alert_wrong_posture_image_link))
+            alert_wrong_images.append(getImageFromLink(alert.alert_wrong_posture_image_link))'''
 
         queue.put(exercise_instructions_list)
         queue.put(instructions_list)
-        queue.put(alert_wrong_images)
+        #queue.put(alert_wrong_images)
         queue.put(instruction_alert_data_list)
         queue.put(exercise_stages)
         queue.put(stage_images)
@@ -258,7 +270,7 @@ class WorkoutEstimationThread(QThread):
         # mp_pose = self.parameters_queue.get()
         exercise_instructions_list = self.parameters_queue.get()
         instructions_list = self.parameters_queue.get()
-        alert_wrong_images = self.parameters_queue.get()
+        #alert_wrong_images = self.parameters_queue.get()
         instruction_alert_data_list = self.parameters_queue.get()
         exercise_stages = self.parameters_queue.get()
         # mp_drawing = self.parameters_queue.get()
@@ -313,7 +325,11 @@ class WorkoutEstimationThread(QThread):
                             continue
 
                         # get current instruction
-                        current_instruction = instructions_list[exercise_instruction_loop.instructionId - 1]
+                        for item in instructions_list:
+                            if item.instructionId == exercise_instruction_loop.instructionId:
+                                current_instruction = item
+                                break
+                        #current_instruction = instructions_list[exercise_instruction_loop.instructionId - 1]
 
                         # test for Depth - only XY plain will be tested
                         if E_InstructionAxis[current_instruction.instructionAxis].value != E_InstructionAxis.XY.value:
@@ -355,8 +371,8 @@ class WorkoutEstimationThread(QThread):
                                 triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
-                                wrong_posture_image_to_display = alert_wrong_images[
-                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                '''wrong_posture_image_to_display = alert_wrong_images[
+                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0'''
                                 update_posture_image_flag = True
 
                                 # ofir - score
@@ -368,9 +384,14 @@ class WorkoutEstimationThread(QThread):
                             # check for extended deviation
                             if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
                                 if starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 >= tested_angle:
-                                    triggered_error_list_text.append(
+                                    for item in instruction_alert_data_list:
+                                        if item.alertId == exercise_instruction_loop.alertExtendedId:
+                                            triggered_error_list_text.append(item.alertText)
+                                            break
+
+                                    '''triggered_error_list_text.append(
                                         instruction_alert_data_list[
-                                            exercise_instruction_loop.alertExtendedId].alertText)
+                                            exercise_instruction_loop.alertExtendedId].alertText)'''
                                     error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                     error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -378,8 +399,8 @@ class WorkoutEstimationThread(QThread):
                                     triggered_error_list.append(
                                         TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                         repNumber=repetition_counter))
-                                    wrong_posture_image_to_display = alert_wrong_images[
-                                        exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                    '''wrong_posture_image_to_display = alert_wrong_images[
+                                        exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0'''
                                     update_posture_image_flag = True
 
                                     # ofir - score
@@ -400,8 +421,8 @@ class WorkoutEstimationThread(QThread):
                                 triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
-                                wrong_posture_image_to_display = alert_wrong_images[
-                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                '''wrong_posture_image_to_display = alert_wrong_images[
+                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0'''
                                 update_posture_image_flag = True
 
                                 # ofir - score
@@ -412,9 +433,15 @@ class WorkoutEstimationThread(QThread):
 
                             if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
                                 if starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1 <= tested_angle:
-                                    triggered_error_list_text.append(
+                                    for item in instruction_alert_data_list:
+                                        if item.alertId == exercise_instruction_loop.alertExtendedId:
+                                            triggered_error_list_text.append(item.alertText)
+                                            break
+
+
+                                    '''triggered_error_list_text.append(
                                         instruction_alert_data_list[
-                                            exercise_instruction_loop.alertExtendedId].alertText)
+                                            exercise_instruction_loop.alertExtendedId].alertText)'''
                                     error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                     error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
@@ -422,8 +449,8 @@ class WorkoutEstimationThread(QThread):
                                     triggered_error_list.append(
                                         TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                         repNumber=repetition_counter))
-                                    wrong_posture_image_to_display = alert_wrong_images[
-                                        exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                    '''wrong_posture_image_to_display = alert_wrong_images[
+                                        exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0'''
                                     update_posture_image_flag = True
 
                                     # ofir - score
@@ -446,8 +473,8 @@ class WorkoutEstimationThread(QThread):
                                 triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
-                                wrong_posture_image_to_display = alert_wrong_images[
-                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0
+                                '''wrong_posture_image_to_display = alert_wrong_images[
+                                    exercise_instruction_loop.alertId - 1]  # alert id starts from 1, array from 0'''
                                 update_posture_image_flag = True
 
                                 # ofir - score
@@ -475,6 +502,7 @@ class WorkoutEstimationThread(QThread):
                         repetition_direction = 1
 
                 except Exception as e:
+                    print(e)
                     pass
                     # status image alerts
 
@@ -505,7 +533,8 @@ class WorkoutEstimationThread(QThread):
                     posture_image_to_display = wrong_posture_image_to_display
                 else:
                     # Next stage posture
-                    posture_image_to_display = stage_images[current_stage + repetition_direction - 1]
+                    pass
+                posture_image_to_display = stage_images[current_stage + repetition_direction - 1]
 
 
                 posture_image_to_display = cv2.resize(posture_image_to_display,

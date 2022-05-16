@@ -41,11 +41,11 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
        <string/>
       </property>
       <property name="styleSheet">
-       <string notr="true">QWidget#tab_landingPage,#tab_manageExercises,#tab_editExercise,#tab_manageInstructions,#tab_manageAlerts{
+       <string notr="true">QWidget#tab_landingPage,#tab_manageExercises,#tab_manageStageImages,#tab_editExercise,#tab_manageInstructions,#tab_manageAlerts{
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_landingPage">
        <attribute name="title">
@@ -75,8 +75,8 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
        <widget class="QLabel" name="label_bottomtxt">
         <property name="geometry">
          <rect>
-          <x>630</x>
-          <y>350</y>
+          <x>710</x>
+          <y>360</y>
           <width>351</width>
           <height>61</height>
          </rect>
@@ -92,8 +92,8 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QLabel" name="label_maintxt">
         <property name="geometry">
          <rect>
-          <x>550</x>
-          <y>20</y>
+          <x>680</x>
+          <y>30</y>
           <width>650</width>
           <height>81</height>
          </rect>
@@ -108,7 +108,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QLineEdit" name="lineEdit_searchBarMngExercises">
         <property name="geometry">
          <rect>
-          <x>420</x>
+          <x>460</x>
           <y>130</y>
           <width>831</width>
           <height>31</height>
@@ -129,7 +129,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QPushButton" name="bt_deleteExerciseMngExercises">
         <property name="geometry">
          <rect>
-          <x>800</x>
+          <x>860</x>
           <y>790</y>
           <width>211</width>
           <height>41</height>
@@ -147,7 +147,7 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QPushButton" name="bt_addExerciseMngExercises">
         <property name="geometry">
          <rect>
-          <x>570</x>
+          <x>640</x>
           <y>790</y>
           <width>211</width>
           <height>41</height>
@@ -165,8 +165,8 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QLabel" name="label_messagesMngExercises">
         <property name="geometry">
          <rect>
-          <x>420</x>
-          <y>820</y>
+          <x>640</x>
+          <y>850</y>
           <width>551</width>
           <height>61</height>
          </rect>
@@ -182,7 +182,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QTableView" name="table_exercisesMngExercises">
         <property name="geometry">
          <rect>
-          <x>420</x>
+          <x>460</x>
           <y>170</y>
           <width>831</width>
           <height>192</height>
@@ -195,7 +195,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QLineEdit" name="lineEdit_enameMngExercises">
         <property name="geometry">
          <rect>
-          <x>420</x>
+          <x>460</x>
           <y>415</y>
           <width>831</width>
           <height>29</height>
@@ -216,8 +216,8 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QLineEdit" name="lineEdit_videolinkMngExercises">
         <property name="geometry">
          <rect>
-          <x>630</x>
-          <y>645</y>
+          <x>690</x>
+          <y>650</y>
           <width>351</width>
           <height>29</height>
          </rect>
@@ -237,7 +237,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QLineEdit" name="lineEdit_stagenumMngExercises">
         <property name="geometry">
          <rect>
-          <x>630</x>
+          <x>690</x>
           <y>610</y>
           <width>351</width>
           <height>29</height>
@@ -258,7 +258,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QPlainTextEdit" name="plainTextEdit_descriptionMngExercises">
         <property name="geometry">
          <rect>
-          <x>420</x>
+          <x>460</x>
           <y>450</y>
           <width>831</width>
           <height>151</height>
@@ -271,8 +271,8 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QLineEdit" name="lineEdit_mainTargetMngExercises">
         <property name="geometry">
          <rect>
-          <x>630</x>
-          <y>680</y>
+          <x>690</x>
+          <y>690</y>
           <width>351</width>
           <height>29</height>
          </rect>
@@ -292,7 +292,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
        <widget class="QPushButton" name="bt_clearFormMngExercises">
         <property name="geometry">
          <rect>
-          <x>570</x>
+          <x>640</x>
           <y>730</y>
           <width>211</width>
           <height>41</height>
@@ -310,7 +310,7 @@ background-color: rgb(205, 236, 255);</string>
        <widget class="QPushButton" name="bt_saveChangesMngExercises">
         <property name="geometry">
          <rect>
-          <x>800</x>
+          <x>860</x>
           <y>730</y>
           <width>211</width>
           <height>41</height>
@@ -323,6 +323,140 @@ background-color: rgb(205, 236, 255);</string>
         </property>
         <property name="text">
          <string>Save changes</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_manageStageImages">
+       <attribute name="title">
+        <string>Stage Images</string>
+       </attribute>
+       <widget class="QLineEdit" name="lineEdit_stagenumImageLinkMngExercisesStageImages">
+        <property name="geometry">
+         <rect>
+          <x>780</x>
+          <y>410</y>
+          <width>191</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="placeholderText">
+         <string>Image link</string>
+        </property>
+       </widget>
+       <widget class="QTableView" name="table_StageImagesMngExercisesStageImages">
+        <property name="geometry">
+         <rect>
+          <x>510</x>
+          <y>210</y>
+          <width>521</width>
+          <height>192</height>
+         </rect>
+        </property>
+        <property name="selectionBehavior">
+         <enum>QAbstractItemView::SelectRows</enum>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_selectExerciseMngExerciseStageImages">
+        <property name="geometry">
+         <rect>
+          <x>610</x>
+          <y>180</y>
+          <width>331</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="currentText">
+         <string/>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_StageImageMaintxt">
+        <property name="geometry">
+         <rect>
+          <x>540</x>
+          <y>90</y>
+          <width>650</width>
+          <height>81</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">font: 75 36pt &quot;MS Shell Dlg 2&quot;;color:rgb(255, 255, 255)</string>
+        </property>
+        <property name="text">
+         <string>Manage Stage Images</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bt_deleteExerciseMngExercisesStageImages">
+        <property name="geometry">
+         <rect>
+          <x>780</x>
+          <y>460</y>
+          <width>191</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+        </property>
+        <property name="text">
+         <string>Delete image</string>
+        </property>
+       </widget>
+       <widget class="QPushButton" name="bt_addExerciseMngExercisesStageImages">
+        <property name="geometry">
+         <rect>
+          <x>570</x>
+          <y>460</y>
+          <width>191</width>
+          <height>41</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">border-radius:20px;
+font: 75 14pt &quot;MS Shell Dlg 2&quot;;
+background-color: rgb(205, 236, 255);</string>
+        </property>
+        <property name="text">
+         <string>Add new image</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_messagesMngExercisesStageImages">
+        <property name="geometry">
+         <rect>
+          <x>560</x>
+          <y>580</y>
+          <width>551</width>
+          <height>61</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color:rgb(255, 255, 255);
+font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
+        </property>
+        <property name="text">
+         <string>Messages</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="comboBox_selectStageNumberMngExerciseStageImages">
+        <property name="geometry">
+         <rect>
+          <x>580</x>
+          <y>410</y>
+          <width>171</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="currentText">
+         <string/>
         </property>
        </widget>
       </widget>

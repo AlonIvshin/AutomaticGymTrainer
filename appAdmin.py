@@ -1,3 +1,5 @@
+import string
+
 import PyQt5.QtCore as QtCore
 import cv2
 import mediapipe.python.solutions.pose_connections
@@ -78,7 +80,19 @@ class AdminApp(QMainWindow):
         # Tab #1 - Greetings
         self.lbl_welcome.setText('Welcome ' + current_user.first_name + ' ' + current_user.last_name)  # greeting user
 
-        # Tab #2
+        # Tab #3 - Stage Images
+        self.bt_addExerciseMngExercisesStageImages.clicked.connect(self.insertNewStageImageLink)
+        self.bt_deleteExerciseMngExercisesStageImages.clicked.connect(self.deleteStageImageLink)
+        self.loadExerciseToComboBoxExerciseStageImages()
+        self.comboBox_selectExerciseMngExerciseStageImages.currentIndexChanged.connect(
+            self.mngExerciseStageImagesExerciseSelected)
+
+        self.comboBox_selectStageNumberMngExerciseStageImages.currentIndexChanged.connect(
+            self.mngExerciseStageImageStageSelected)
+
+        self.label_messagesMngExercisesStageImages.hide()
+
+        # Tab #4
         '''
         1. Set functions
         2. Load Tables and set table view
@@ -97,7 +111,7 @@ class AdminApp(QMainWindow):
         self.table_exercisesMngExercises.clicked.connect(self.manageExerciseTableClicked)
         self.label_messagesMngExercises.hide()
 
-        # Tab #3 - Manage instructions
+        # Tab #4 - Manage instructions
         self.loadCoordinatesImage()  # load image
         self.initManageInstructionsComboBoxs()  # set combo boxes
 
@@ -114,7 +128,7 @@ class AdminApp(QMainWindow):
         self.table_instructionsMngInstructions.clicked.connect(self.manageInstructionsTableClicked)
         self.label_messagesMngInstructions.hide()
 
-        # Tab #4 - Edit exercises (instructions)
+        # Tab #5 - Edit exercises (instructions)
         # image loaded with loadCoordinates function - no need to recall
         self.loadExerciseToComboBoxExerciseInstructions()
         self.comboBox_selectExerciseMngExerciseInstructions.currentIndexChanged.connect(
@@ -159,7 +173,7 @@ class AdminApp(QMainWindow):
         self.label_selectedExtendedAlertMngExerciseInstructions.hide()
         self.label_msgMngExerciseInstructions.hide()
 
-        # Tab #5 - Mange Alerts
+        # Tab #6 - Mange Alerts
         self.loadInstructionsDataForAlerts()
         self.tb_instructionsMngAlerts.setColumnHidden(0, True)
         self.tb_instructionsMngAlerts.clicked.connect(self.instructionsAlertsTablePressed)
@@ -172,13 +186,157 @@ class AdminApp(QMainWindow):
         self.bt_deleteAlertMngAlerts.clicked.connect(self.deleteAlert)
         self.bt_updateAlertMngAlerts.clicked.connect(self.updateAlert)
 
-    # Tab4
+    # For tab #3 - Stage images
+    def loadExerciseToComboBoxExerciseStageImages(self):
+        self.ExerciseStageImagesExerciseComboBoxData = res = DBConnection.getExerciesNamesAndTarget()
+        self.selected_exercise_id_MngExerciseStageImages = -1
+
+        self.comboBox_selectExerciseMngExerciseStageImages.clear()
+        self.comboBox_selectExerciseMngExerciseStageImages.addItem("Select exercise")
+        for item in res:
+            self.comboBox_selectExerciseMngExerciseStageImages.addItem(item[1])
+
+    # Tab 3
+    def mngExerciseStageImagesExerciseSelected(self, index):
+        """ Need to load to combo box """
+        '''comboBox_selectExerciseMngExerciseInstructions'''
+        ''''''
+
+        ''' need to get exercise from combo box index'''
+        if index == 0:
+            return
+        self.selected_exercise_id_MngExerciseStageImages = self.ExerciseStageImagesExerciseComboBoxData[index - 1][
+            0]  # index -1 = initial index is select exercise
+        self.loadStageImageLinksForTableMngExerciseStageImages(
+            exercise_id=self.selected_exercise_id_MngExerciseStageImages)
+        self.loadExerciseStagesToComboBoxExerciseStageImages(self.selected_exercise_id_MngExerciseStageImages)
+
+    # For tab #3 - Stage images
+    def loadStageImageLinksForTableMngExerciseStageImages(self, exercise_id):
+        headers = ["Stage Number", 'Image link']
+
+        self.ExerciseStageImageLinksData = DBConnection.getExerciseImages(exerciseId=exercise_id)
+        if self.ExerciseStageImageLinksData == []:
+            self.ExerciseStageImageLinksData = [""]
+        else:
+            self.ExerciseStageImageLinksData = sorted(self.ExerciseStageImageLinksData,
+                                                      key=lambda x: x[0])  # sort by stage number
+
+        self.ExerciseStageImageLinksModel = TableModel(self.ExerciseStageImageLinksData)
+        self.ExerciseStageImageLinksModel.setHeaderList(headers)
+        self.ExerciseStageImageLinks_proxy_model = QSortFilterProxyModel()
+        self.ExerciseStageImageLinks_proxy_model.setFilterKeyColumn(-1)
+        self.ExerciseStageImageLinks_proxy_model.setSourceModel(self.ExerciseStageImageLinksModel)
+        self.ExerciseStageImageLinks_proxy_model.sort(0, Qt.AscendingOrder)
+        self.table_StageImagesMngExercisesStageImages.setModel(self.ExerciseStageImageLinks_proxy_model)
+        # Handle empty table case
+        if self.ExerciseStageImageLinksData == [""]:
+            self.selected_stage_id_table_MngExerciseStageImage = 0
+            self.label_messagesMngExercisesStageImages.hide()
+            return
+        self.table_StageImagesMngExercisesStageImages.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.table_StageImagesMngExercisesStageImages.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.table_StageImagesMngExercisesStageImages.clicked.connect(self.ExerciseStageClickedMngExerciseStageImages)
+
+    # Tab 3
+    def ExerciseStageClickedMngExerciseStageImages(self):
+        index = self.table_StageImagesMngExercisesStageImages.currentIndex()
+        self.selected_stage_id_table_MngExerciseStageImage = self.ExerciseStageImageLinksData[index.row()][0]
+        self.label_messagesMngExercisesStageImages.setText(
+            f"Selected stage {self.selected_stage_id_table_MngExerciseStageImage}")
+        self.label_messagesMngExercisesStageImages.show()
+
+    # Tab 3
+    def loadExerciseStagesToComboBoxExerciseStageImages(self, exercise_id):
+
+        self.ExerciseStageImagesStageNumberData = res = DBConnection.getMaxStageForExericse(exercise_id=exercise_id)
+        self.ExerciseStageImagesStageNumberData = res = list(range(1, int(res[0][0]) + 1))
+        self.selected_stage_number_id_MngExerciseStageImages = -1
+
+        self.comboBox_selectStageNumberMngExerciseStageImages.clear()
+        self.comboBox_selectStageNumberMngExerciseStageImages.addItem("Select stage number")
+        for item in self.ExerciseStageImagesStageNumberData:
+            self.comboBox_selectStageNumberMngExerciseStageImages.addItem(str(item))
+
+    # Tab 3
+    def mngExerciseStageImageStageSelected(self, index):
+        ''' need to get exercise from combo box index'''
+        if index == 0:
+            return
+        print(self.ExerciseStageImagesStageNumberData)
+        self.selected_stage_number_id_MngExerciseStageImages = self.ExerciseStageImagesStageNumberData[index - 1]
+
+    # index -1 = initial index is select exercise
+
+    # Tab 3
+    def insertNewStageImageLink(self):
+        link = self.lineEdit_stagenumImageLinkMngExercisesStageImages.text()
+        if link == '':
+            self.label_messagesMngExercisesStageImages.setText("Fill all fields")
+            self.label_messagesMngExercisesStageImages.show()
+            return
+        if self.selected_exercise_id_MngExerciseStageImages <= 0:
+            self.label_messagesMngExercisesStageImages.setText("Select exercise first")
+            self.label_messagesMngExercisesStageImages.show()
+            return
+
+        if self.selected_stage_number_id_MngExerciseStageImages <= 0:
+            self.label_messagesMngExercisesStageImages.setText("Select stage first")
+            self.label_messagesMngExercisesStageImages.show()
+            return
+
+        res = DBConnection.stageImageExist(self.selected_exercise_id_MngExerciseStageImages,
+                                           self.selected_stage_number_id_MngExerciseStageImages)
+        if res:
+            self.label_messagesMngExercisesStageImages.setText("Already exist!")
+            self.label_messagesMngExercisesStageImages.show()
+            return
+
+        res = DBConnection.insertNewStageImage(self.selected_exercise_id_MngExerciseStageImages,
+                                               self.selected_stage_number_id_MngExerciseStageImages,
+                                               link)
+
+        if res:
+            self.label_messagesMngExercisesStageImages.setText("Added !")
+            self.label_messagesMngExercisesStageImages.show()
+
+            self.loadStageImageLinksForTableMngExerciseStageImages(
+                exercise_id=self.selected_exercise_id_MngExerciseStageImages)
+            '''reload table'''
+            return
+
+    # Tab 3
+    def deleteStageImageLink(self):
+
+        if self.selected_exercise_id_MngExerciseStageImages <= 0:
+            self.label_messagesMngExercisesStageImages.setText("Select exercise first")
+            self.label_messagesMngExercisesStageImages.show()
+            return
+
+        if self.selected_stage_id_table_MngExerciseStageImage <= 0:
+            self.label_messagesMngExercisesStageImages.setText("Select stage first")
+            self.label_messagesMngExercisesStageImages.show()
+            return
+
+        res = DBConnection.deleteStageImage(self.selected_exercise_id_MngExerciseStageImages,
+                                            self.selected_stage_id_table_MngExerciseStageImage)
+
+        if res:
+            self.label_messagesMngExercisesStageImages.setText("Deleted !")
+            self.label_messagesMngExercisesStageImages.show()
+
+            self.loadStageImageLinksForTableMngExerciseStageImages(
+                exercise_id=self.selected_exercise_id_MngExerciseStageImages)
+            '''reload table'''
+            return
+
+    # Tab6
     def ClearLabelsMngExerciseInstructions(self):
         self.label_selectedAlertMngExerciseInstructions.setText("")
         self.label_selectedExtendedAlertMngExerciseInstructions.setText("")
         self.label_msgMngExerciseInstructions.setText("")
 
-    # Load image to Tab #2
+    # Load image to Tab #3
     # Load posture image for who needs it
     def loadCoordinatesImage(self):
         vertexes_image_url = 'https://i.imgur.com/C5eBW20.png'
@@ -230,7 +388,7 @@ class AdminApp(QMainWindow):
         self.loadAlertsForSelectedInstruction(self.table_AlertsMngExerciseInstructions)
         self.loadExtendedAlertsForSelectedInstruction(self.table_extendedAlertsMngExerciseInstructions)
 
-    # for tab 3
+    # for tab 4
     def deleteInstructionMngInstructions(self):
         if self.selected_instruction_id == -1:
             self.label_messagesMngInstructions.setText("Please select instruction before deleting")
@@ -262,8 +420,7 @@ class AdminApp(QMainWindow):
             # Tab- Mange Alerts
             self.loadInstructionsDataForAlerts()
 
-
-    # For first table in tab #4 - Edit exercise
+    # For first table in tab #5 - Edit exercise
     def loadInstructionsDataForExerciseInstructionTab(self):
         self.ClearLabelsMngExerciseInstructions()  # Hide labels
         headers = ['', 'Vertex1', 'Vertex2', 'Vertex3', 'Angle', 'Description', 'Axis']
@@ -286,7 +443,7 @@ class AdminApp(QMainWindow):
         # set instruction mng clicked action
         # self.table_instructionsMngExerciseInstructions.clicked.connect(self.InstructionSelected)
 
-    # For alerts table in tab  #4 - Edit exercise
+    # For alerts table in tab  #5 - Edit exercise
     def loadAlertsForSelectedInstruction(self, table):
         headers = ['', '', 'Text', 'Link']
         self.alertsDataMngExerciseInstructions = DBConnection.getAlertsOfInstruction(
@@ -317,7 +474,7 @@ class AdminApp(QMainWindow):
         self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
         self.table_AlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
 
-    # For extended alerts table in tab #4 - Edit exercise
+    # For extended alerts table in tab #5 - Edit exercise
     def loadExtendedAlertsForSelectedInstruction(self, table):
         headers = ['', '', 'Text', 'Link']
         # self.alertsDataMngExerciseInstructions = DBConnection.getAlertsOfInstruction(
@@ -361,7 +518,7 @@ class AdminApp(QMainWindow):
         self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
         self.table_extendedAlertsMngExerciseInstructions.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
 
-    # tab  # 4 - Edit exercise
+    # tab  # 5 - Edit exercise
     def manageAlertTableClickedMngExerciseInstruction(self):
         index = self.table_AlertsMngExerciseInstructions.currentIndex()
         newIndex = self.table_AlertsMngExerciseInstructions.model().index(index.row(), 0)
@@ -375,7 +532,7 @@ class AdminApp(QMainWindow):
             f"Selected alert {self.selected_alert_id_MngExerciseInstruction}")
         self.label_selectedAlertMngExerciseInstructions.show()
 
-    # tab  # 4
+    # tab  # 5
     def manageExtendedAlertTableClickedMngExerciseInstruction(self):
         index = self.table_extendedAlertsMngExerciseInstructions.currentIndex()
         newIndex = self.table_extendedAlertsMngExerciseInstructions.model().index(index.row(), 0)
@@ -389,21 +546,21 @@ class AdminApp(QMainWindow):
             f"Selected extended alert {self.selected_extended_alert_id_MngExerciseInstruction}")
         self.label_selectedExtendedAlertMngExerciseInstructions.show()
 
-    # TAB 4 - Loads trigger types into the combo box
+    # TAB 5 - Loads trigger types into the combo box
     def loadDevTriggerToComboBoxExerciseInstructions(self):
         self.selected_trigger_id_MngExerciseInstructions = -1
         self.comboBox_alertDevTriggerMngExerciseInstructions.addItem("Select trigger")
         for item in ['Both', 'Negative', 'Positive']:
             self.comboBox_alertDevTriggerMngExerciseInstructions.addItem(item)
 
-    # TAB 4 - Loads instruction types into the combo box
+    # TAB 5 - Loads instruction types into the combo box
     def loadInstructionTypeToComboBoxExerciseInstructions(self):
         self.selected_instruction_type_id_MngExerciseInstructions = -1
         self.comboBox_instructionTypeMngExerciseInstructions.addItem("Select instruction type")
         for item in ['Dynamic', 'Static']:
             self.comboBox_instructionTypeMngExerciseInstructions.addItem(item)
 
-    # tab  # 4 - Edit exercise
+    # tab  # 5 - Edit exercise
     def loadExerciseToComboBoxExerciseInstructions(self):
         self.ExerciseInstructionsExerciseComboBoxData = res = DBConnection.getExerciesNamesAndTarget()
         self.selected_exercise_id_MngExerciseInstructions = -1
@@ -413,7 +570,7 @@ class AdminApp(QMainWindow):
         for item in res:
             self.comboBox_selectExerciseMngExerciseInstructions.addItem(item[1])
 
-    # tab  # 4
+    # tab  # 5
     def mngExerciseInstructionExerciseSelected(self, index):
         """ Need to load to combo box """
         '''comboBox_selectExerciseMngExerciseInstructions'''
@@ -427,21 +584,21 @@ class AdminApp(QMainWindow):
         self.loadExerciseInstructionsForSelectedExercise(
             self.selected_exercise_id_MngExerciseInstructions)  # load instructions
 
-    # tab  # 4
+    # tab  # 5
     def mngExerciseInstructionAlertDevTriggerSelected(self, index):
         self.selected_trigger_id_MngExerciseInstructions = index - 1
         print("trigger " + str(self.selected_trigger_id_MngExerciseInstructions))
 
-    # tab  # 4
+    # tab  # 5
     def mngExerciseInstructionInstructionTypeSelected(self, index):
         self.selected_instruction_type_id_MngExerciseInstructions = index - 1
         print("type  " + str(self.selected_instruction_type_id_MngExerciseInstructions))
 
-    # tab  # 4 - Edit exercise
+    # tab  # 5 - Edit exercise
     def setLabelsForMngExerciseInstructions(self):
         pass
 
-    # tab  # 4 - Edit exercise
+    # tab  # 5 - Edit exercise
     def loadExerciseInstructionsForSelectedExercise(self, exercise_id):
         ''' sort by instruction id '''
         '''headers = ['Instruction ID', 'Alert text', 'Alert image', 'Positive deviation', 'Negative deviation', 'Stage',
@@ -455,8 +612,9 @@ class AdminApp(QMainWindow):
         if self.ExerciseInstructionMngExerciseInstructionData == []:
             self.ExerciseInstructionMngExerciseInstructionData = [""]
         else:
-            self.ExerciseInstructionMngExerciseInstructionData = sorted(self.ExerciseInstructionMngExerciseInstructionData,
-                                                                    key=lambda x: x[2])  # Sort data by instruction id
+            self.ExerciseInstructionMngExerciseInstructionData = sorted(
+                self.ExerciseInstructionMngExerciseInstructionData,
+                key=lambda x: x[2])  # Sort data by instruction id
 
         self.ExerciseInstructionMngExerciseInstructionAlertsData = DBConnection.getAllAlertsData(exercise_id)
         self.ExerciseInstructionMngExerciseInstructionAlertsData = sorted(
@@ -542,7 +700,7 @@ class AdminApp(QMainWindow):
             f"Selected exercise instruction {self.selected_exercise_instruction_id_MngExerciseInstructions}")
         self.label_msgMngExerciseInstructions.show()
 
-    # tab  # 4 - Add exercise instructions
+    # tab  # 5 - Add exercise instructions
     def addExerciseInsturctionMngExerciseInstruction(self):
         ins_id = self.selected_instruction_id_MngExerciseInstruction
         alert_id = self.selected_alert_id_MngExerciseInstruction
@@ -553,8 +711,8 @@ class AdminApp(QMainWindow):
         pos_dev = self.lineEdit_posDevMngExerciseInstructions.text()
         neg_dev = self.lineEdit_negDevMngExerciseInstructions.text()
         stage = self.lineEdit_stageMngExerciseInstructions.text()
-        ex_ins_type = self.comboBox_instructionTypeMngExerciseInstructions.currentText()
-        ex_ins_trigger = self.comboBox_alertDevTriggerMngExerciseInstructions.currentText()
+        ex_ins_type = string.upper(self.comboBox_instructionTypeMngExerciseInstructions.currentText())
+        ex_ins_trigger = string.upper(self.comboBox_alertDevTriggerMngExerciseInstructions.currentText())
         exe_ins_extended_id = self.selected_extended_alert_id_MngExerciseInstruction
         '''
         extended ID reasons:
@@ -572,25 +730,25 @@ class AdminApp(QMainWindow):
         # -1 -> creates new exercise instruction
         exe_ins = ExerciseInstruction(-1, self.selected_exercise_id_MngExerciseInstructions, ins_id, alert_id, pos_dev,
                                       neg_dev, stage, ex_ins_type, ex_ins_trigger, exe_ins_extended_id)
-        res = DBConnection.addNewExerciseInstruction(exe_ins)
 
-        ''' Don't forget to reload the table after this line '''
-        ''' Don't forget to reload the table after this line '''
-        ''' Don't forget to reload the table after this line '''
-        ''' Don't forget to reload the table after this line '''
-        ''' Don't forget to reload the table after this line '''
+        res = DBConnection.exerciseInstructionExist(exe_ins)
+        if res:
+            self.label_msgMngExerciseInstructions.setText("Already exist!")
+            self.label_msgMngExerciseInstructions.show()
+            return
+        res = DBConnection.addNewExerciseInstruction(exe_ins)
 
         # exercise id
         self.loadExerciseInstructionsForSelectedExercise(self.selected_exercise_id_MngExerciseInstructions)
 
-    # tab  # 4 - delete exercise instructions
+    # tab  # 5 - delete exercise instructions
     def deleteExerciseInstructionMngExerciseInstruction(self):
         # self.selected_exercise_instruction_id_MngExerciseInstructions - holds exercise instruction id
         if self.selected_exercise_instruction_id_MngExerciseInstructions == -1:
             self.label_msgMngExerciseInstructions.setText("Please choose exercise instruction")
             self.label_msgMngExerciseInstructions.show()
             return
-        res = DBConnection.deleteExerciseInsturction(self.selected_exercise_instruction_id_MngExerciseInstructions)
+        res = DBConnection.deleteExerciseInstruction(self.selected_exercise_instruction_id_MngExerciseInstructions)
         if res:
             self.label_msgMngExerciseInstructions.setText("exercise instruction deleted")
             self.label_msgMngExerciseInstructions.show()
@@ -598,7 +756,7 @@ class AdminApp(QMainWindow):
 
         pass
 
-    # tab  # 4 - Edit exercise
+    # tab  # 5 - Edit exercise
     def checkFilledAreFullMngExerciseInstructions(self):
         return self.lineEdit_posDevMngExerciseInstructions.text() == '' or \
                self.lineEdit_negDevMngExerciseInstructions.text() == '' or \
@@ -772,6 +930,13 @@ class AdminApp(QMainWindow):
                             self.plainTextEdit_descriptionMngExercises.toPlainText(),
                             self.lineEdit_stagenumMngExercises.text()
                             , self.lineEdit_mainTargetMngExercises.text())
+
+        res = DBConnection.exerciseExist(exercise)
+        if res:
+            self.label_messagesMngExercises.setText("Exericse allready exist!")
+            self.label_messagesMngExercises.show()
+            return
+
         res = DBConnection.addNewExercise(exercise)
         if res:
             self.label_messagesMngExercises.setText("Exercise added")
@@ -794,6 +959,12 @@ class AdminApp(QMainWindow):
         instruction = Instruction(-1, vertex1, vertex2, vertex3, self.lineEdit_angleMngInstructions.text()
                                   , self.plainTextEdit_descriptionMngInstructions.toPlainText(),
                                   str(self.comboBox_axisMngInstructions.currentText()))
+        res = DBConnection.instructionExist(instruction)
+        if res:
+            self.label_messagesMngExercises.setText("Already exist")
+            self.label_messagesMngExercises.show()
+            return
+
         res = DBConnection.addNewInstruction(instruction)
         if res:
             self.label_messagesMngInstructions.setText("Instruction added")
@@ -806,9 +977,7 @@ class AdminApp(QMainWindow):
             # Tab - Manage Alerts
             self.loadInstructionsDataForAlerts()
 
-
     def deleteExercise(self):
-
         if self.selected_exercise_id == -1:
             self.label_messagesMngExercises.setText("Choose exercise before delete")
             self.label_messagesMngExercises.show()
@@ -1017,21 +1186,15 @@ class AdminApp(QMainWindow):
             self.label_messagesMngAlerts.show()
             self.loadInstructionsAlerts(self.selected_instructionAlerts_id)
 
+    '''def openInstructionsWindow(self):
+        if self.i_eid.text() != '':
+            vid_id = DBConnection.getVideoId(self.i_eid.text())
+            ins = WatchExerciseInstructions(vid_id, self.i_eid.text())
+            ins.show()
+            self.lbl_alert.hide()
+        else:
+            self.lbl_alert.show()'''
 
-'''def openInstructionsWindow(self):
-    if self.i_eid.text() != '':
-        vid_id = DBConnection.getVideoId(self.i_eid.text())
-        ins = WatchExerciseInstructions(vid_id, self.i_eid.text())
-        ins.show()
-        self.lbl_alert.hide()
-    else:
-        self.lbl_alert.show()'''
-
-'''def closeEvent(self, event):
-    print("The user: " + self.current_user.first_name + ' ' + self.current_user.last_name + ' ' + "logged out!")
-    DBConnection.logOutCurrentUser(self.current_user.user_id)'''
-
-# ToDo:
-'''
-   Check that delete exercise is working - delete all instructions as well?
-'''
+    '''def closeEvent(self, event):
+        print("The user: " + self.current_user.first_name + ' ' + self.current_user.last_name + ' ' + "logged out!")
+        DBConnection.logOutCurrentUser(self.current_user.user_id)'''
