@@ -185,6 +185,7 @@ class AdminApp(QMainWindow):
         self.selected_alert_id = -1
         self.bt_deleteAlertMngAlerts.clicked.connect(self.deleteAlert)
         self.bt_updateAlertMngAlerts.clicked.connect(self.updateAlert)
+        self.label_messagesMngAlerts.hide()
 
     # For tab #3 - Stage images
     def loadExerciseToComboBoxExerciseStageImages(self):
@@ -249,7 +250,7 @@ class AdminApp(QMainWindow):
     # Tab 3
     def loadExerciseStagesToComboBoxExerciseStageImages(self, exercise_id):
 
-        self.ExerciseStageImagesStageNumberData = res = DBConnection.getMaxStageForExericse(exercise_id=exercise_id)
+        self.ExerciseStageImagesStageNumberData = res = DBConnection.getMaxStageForExercise(exercise_id=exercise_id)
         self.ExerciseStageImagesStageNumberData = res = list(range(1, int(res[0][0]) + 1))
         self.selected_stage_number_id_MngExerciseStageImages = -1
 
@@ -711,9 +712,12 @@ class AdminApp(QMainWindow):
         pos_dev = self.lineEdit_posDevMngExerciseInstructions.text()
         neg_dev = self.lineEdit_negDevMngExerciseInstructions.text()
         stage = self.lineEdit_stageMngExerciseInstructions.text()
-        ex_ins_type = string.upper(self.comboBox_instructionTypeMngExerciseInstructions.currentText())
-        ex_ins_trigger = string.upper(self.comboBox_alertDevTriggerMngExerciseInstructions.currentText())
-        exe_ins_extended_id = self.selected_extended_alert_id_MngExerciseInstruction
+        ex_ins_type = self.comboBox_instructionTypeMngExerciseInstructions.currentText().upper()
+        ex_ins_trigger = self.comboBox_alertDevTriggerMngExerciseInstructions.currentText().upper()
+        if ex_ins_trigger != 'BOTH':
+            exe_ins_extended_id = self.selected_extended_alert_id_MngExerciseInstruction
+        else:
+            exe_ins_extended_id = 0
         '''
         extended ID reasons:
         when a trainee does a movement that exceeds upper case of movement - example: 
@@ -727,6 +731,8 @@ class AdminApp(QMainWindow):
         selected_trigger_id_MngExerciseInstructions 
         selected_instruction_type_id_MngExerciseInstructions
         '''
+
+
         # -1 -> creates new exercise instruction
         exe_ins = ExerciseInstruction(-1, self.selected_exercise_id_MngExerciseInstructions, ins_id, alert_id, pos_dev,
                                       neg_dev, stage, ex_ins_type, ex_ins_trigger, exe_ins_extended_id)
@@ -933,7 +939,7 @@ class AdminApp(QMainWindow):
 
         res = DBConnection.exerciseExist(exercise)
         if res:
-            self.label_messagesMngExercises.setText("Exericse allready exist!")
+            self.label_messagesMngExercises.setText("Exericse already exist!")
             self.label_messagesMngExercises.show()
             return
 
@@ -961,8 +967,8 @@ class AdminApp(QMainWindow):
                                   str(self.comboBox_axisMngInstructions.currentText()))
         res = DBConnection.instructionExist(instruction)
         if res:
-            self.label_messagesMngExercises.setText("Already exist")
-            self.label_messagesMngExercises.show()
+            self.label_messagesMngInstructions.setText("Already exist")
+            self.label_messagesMngInstructions.show()
             return
 
         res = DBConnection.addNewInstruction(instruction)

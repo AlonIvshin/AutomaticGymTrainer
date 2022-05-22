@@ -23,9 +23,13 @@ class WelcomeScreen(QMainWindow):
         #self.close()
 
     def openCreateAccountWindow(self):
-        ca = CreateAcc()
-        ca.show()
-        self.close()
+        ca = CreateAcc(self.widget)
+        self.widget.addWidget(ca)
+        self.widget.setCurrentIndex(self.widget.currentIndex() + 1)
+        ''' Old '''
+        #ca = CreateAcc()
+        #ca.show()
+        #self.close()
 
-    def closeEvent(self, event):
-        print("X Pressed!")
+    '''def closeEvent(self, event):
+        print("X Pressed!")'''

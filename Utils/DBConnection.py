@@ -544,8 +544,9 @@ def deleteExercise(exercise_id):
     cur.close
     return True
 
-# Query 47
-def getMaxStageForExericse(exercise_id):
+
+# Query 47 Exercise
+def getMaxStageForExercise(exercise_id):
     cur = con.cursor()
     sql = f"select num_of_stages from exercises where exercise_id = '{exercise_id}'"
     cur.execute(sql)
@@ -554,7 +555,7 @@ def getMaxStageForExericse(exercise_id):
 
 
 # Query 48
-def insertNewStageImage(e_id,stage_num,link):
+def insertNewStageImage(e_id, stage_num, link):
     cur = con.cursor()
     sql = f'''INSERT INTO stage_images (exercise_id, stage_number, image) 
            VALUES ('{e_id}','{stage_num}','{link}');'''
@@ -565,7 +566,7 @@ def insertNewStageImage(e_id,stage_num,link):
 
 
 # Query 49
-def stageImageExist(e_id,stage_num):
+def stageImageExist(e_id, stage_num):
     cur = con.cursor()
     sql = f'''select * from stage_images where exercise_id = '{e_id}' and stage_number = '{stage_num}';'''
     cur.execute(sql)
@@ -578,7 +579,7 @@ def stageImageExist(e_id,stage_num):
 def exerciseExist(exercise):
     cur = con.cursor()
     sql = f'''select * from exercises where exercise_name = '{exercise.exercise_name}' and 
-       video = '{exercise.video}' and description ='{exercise.description}' and num_of_stages = '{exercise.num_of_stages}' and main_target = '{exercise.main_target}');'''
+       video = '{exercise.video}' and description ='{exercise.description}' and num_of_stages = '{exercise.num_of_stages}' and main_target = '{exercise.main_target}'; '''
     cur.execute(sql)
     res = cur.fetchall()
     cur.close()
@@ -591,11 +592,12 @@ def instructionExist(instruction):
     sql = f'''select * from instructions where vertex1 = '{instruction.vertex1}' and 
     vertex2 = '{instruction.vertex2}' and vertex3 = '{instruction.vertex3}' and 
     angle = '{instruction.angle}' and description= '{instruction.description}' and
-     instruction_axis = '{instruction.instructionAxis}');'''
+     instruction_axis = '{instruction.instructionAxis}';'''
     cur.execute(sql)
     res = cur.fetchall()
     cur.close()
     return res != []
+
 
 # Query 52
 def exerciseInstructionExist(exercise_instruction):
@@ -604,7 +606,7 @@ def exerciseInstructionExist(exercise_instruction):
      and alert_id = '{exercise_instruction.alertId}' and deviation_positive ='{exercise_instruction.deviationPositive}' and
       deviation_negative = '{exercise_instruction.deviationNegative}' and instruction_stage = '{exercise_instruction.instructionStage}' and
       exercise_instruction_type = '{exercise_instruction.exerciseInstructionType}' and alert_deviation_trigger = '{exercise_instruction.alertDeviationTrigger}' 
-      and alert_extended_id = '{exercise_instruction.alertExtendedId}'''
+      and alert_extended_id = '{exercise_instruction.alertExtendedId}';'''
     cur.execute(sql)
     res = cur.fetchall()
     cur.close()
@@ -612,12 +614,10 @@ def exerciseInstructionExist(exercise_instruction):
 
 
 # Query 53
-def deleteStageImage(e_id,stage_num):
+def deleteStageImage(e_id, stage_num):
     cur = con.cursor()
     sql = f'''DELETE FROM stage_images WHERE exercise_id = '{e_id}' and stage_number = '{stage_num}';'''
     cur.execute(sql)
     con.commit()
     cur.close
     return True
-
-

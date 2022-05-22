@@ -45,7 +45,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="tab_landingPage">
        <attribute name="title">

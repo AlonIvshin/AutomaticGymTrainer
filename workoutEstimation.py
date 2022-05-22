@@ -249,7 +249,7 @@ class WorkoutEstimationThread(QThread):
             ret, frame = cap.read()
             frame = cv2.flip(frame, 1)
             camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            figureImg = cv2.imread('figure.png')
+            figureImg = cv2.imread('etc./figure.png')
             camera_image = cv2.addWeighted(camera_image,0.6,figureImg,0.4,0)
             cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                         cv2.LINE_AA)  # adding timer text
