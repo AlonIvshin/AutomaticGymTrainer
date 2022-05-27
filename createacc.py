@@ -61,7 +61,6 @@ class CreateAcc(QDialog):
     def confirm(self):
         self.lblMessage.hide()
         if self.emailTest() and self.emailExist() and self.matchPasswords() and self.checkIfTheFieldsAreFull():
-            print('All Good!')
             password = self.i_password.text()
             first = self.i_firstname.text()
             last = self.i_lastname.text()

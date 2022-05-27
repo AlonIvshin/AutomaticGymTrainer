@@ -1,5 +1,5 @@
 import threading
-
+from PyQt5 import QtGui
 import requests
 from PyQt5.QtGui import QImage, QPixmap
 
@@ -188,6 +188,8 @@ class App(QMainWindow):
         if self.i_eid.text() != '':
             vid_id = DBConnection.getVideoId(self.i_eid.text())
             ins = WatchExerciseInstructions(vid_id, self.i_eid.text())
+            ins.setWindowTitle("Automatic Gym Trainer")
+            ins.setWindowIcon(QtGui.QIcon('coach.png'))
             ins.show()
             self.lbl_alert.hide()
         else:

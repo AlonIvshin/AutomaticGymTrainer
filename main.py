@@ -1,9 +1,11 @@
+import ctypes
 import sys
 
 from PyQt5 import QtWidgets
 
 import welcomscreen
 from PyQt5.QtWidgets import QApplication
+from PyQt5 import QtGui
 from score import FeedbackScreen
 from Utils import DBConnection
 from ClassObjects.User import User
@@ -15,10 +17,16 @@ import workouthistory
 from workoutEstimation import EstimationScreen
 
 if __name__ == '__main__':
+    myappid = 'mycompany.myproduct.subproduct.version'  # arbitrary string
+    ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
     app = QApplication([])
 
     widget = QtWidgets.QStackedWidget()
+    widget.setWindowTitle("Automatic Gym Trainer")
+    widget.setWindowIcon(QtGui.QIcon('coach.png'))
+    #widget.setWindowIcon(QtGui.QIcon('body_building.png'))
     welcome = welcomscreen.WelcomeScreen(widget)
+
     #welcome.showFullScreen()
     #welcome = FeedbackScreen(feedback_id='14',widget=widget)
     #res = DBConnection.getUser('a')

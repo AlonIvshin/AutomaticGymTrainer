@@ -137,7 +137,7 @@ color: rgb(255, 255, 255);</string>
      </font>
     </property>
     <property name="text">
-     <string>Rulla</string>
+     <string>Next Stage:</string>
     </property>
     <property name="scaledContents">
      <bool>true</bool>
@@ -208,7 +208,7 @@ color: rgb(255, 255, 255);</string>
 color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
-     <string>Next Stage / Correction Guidance:</string>
+     <string>Next Stage:</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_Alert_3">
