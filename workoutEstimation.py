@@ -83,7 +83,7 @@ class EstimationScreen(QMainWindow):
     def ScoreScreenReadyUpdateSlot(self, feedback_id):
         FeedbackScreen_holder = FeedbackScreen(feedback_id=str(feedback_id), widget=self.widget)
         self.widget.removeWidget(self.widget.currentWidget())
-        #reloading app.py
+        # reloading app.py
         self.widget.currentWidget().loadMain(self.user_id)
         self.widget.currentWidget().loadDataHistory(self.user_id)
         self.widget.addWidget(FeedbackScreen_holder)
@@ -138,10 +138,9 @@ class EstimationScreen(QMainWindow):
 
         # QUERY 8: get all images for specific exercise
         all_stage_images_links = DBConnection.getExerciseImages(self.exercise_id)
-        all_stage_images_links = sorted(all_stage_images_links,key=lambda x:x[0])
+        all_stage_images_links = sorted(all_stage_images_links, key=lambda x: x[0])
         for index in range(len(all_stage_images_links)):
             all_stage_images_links[index] = all_stage_images_links[index][1]
-
 
         instructions_list = []
         exercise_instructions_list = []
@@ -165,8 +164,6 @@ class EstimationScreen(QMainWindow):
         '''# creating the relevant instructions
         for item in instruction_alert_data_list:
             instructions_list[item.alertInstructionId - 1].instructionAlertData = item'''
-
-
 
         for item in instruction_alert_data_list:
             for index in range(len(instructions_list)):
@@ -201,7 +198,7 @@ class EstimationScreen(QMainWindow):
 
         queue.put(exercise_instructions_list)
         queue.put(instructions_list)
-        #queue.put(alert_wrong_images)
+        # queue.put(alert_wrong_images)
         queue.put(instruction_alert_data_list)
         queue.put(exercise_stages)
         queue.put(stage_images)
@@ -250,7 +247,7 @@ class WorkoutEstimationThread(QThread):
             frame = cv2.flip(frame, 1)
             camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             figureImg = cv2.imread('etc./figure.png')
-            camera_image = cv2.addWeighted(camera_image,0.6,figureImg,0.4,0)
+            camera_image = cv2.addWeighted(camera_image, 0.6, figureImg, 0.4, 0)
             cv2.putText(frame, str(diff), (70, 70), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2,
                         cv2.LINE_AA)  # adding timer text
 
@@ -270,7 +267,7 @@ class WorkoutEstimationThread(QThread):
         # mp_pose = self.parameters_queue.get()
         exercise_instructions_list = self.parameters_queue.get()
         instructions_list = self.parameters_queue.get()
-        #alert_wrong_images = self.parameters_queue.get()
+        # alert_wrong_images = self.parameters_queue.get()
         instruction_alert_data_list = self.parameters_queue.get()
         exercise_stages = self.parameters_queue.get()
         # mp_drawing = self.parameters_queue.get()
@@ -329,7 +326,7 @@ class WorkoutEstimationThread(QThread):
                             if item.instructionId == exercise_instruction_loop.instructionId:
                                 current_instruction = item
                                 break
-                        #current_instruction = instructions_list[exercise_instruction_loop.instructionId - 1]
+                        # current_instruction = instructions_list[exercise_instruction_loop.instructionId - 1]
 
                         # test for Depth - only XY plain will be tested
                         if E_InstructionAxis[current_instruction.instructionAxis].value != E_InstructionAxis.XY.value:
@@ -367,7 +364,21 @@ class WorkoutEstimationThread(QThread):
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                                # Save alerts that triggered during the exercise
+                                triggered_alert_to_add = TriggeredAlerts(exercise_instruction_loop.alertId,
+                                                                         stageNumber=current_stage,
+                                                                         repNumber=repetition_counter)
+                                triggered_alert_exist_flag = False
+                                for item in triggered_error_list:
+                                    if triggered_alert_to_add.alertId == item.alertId and \
+                                            triggered_alert_to_add.repNumber == item.repNumber and \
+                                            triggered_alert_to_add.stageNumber == item.stageNumber:
+                                        triggered_alert_exist_flag = True
+                                if not triggered_alert_exist_flag:
+                                    triggered_error_list.append(triggered_alert_to_add)
+                                    exercise_score -= calculateScore(
+                                        tested_angle - exercise_instruction_loop.deviationPositive - starting_angle)
+
+                                """# Save alerts that triggered during the exercise
                                 triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
@@ -379,7 +390,7 @@ class WorkoutEstimationThread(QThread):
                                 if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                     exercise_score_frame_counter = 0
                                     exercise_score -= calculateScore(
-                                        tested_angle - exercise_instruction_loop.deviationPositive - starting_angle)
+                                        tested_angle - exercise_instruction_loop.deviationPositive - starting_angle)"""
 
                             # check for extended deviation
                             if starting_angle + exercise_instruction_loop.deviationNegative >= tested_angle:
@@ -395,7 +406,21 @@ class WorkoutEstimationThread(QThread):
                                     error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                     error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                                    # Save alerts that triggered during the exercise
+                                    triggered_alert_to_add = TriggeredAlerts(exercise_instruction_loop.alertId,
+                                                                             stageNumber=current_stage,
+                                                                             repNumber=repetition_counter)
+                                    triggered_alert_exist_flag = False
+                                    for item in triggered_error_list:
+                                        if triggered_alert_to_add.alertId == item.alertId and \
+                                                triggered_alert_to_add.repNumber == item.repNumber and \
+                                                triggered_alert_to_add.stageNumber == item.stageNumber:
+                                            triggered_alert_exist_flag = True
+                                    if not triggered_alert_exist_flag:
+                                        triggered_error_list.append(triggered_alert_to_add)
+                                        exercise_score -= calculateScore(
+                                            starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 - tested_angle)
+
+                                    """# Save alerts that triggered during the exercise
                                     triggered_error_list.append(
                                         TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                         repNumber=repetition_counter))
@@ -407,7 +432,7 @@ class WorkoutEstimationThread(QThread):
                                     if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                         exercise_score_frame_counter = 0
                                         exercise_score -= calculateScore(
-                                            starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 - tested_angle)
+                                            starting_angle + exercise_instruction_loop.deviationNegative + exercise_instruction_loop.deviationPositive * -1 - tested_angle)"""
                                 else:
                                     successful_exercise_instructions_in_current_stage += 1
                             continue
@@ -417,7 +442,22 @@ class WorkoutEstimationThread(QThread):
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                                # Save alerts that triggered during the exercise
+                                triggered_alert_to_add = TriggeredAlerts(exercise_instruction_loop.alertId,
+                                                                         stageNumber=current_stage,
+                                                                         repNumber=repetition_counter)
+
+                                triggered_alert_exist_flag = False
+                                for item in triggered_error_list:
+                                    if triggered_alert_to_add.alertId == item.alertId and \
+                                            triggered_alert_to_add.repNumber == item.repNumber and \
+                                            triggered_alert_to_add.stageNumber == item.stageNumber:
+                                        triggered_alert_exist_flag = True
+                                if not triggered_alert_exist_flag:
+                                    triggered_error_list.append(triggered_alert_to_add)
+                                    exercise_score -= calculateScore(
+                                        starting_angle - tested_angle - exercise_instruction_loop.deviationNegative)
+
+                                """# Save alerts that triggered during the exercise
                                 triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
@@ -429,7 +469,7 @@ class WorkoutEstimationThread(QThread):
                                 if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                     exercise_score_frame_counter = 0
                                     exercise_score -= calculateScore(
-                                        starting_angle - tested_angle - exercise_instruction_loop.deviationNegative)
+                                        starting_angle - tested_angle - exercise_instruction_loop.deviationNegative)"""
 
                             if starting_angle + exercise_instruction_loop.deviationPositive <= tested_angle:
                                 if starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1 <= tested_angle:
@@ -438,14 +478,27 @@ class WorkoutEstimationThread(QThread):
                                             triggered_error_list_text.append(item.alertText)
                                             break
 
-
                                     '''triggered_error_list_text.append(
                                         instruction_alert_data_list[
                                             exercise_instruction_loop.alertExtendedId].alertText)'''
                                     error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                     error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                                    # Save alerts that triggered during the exercise
+                                    triggered_alert_to_add = TriggeredAlerts(exercise_instruction_loop.alertId,
+                                                                             stageNumber=current_stage,
+                                                                             repNumber=repetition_counter)
+                                    triggered_alert_exist_flag = False
+                                    for item in triggered_error_list:
+                                        if triggered_alert_to_add.alertId == item.alertId and \
+                                                triggered_alert_to_add.repNumber == item.repNumber and \
+                                                triggered_alert_to_add.stageNumber == item.stageNumber:
+                                            triggered_alert_exist_flag = True
+                                    if not triggered_alert_exist_flag:
+                                        triggered_error_list.append(triggered_alert_to_add)
+                                        exercise_score -= calculateScore(
+                                            tested_angle - starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1)
+
+                                    """# Save alerts that triggered during the exercise
                                     triggered_error_list.append(
                                         TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                         repNumber=repetition_counter))
@@ -457,7 +510,7 @@ class WorkoutEstimationThread(QThread):
                                     if exercise_score_frame_counter % NUMBER_OF_FRAMES_BETWEEN_SCORE == 0:
                                         exercise_score_frame_counter = 0
                                         exercise_score -= calculateScore(
-                                            tested_angle - starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1)
+                                            tested_angle - starting_angle + exercise_instruction_loop.deviationPositive + exercise_instruction_loop.deviationNegative * -1)"""
                                 else:
                                     successful_exercise_instructions_in_current_stage += 1
                             continue
@@ -469,7 +522,23 @@ class WorkoutEstimationThread(QThread):
                                 error_edges.append((current_instruction_v1_index, current_instruction_v2_index))
                                 error_edges.append((current_instruction_v2_index, current_instruction_v3_index))
 
-                                # Save alerts that triggered during the exercise
+                                triggered_alert_to_add = TriggeredAlerts(exercise_instruction_loop.alertId,
+                                                                         stageNumber=current_stage,
+                                                                         repNumber=repetition_counter)
+
+                                triggered_alert_exist_flag = False
+                                for item in triggered_error_list:
+                                    if triggered_alert_to_add.alertId == item.alertId and \
+                                            triggered_alert_to_add.repNumber == item.repNumber and \
+                                            triggered_alert_to_add.stageNumber == item.stageNumber:
+                                        triggered_alert_exist_flag = True
+                                if not triggered_alert_exist_flag:
+                                    triggered_error_list.append(triggered_alert_to_add)
+                                    exercise_score -= calculateScore(
+                                        max(tested_angle - exercise_instruction_loop.deviationPositive,
+                                            tested_angle - exercise_instruction_loop.deviationNegative))
+
+                                """# Save alerts that triggered during the exercise
                                 triggered_error_list.append(
                                     TriggeredAlerts(exercise_instruction_loop.alertId, stageNumber=current_stage,
                                                     repNumber=repetition_counter))
@@ -482,7 +551,7 @@ class WorkoutEstimationThread(QThread):
                                     exercise_score_frame_counter = 0
                                     exercise_score -= calculateScore(
                                         max(tested_angle - exercise_instruction_loop.deviationPositive,
-                                            tested_angle - exercise_instruction_loop.deviationNegative))
+                                            tested_angle - exercise_instruction_loop.deviationNegative))"""
 
                             else:
                                 successful_exercise_instructions_in_current_stage += 1
@@ -516,7 +585,7 @@ class WorkoutEstimationThread(QThread):
 
                 # Recolor camera image
                 camera_image = cv2.cvtColor(camera_image, cv2.COLOR_BGR2RGB)
-                camera_image = cv2.flip(camera_image,1)
+                camera_image = cv2.flip(camera_image, 1)
 
                 # Resize image
                 camera_image = cv2.resize(camera_image,
@@ -535,7 +604,6 @@ class WorkoutEstimationThread(QThread):
                     # Next stage posture
                     pass
                 posture_image_to_display = stage_images[current_stage + repetition_direction - 1]
-
 
                 posture_image_to_display = cv2.resize(posture_image_to_display,
                                                       (IMAGE_WIDTH, IMAGE_HEIGHT))
