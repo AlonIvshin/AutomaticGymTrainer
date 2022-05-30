@@ -32,3 +32,6 @@ class WatchExerciseInstructions(QtWidgets.QMainWindow):
             self.lbl_txt.show()
         except Exception as error:
             print(error)
+
+    def closeEvent(self, event):
+        self.webview.close()

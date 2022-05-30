@@ -98,8 +98,11 @@ class App(QMainWindow):
             #self.close() #Problem here
 
             # self.bt_start.clicked.connect(lambda: EstimationScreen(e_id, r_num))
-
+        elif isnumeric(e_id) and not isnumeric(r_num):
+            self.lbl_alert.setText("Please fill reps number!")
+            self.lbl_alert.show()
         else:
+            self.lbl_alert.setText("Please choose an exercise from the table and fill ")
             self.lbl_alert.show()
             self.lbl_chosen.hide()
 
@@ -193,6 +196,7 @@ class App(QMainWindow):
             ins.show()
             self.lbl_alert.hide()
         else:
+            self.lbl_alert.setText("Please choose an exercise from the table")
             self.lbl_alert.show()
 
 

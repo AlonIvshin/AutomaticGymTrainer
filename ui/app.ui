@@ -33,7 +33,7 @@ background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, st
 background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:0.008, y2:0.994, stop:0.0152381 rgba(5, 5, 122, 255), stop:1 rgba(186, 0, 216, 255));}</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab_main">
        <attribute name="title">
@@ -358,7 +358,7 @@ font: 75 20pt &quot;MS Shell Dlg 2&quot;;</string>
          <rect>
           <x>1300</x>
           <y>480</y>
-          <width>151</width>
+          <width>232</width>
           <height>20</height>
          </rect>
         </property>
@@ -392,7 +392,7 @@ font: 75 36pt &quot;MS Shell Dlg 2&quot;;</string>
          <rect>
           <x>840</x>
           <y>480</y>
-          <width>151</width>
+          <width>232</width>
           <height>21</height>
          </rect>
         </property>
@@ -585,7 +585,7 @@ font: 75 12pt &quot;MS Shell Dlg 2&quot;;</string>
          <rect>
           <x>400</x>
           <y>480</y>
-          <width>151</width>
+          <width>232</width>
           <height>20</height>
          </rect>
         </property>

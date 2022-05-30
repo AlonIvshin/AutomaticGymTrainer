@@ -23,8 +23,7 @@ if __name__ == '__main__':
 
     widget = QtWidgets.QStackedWidget()
     widget.setWindowTitle("Automatic Gym Trainer")
-    widget.setWindowIcon(QtGui.QIcon('coach.png'))
-    #widget.setWindowIcon(QtGui.QIcon('body_building.png'))
+    widget.setWindowIcon(QtGui.QIcon('etc/coach.png'))
     welcome = welcomscreen.WelcomeScreen(widget)
 
     #welcome.showFullScreen()

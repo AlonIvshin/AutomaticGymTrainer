@@ -225,9 +225,9 @@ def getFeedbackLogData(feedback_id):
 def getCurrentUserFeedbacks(current_user):
     try:
         cur = con.cursor()
-        cur.execute('''select f.feedback_id, e.exercise_name, f.date, f.score, f.reps from feedbacks as f
-                        join exercises as e on f.exercise_id = e.exercise_id
-                        where user_id = %s order by date DESC;''', (current_user,))
+        cur.execute('''select f.feedback_id, e.exercise_name, date_trunc('second', date), f.score, f.reps from feedbacks 
+        as f join exercises as e on f.exercise_id = e.exercise_id where user_id = %s order by date DESC;''',
+                    (current_user,))
         res = cur.fetchall()
         cur.close()
         return res
