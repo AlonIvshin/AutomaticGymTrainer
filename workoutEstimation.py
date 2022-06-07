@@ -24,7 +24,7 @@ from score import FeedbackScreen
 
 # Constants
 NUMBER_OF_FRAMES_BETWEEN_SCORE = 150  # Ofir
-SET_UP_DELAY_TIME = 4
+SET_UP_DELAY_TIME = 10
 IMAGE_WIDTH = 400
 IMAGE_HEIGHT = 400
 mp_drawing = mp.solutions.drawing_utils
@@ -57,7 +57,7 @@ class EstimationScreen(QMainWindow):
         self.WorkoutEstimation = WorkoutEstimationThread(repetition_num=self.repetition_num,
                                                          parameters_thread=self.fetch_data_thread,
                                                          parameters_queue=self.parameters_queue, estimation_screen=self,
-                                                         widget=self.widget)
+                                                         widget=self.widget,nextstagelbl=self.lbl_postureImage)
 
         # For camera feed
         self.WorkoutEstimation.CameraImageUpdate.connect(self.CameraImageUpdateSlot)
@@ -216,7 +216,7 @@ class WorkoutEstimationThread(QThread):
     ScoreScreenReadyUpdate = pyqtSignal(object)  # For moving towards next screen, notifying the GUI thread
     TriggeredAlertsUpdate = pyqtSignal(object)  # For updating alerts in the GUI text box
 
-    def __init__(self, repetition_num, parameters_queue, parameters_thread, estimation_screen, widget):
+    def __init__(self, repetition_num, parameters_queue, parameters_thread, estimation_screen, widget,nextstagelbl):
         QThread.__init__(self)
         self.repetition_num = int(repetition_num)
         self.parameters_queue = parameters_queue
@@ -224,6 +224,7 @@ class WorkoutEstimationThread(QThread):
         self.score = 100
         self.estimation_screen = estimation_screen
         self.widget = widget
+        self.nextstagelbl = nextstagelbl
 
     def run(self):  # estimation // my_est
         # current stage variable
@@ -243,6 +244,7 @@ class WorkoutEstimationThread(QThread):
         start_time = datetime.now()
         diff = (datetime.now() - start_time).seconds  # converting into seconds
         while diff <= SET_UP_DELAY_TIME:
+            self.nextstagelbl.setText(str(SET_UP_DELAY_TIME-diff))
             ret, frame = cap.read()
             frame = cv2.flip(frame, 1)
             camera_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
