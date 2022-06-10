@@ -172,19 +172,26 @@ class EstimationScreen(QMainWindow):
                     break
 
         # creating the relevant exercise instructions
-        for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviation_Negative, instruction_Stage, exerciseInstruction_Type \
-                , alertDeviation_Trigger, alertExtended_Id in zip(exerciseInstructionId, instructionId,
-                                                                  exerciseInstructionAlertId, deviationPositive,
-                                                                  deviationNegative,
-                                                                  instructionStage, exerciseInstructionType,
-                                                                  alertDeviationTrigger, alertExtendedId):
+        # for exerciseInstruction_Id, instruction_Id, alert_Id, deviation_Positive, deviation_Negative, instruction_Stage, exerciseInstruction_Type \
+        #         , alertDeviation_Trigger, alertExtended_Id in zip(exerciseInstructionId, instructionId,
+        #                                                           exerciseInstructionAlertId, deviationPositive,
+        #                                                           deviationNegative,
+        #                                                           instructionStage, exerciseInstructionType,
+        #                                                           alertDeviationTrigger, alertExtendedId):
+        #     exercise_instructions_list.append(
+        #         ExerciseInstruction(exerciseInstruction_Id, self.exercise_id, instruction_Id, alert_Id,
+        #                             deviation_Positive,
+        #                             deviation_Negative, instruction_Stage, exerciseInstruction_Type,
+        #                             alertDeviation_Trigger,
+        #                             alertExtended_Id))
+        # # Ofir
+
+        res = DBConnection.getExerciseInstructionsForId(self.exercise_id)
+        for item in res:
             exercise_instructions_list.append(
-                ExerciseInstruction(exerciseInstruction_Id, self.exercise_id, instruction_Id, alert_Id,
-                                    deviation_Positive,
-                                    deviation_Negative, instruction_Stage, exerciseInstruction_Type,
-                                    alertDeviation_Trigger,
-                                    alertExtended_Id))
-        # Ofir
+                ExerciseInstruction(item[0], item[1], item[2], item[3], item[4], item[5], item[6], item[7], item[8],
+                                    item[9]))
+
         # convert all links to actual images
         stage_images = []  # change stage images to exercise images
         for image_links in all_stage_images_links:  # all_stage_images_links contains tuples

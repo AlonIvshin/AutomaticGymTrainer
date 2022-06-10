@@ -4,13 +4,24 @@ import psycopg2
 class getInstanceDBConnection:
     con = None
 
+    # Local DB
+
+    # def getConnectionInstance(self):
+    #     if self.con == None:
+    #         self.con = psycopg2.connect(
+    #             host="127.0.0.1",
+    #             database="mytrainer",
+    #             user="postgres",
+    #             password="root")
+    #     return self.con
+
     def getConnectionInstance(self):
         if self.con == None:
             self.con = psycopg2.connect(
-                host="127.0.0.1",
-                database="mytrainer",
-                user="postgres",
-                password="root")
+                host="ec2-54-75-184-144.eu-west-1.compute.amazonaws.com",
+                database="d6qraohg5qkkbr",
+                user="rxggofeqwmzxcw",
+                password="3e7cd97fa206d041f3f75b44f3082944ebe631654f855d1d21a54f102561bc72")
         return self.con
 
 
@@ -23,11 +34,13 @@ def closeConnection():
 
 def getAllExerciseInstructionData(exerciseId):
     cur = con.cursor()
-    cur.execute(f'''select e.exercise_instruction_id,e.instruction_id,e.alert_id,e.deviation_positive,e.deviation_negative,
+    cur.execute(
+        f'''select e.exercise_instruction_id,e.instruction_id,e.alert_id,e.deviation_positive,e.deviation_negative,
     e.instruction_stage,e.exercise_instruction_type,e.alert_deviation_trigger, e.alert_extended_id
     from exercises_instructions as e
     where e.exercise_id = '{str(exerciseId)}'; ''')
     res = cur.fetchall()
+    res = sorted(res, key=lambda x: x[0])
     cur.close()
     return res
 
@@ -37,6 +50,7 @@ def getAllExerciseStages(exerciseId):
     cur = con.cursor()
     cur.execute('select num_of_stages from exercises where exercise_id = %s', str(exerciseId))
     res = cur.fetchall()
+    res = sorted(res, key=lambda x: x[0])
     cur.close()
     return res
 
@@ -49,6 +63,7 @@ def getAllInstructionData(exerciseId):
     inner join exercises_instructions as ei on i.instruction_id=ei.instruction_id
     where ei.exercise_id = %s''', str(exerciseId))
     res = cur.fetchall()
+    res = sorted(res, key=lambda x: x[0])
     cur.close()
     return res
 
@@ -61,6 +76,7 @@ def getAllAlertsData(exerciseId):
     inner join exercises_instructions as ei on a.instruction_id=ei.instruction_id
     where ei.exercise_id = '{str(exerciseId)}'; ''')
     res = cur.fetchall()
+    res = sorted(res, key=lambda x: x[0])
     cur.close()
     return res
 
@@ -159,6 +175,7 @@ def getExerciseImages(exerciseId):
     # sql = 'select image from stage_images where stage_images.exercise_id = '1''
     cur.execute('''select stage_number,image from stage_images where stage_images.exercise_id = %s''', str(exerciseId))
     res = cur.fetchall()
+    res = sorted(res, key=lambda x: x[0])
     cur.close()
     return res
 
@@ -621,3 +638,14 @@ def deleteStageImage(e_id, stage_num):
     con.commit()
     cur.close
     return True
+
+
+# Select all from exercise instructions
+# Query 54
+def getExerciseInstructionsForId(exercise_id):
+    cur = con.cursor()
+    sql = f'''select * from exercises_instructions where exercise_id = {exercise_id}'''
+    cur.execute(sql)
+    res = cur.fetchall()
+    cur.close()
+    return res
